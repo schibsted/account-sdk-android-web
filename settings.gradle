@@ -1,0 +1,3 @@
+include ':webflows'
+include ':app'
+rootProject.name = "Account SDK Android Web"
