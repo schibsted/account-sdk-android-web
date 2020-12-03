@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         val button = findViewById<Button>(R.id.loginButton)
         button.setOnClickListener({
-            val loginUrl = client.generateLoginUrl("5fc8feb4653bd9707bbd40e9", "com.sdk-example.pre.5fc8feb4653bd9707bbd40e9:/login", null, setOf<String>())
+            val loginUrl = client.generateLoginUrl("5fc8feb4653bd9707bbd40e9", "com.sdk-example.pre.5fc8feb4653bd9707bbd40e9://login", null, setOf<String>())
             println(loginUrl)
 
             val customTabsIntent = CustomTabsIntent.Builder().build()
