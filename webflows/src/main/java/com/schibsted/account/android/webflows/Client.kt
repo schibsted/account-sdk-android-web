@@ -48,7 +48,7 @@ class Client(val env: Environment) {
 
     fun generateCodeChallenge(value: String): String {
         //TODO: Prepare it according to https://www.oauth.com/oauth2-servers/pkce/authorization-request/
-        return "fakeCodeChallange";
+        return value;
     }
 
     private fun randomString(length: Int): String {

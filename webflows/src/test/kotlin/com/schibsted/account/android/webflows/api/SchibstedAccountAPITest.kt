@@ -8,12 +8,6 @@ import java.net.URL
 class SchibstedAccountAPITest {
 
     @Test
-    fun test() {
-        val api = SchibstedAccountAPI(URL(Environment.PRE.url))
-        api.tokenRequest("fake")
-    }
-
-    @Test
     fun testLoginUlr() {
         val api = SchibstedAccountAPI(URL(Environment.PRE.url))
 
