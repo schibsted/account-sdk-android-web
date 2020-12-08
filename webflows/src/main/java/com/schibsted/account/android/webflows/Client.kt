@@ -1,10 +1,15 @@
 package com.schibsted.account.android.webflows
 
+import android.content.Context
+import android.util.Base64
 import com.schibsted.account.android.webflows.client.Environment
 import com.schibsted.account.android.webflows.client.MfaType
+import com.schibsted.account.android.webflows.persistance.WebViewData
+import com.schibsted.account.android.webflows.persistance.WebViewDataStorage
+import java.security.MessageDigest
 import kotlin.random.Random
 
-class Client(val env: Environment) {
+class Client(val env: Environment, val context: Context) {
 
     fun generateLoginUrl(
         clientId: String,
@@ -17,6 +22,12 @@ class Client(val env: Environment) {
         val codeVerifier = randomString(10)
 
         // Put those three into storage
+        val storage = WebViewDataStorage(context)
+        storage.store(
+            WebViewData(
+                state, nonce, codeVerifier, mfa
+            )
+        )
 
         val scopes: Set<String> = extraScopeValues.union(listOf("openid"))
         val scopeString = scopes.joinToString(" ")
@@ -46,9 +57,11 @@ class Client(val env: Environment) {
         return params.map { (k: String, v: String) -> "${k.utf8()}=${v.utf8()}" }.joinToString("&")
     }
 
-    fun generateCodeChallenge(value: String): String {
-        //TODO: Prepare it according to https://www.oauth.com/oauth2-servers/pkce/authorization-request/
-        return value;
+    private fun generateCodeChallenge(codeVerifier: String): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        md.update(codeVerifier.toByteArray())
+        val digest = md.digest()
+        return Base64.encodeToString(digest, Base64.NO_WRAP)
     }
 
     private fun randomString(length: Int): String {
