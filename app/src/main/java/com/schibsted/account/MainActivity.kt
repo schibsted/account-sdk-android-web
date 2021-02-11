@@ -9,15 +9,15 @@ import com.schibsted.account.android.webflows.Client
 import com.schibsted.account.android.webflows.client.Environment
 
 class MainActivity : AppCompatActivity() {
-    private val client: Client = Client(Environment.PRE)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val client = Client(Environment.PRE, applicationContext)
+
         val button = findViewById<Button>(R.id.loginButton)
         button.setOnClickListener({
-            val loginUrl = client.generateLoginUrl("5fc8feb4653bd9707bbd40e9", "com.sdk-example.pre.5fc8feb4653bd9707bbd40e9://login", null, setOf<String>())
+            val loginUrl = client.generateLoginUrl("602525f2b41fa31789a95aa8", "com.sdk-example.pre.602525f2b41fa31789a95aa8://login", null, setOf<String>())
             println(loginUrl)
 
             val customTabsIntent = CustomTabsIntent.Builder().build()
