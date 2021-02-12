@@ -1,8 +1,5 @@
-package com.schibsted.account.android.webflows
+package com.schibsted.account.android.webflows.client
 
-import com.schibsted.account.android.webflows.client.Client
-import com.schibsted.account.android.webflows.client.ClientConfiguration
-import com.schibsted.account.android.webflows.client.MfaType
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
