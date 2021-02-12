@@ -2,8 +2,10 @@ package com.schibsted.account.android.webflows.client
 
 import java.net.URL
 
-class ClientConfiguration(_serverUrl: String, val clientId: String, val clientSecret: String, val redirectUrl: URL) {
-    val serverUrl = URL(_serverUrl)
-
+data class ClientConfiguration(val serverUrl: URL, val clientId: String, val redirectUri: String) {
+    constructor(env: Environment, clientId: String, redirectUri: String) : this(
+        env.url,
+        clientId,
+        redirectUri
+    )
 }
-

@@ -24,7 +24,7 @@ android {
 
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'
-    test.java.srcDirs 'test/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
 }
 
 dependencies {
@@ -43,6 +43,7 @@ dependencies {
     }
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'io.mockk:mockk:1.10.5'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 

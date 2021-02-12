@@ -1,8 +1,10 @@
 package com.schibsted.account.android.webflows.client
 
-enum class Environment(val url: String) {
-    PRO_COM("https://login.schibsted.com"),
-    PRO_NO("https://payment.schibsted.no"),
-    PRO_FI("https://login.schibsted.fi"),
-    PRE("https://identity-pre.schibsted.com")
+import java.net.URL
+
+enum class Environment(val url: URL) {
+    PRO_COM(URL("https://login.schibsted.com")),
+    PRO_NO(URL("https://payment.schibsted.no")),
+    PRO_FI(URL("https://login.schibsted.fi")),
+    PRE(URL("https://identity-pre.schibsted.com"))
 }

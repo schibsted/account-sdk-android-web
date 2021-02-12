@@ -1,40 +1,45 @@
-package com.schibsted.account.android.webflows
+package com.schibsted.account.android.webflows.client
 
 import android.content.Context
 import android.util.Base64
-import com.schibsted.account.android.webflows.client.Environment
-import com.schibsted.account.android.webflows.client.MfaType
 import com.schibsted.account.android.webflows.persistance.WebViewData
 import com.schibsted.account.android.webflows.persistance.WebViewDataStorage
+import java.net.URL
 import java.security.MessageDigest
 import kotlin.random.Random
 
-class Client(val env: Environment, val context: Context) {
+class Client {
+    private val clientConfiguration: ClientConfiguration
+    private val storage: WebViewDataStorage
 
-    fun generateLoginUrl(
-        clientId: String,
-        redirectUri: String,
-        mfa: MfaType?,
-        extraScopeValues: Set<String>
-    ): String {
+    constructor (context: Context, clientConfiguration: ClientConfiguration) : this(
+        clientConfiguration,
+        WebViewDataStorage(context.applicationContext)
+    )
+
+    internal constructor (clientConfiguration: ClientConfiguration, storage: WebViewDataStorage) {
+        this.clientConfiguration = clientConfiguration
+        this.storage = storage
+    }
+
+    fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {
         val state = randomString(10)
         val nonce = randomString(10)
         val codeVerifier = randomString(10)
 
         // Put those three into storage
-        val storage = WebViewDataStorage(context)
         storage.store(
             WebViewData(
                 state, nonce, codeVerifier, mfa
             )
         )
 
-        val scopes: Set<String> = extraScopeValues.union(listOf("openid"))
+        val scopes = extraScopeValues.union(setOf("openid", "offline_access"))
         val scopeString = scopes.joinToString(" ")
 
         val authParams: MutableMap<String, String> = mutableMapOf(
-            "client_id" to clientId,
-            "redirect_uri" to redirectUri,
+            "client_id" to clientConfiguration.clientId,
+            "redirect_uri" to clientConfiguration.redirectUri,
             "response_type" to "code",
             "state" to state,
             "scope" to scopeString,
@@ -49,7 +54,7 @@ class Client(val env: Environment, val context: Context) {
             authParams["prompt"] = "select_account"
         }
 
-        return "${env.url}/oauth/authorize?${parseParamsToUrl(authParams)}"
+        return "${clientConfiguration.serverUrl}/oauth/authorize?${parseParamsToUrl(authParams)}"
     }
 
     private fun parseParamsToUrl(params: Map<String, String>): String {
