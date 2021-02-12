@@ -2,22 +2,20 @@ package com.schibsted.account.android.webflows.client
 
 import android.content.Context
 import android.util.Base64
-import com.schibsted.account.android.webflows.persistance.WebViewData
-import com.schibsted.account.android.webflows.persistance.WebViewDataStorage
-import java.net.URL
+import com.schibsted.account.android.webflows.persistence.StateStorage
 import java.security.MessageDigest
 import kotlin.random.Random
 
 class Client {
     private val clientConfiguration: ClientConfiguration
-    private val storage: WebViewDataStorage
+    private val storage: StateStorage
 
     constructor (context: Context, clientConfiguration: ClientConfiguration) : this(
         clientConfiguration,
-        WebViewDataStorage(context.applicationContext)
+        StateStorage(context.applicationContext)
     )
 
-    internal constructor (clientConfiguration: ClientConfiguration, storage: WebViewDataStorage) {
+    internal constructor (clientConfiguration: ClientConfiguration, storage: StateStorage) {
         this.clientConfiguration = clientConfiguration
         this.storage = storage
     }
@@ -27,12 +25,7 @@ class Client {
         val nonce = randomString(10)
         val codeVerifier = randomString(10)
 
-        // Put those three into storage
-        storage.store(
-            WebViewData(
-                state, nonce, codeVerifier, mfa
-            )
-        )
+        storage.setValue(WEB_FLOW_DATA_KEY, WebFlowData(state, nonce, codeVerifier, mfa))
 
         val scopes = extraScopeValues.union(setOf("openid", "offline_access"))
         val scopeString = scopes.joinToString(" ")
@@ -78,5 +71,16 @@ class Client {
                 .joinToString("")
 
         return result;
+    }
+
+    internal companion object {
+        const val WEB_FLOW_DATA_KEY = "WebFlowData"
+
+        data class WebFlowData(
+            val state: String,
+            val nonce: String,
+            val codeVerifier: String,
+            val mfa: MfaType?
+        )
     }
 }
