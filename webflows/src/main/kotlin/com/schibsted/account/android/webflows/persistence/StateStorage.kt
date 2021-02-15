@@ -24,6 +24,12 @@ internal class StateStorage(context: Context) {
         return gson.fromJson(json, T::class.java);
     }
 
+    fun removeValue(key: String) {
+        val editor = prefs.edit()
+        editor.remove(key)
+        editor.apply()
+    }
+
     companion object {
         const val PREFERENCE_FILENAME = "SCHACC"
     }
