@@ -1,6 +1,6 @@
 package com.schibsted.account.android.webflows.token
 
-import com.schibsted.account.android.webflows.Util
+import com.schibsted.account.android.webflows.util.Util
 
 internal data class UserTokens(
     val accessToken: String,

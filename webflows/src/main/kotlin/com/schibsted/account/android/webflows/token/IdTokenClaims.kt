@@ -1,6 +1,6 @@
 package com.schibsted.account.android.webflows.token
 
-data class IdTokenClaims(
+internal data class IdTokenClaims(
     val iss: String,
     val sub: String,
     val userId: String,

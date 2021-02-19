@@ -1,4 +1,4 @@
-package com.schibsted.account.android.webflows
+package com.schibsted.account.android.webflows.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

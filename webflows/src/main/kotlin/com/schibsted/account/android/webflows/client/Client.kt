@@ -6,7 +6,7 @@ import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.MfaType
-import com.schibsted.account.android.webflows.Util
+import com.schibsted.account.android.webflows.util.Util
 import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
 import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenHandler
@@ -18,8 +18,8 @@ import java.security.MessageDigest
 import java.util.*
 
 sealed class LoginError {
-    object AUTH_STATE_READ_ERROR : LoginError()
-    object UNSOLICITED_RESPONSE : LoginError()
+    object AuthStateReadError : LoginError()
+    object UnsolicitedResponse : LoginError()
     data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) : LoginError()
     data class TokenErrorResponse(val messsage: String) : LoginError()
     data class UnexpectedError(val message: String) : LoginError()
@@ -95,10 +95,10 @@ class Client {
     fun handleAuthenticationResponse(authResponseParameters: String, callback: LoginResultHandler) {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
         val stored = storage.getValue<AuthState>(AUTH_STATE_KEY)
-            ?: return callback(ResultOrError.Failure(LoginError.AUTH_STATE_READ_ERROR))
+            ?: return callback(ResultOrError.Failure(LoginError.AuthStateReadError))
 
         if (stored.state != authResponse["state"]) {
-            callback(ResultOrError.Failure(LoginError.UNSOLICITED_RESPONSE))
+            callback(ResultOrError.Failure(LoginError.UnsolicitedResponse))
             return
         }
         storage.removeValue(AUTH_STATE_KEY)

@@ -19,7 +19,7 @@ internal class SchibstedAccountAPI(baseUrl: URL, okHttpClient: OkHttpClient) {
         .client(okHttpClient)
         .build()
 
-    val schaccService = retrofit.create(SchibstedAccountService::class.java)
+    private val schaccService = retrofit.create(SchibstedAccountService::class.java)
 
     fun makeTokenRequest(
         authCode: String,

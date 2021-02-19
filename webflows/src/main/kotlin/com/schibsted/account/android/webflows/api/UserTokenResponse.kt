@@ -1,8 +1,8 @@
 package com.schibsted.account.android.webflows.api
 
-import com.schibsted.account.android.webflows.Util
+import com.schibsted.account.android.webflows.util.Util
 
-data class UserTokenResponse(
+internal data class UserTokenResponse(
     val access_token: String,
     val refresh_token: String?,
     val id_token: String?,

@@ -1,4 +1,4 @@
-package com.schibsted.account.android.webflows
+package com.schibsted.account.android.webflows.util
 
 import java.net.URLDecoder
 import kotlin.random.Random
