@@ -3,19 +3,32 @@ package com.schibsted.account.android.webflows.client
 import android.content.Context
 import android.util.Base64
 import android.util.Log
+import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
+import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.Util
 import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
 import com.schibsted.account.android.webflows.persistence.StateStorage
+import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.user.User
+import com.schibsted.account.android.webflows.user.UserSession
+import com.schibsted.account.android.webflows.util.ResultOrError
 import okhttp3.OkHttpClient
 import java.security.MessageDigest
+import java.util.*
 
-typealias LoginResultHandler = (Result<User>) -> Unit
+sealed class LoginError {
+    object AUTH_STATE_READ_ERROR : LoginError()
+    object UNSOLICITED_RESPONSE : LoginError()
+    data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) : LoginError()
+    data class TokenErrorResponse(val messsage: String) : LoginError()
+    data class UnexpectedError(val message: String) : LoginError()
+}
+typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 
 class Client {
     private val clientConfiguration: ClientConfiguration
-    private val schibstedAccountApi: SchibstedAccountAPI
+    private val tokenHandler: TokenHandler
     private val storage: StateStorage
 
     constructor (
@@ -35,7 +48,10 @@ class Client {
     ) {
         this.clientConfiguration = clientConfiguration
         this.storage = storage
-        this.schibstedAccountApi = SchibstedAccountAPI(clientConfiguration.serverUrl, client)
+        tokenHandler = TokenHandler(
+            clientConfiguration,
+            SchibstedAccountAPI(clientConfiguration.serverUrl, client)
+        )
     }
 
     fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {
@@ -43,7 +59,7 @@ class Client {
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
 
-        storage.setValue(WEB_FLOW_DATA_KEY, WebFlowData(state, nonce, codeVerifier, mfa))
+        storage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, mfa))
 
         val scopes = extraScopeValues.union(setOf("openid", "offline_access"))
         val scopeString = scopes.joinToString(" ")
@@ -78,48 +94,44 @@ class Client {
 
     fun handleAuthenticationResponse(authResponseParameters: String, callback: LoginResultHandler) {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
-        val stored = storage.getValue<WebFlowData>(WEB_FLOW_DATA_KEY)
-            ?: return callback(Result.failure(Error("Failed to read stored data"))) // TODO custom exception
+        val stored = storage.getValue<AuthState>(AUTH_STATE_KEY)
+            ?: return callback(ResultOrError.Failure(LoginError.AUTH_STATE_READ_ERROR))
 
         if (stored.state != authResponse["state"]) {
-            callback(Result.failure(Error("Unsolicited response"))) // TODO custom exception
+            callback(ResultOrError.Failure(LoginError.UNSOLICITED_RESPONSE))
             return
         }
-        storage.removeValue(WEB_FLOW_DATA_KEY)
+        storage.removeValue(AUTH_STATE_KEY)
 
         val error = authResponse["error"]
         if (error != null) {
-            callback(Result.failure(Error("OAuth error"))) // TODO custom exception, include description as well
+            val oauthError = LoginError.AuthenticationErrorResponse(error, authResponse["error_description"])
+            callback(ResultOrError.Failure(oauthError))
             return
         }
 
         val authCode = authResponse["code"]
-            ?: return callback(Result.failure(Error("No auth code"))) // TODO custom exception
+            ?: return callback(ResultOrError.Failure(LoginError.UnexpectedError("Missing authorization code in authentication response")))
 
-        schibstedAccountApi.makeTokenRequest(
+        tokenHandler.makeTokenRequest(
             authCode,
-            stored.codeVerifier,
-            clientConfiguration.clientId,
-            clientConfiguration.redirectUri,
+            stored
         ) { result ->
-            result.map { tokenResponse ->
+            result.onSuccess { tokenResponse ->
                 Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
+                val userSession =
+                    UserSession(clientConfiguration.clientId, tokenResponse.userTokens, Date())
+                callback(ResultOrError.Success(User(this, userSession)))
             }.onFailure { err ->
                 Log.d(Logging.SDK_TAG, "Token error response: $err")
+                callback(ResultOrError.Failure(LoginError.TokenErrorResponse(err.toString())))
             }
         }
 
-        // TODO validate ID token, then store tokens
+        // TODO store tokens
     }
 
     internal companion object {
-        const val WEB_FLOW_DATA_KEY = "WebFlowData"
-
-        data class WebFlowData(
-            val state: String,
-            val nonce: String,
-            val codeVerifier: String,
-            val mfa: MfaType?
-        )
+        const val AUTH_STATE_KEY = "AuthState"
     }
 }

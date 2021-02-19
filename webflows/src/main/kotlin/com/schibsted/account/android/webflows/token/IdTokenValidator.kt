@@ -1,21 +1,111 @@
 package com.schibsted.account.android.webflows.token
 
-import kotlin.jvm.Throws
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.jwk.JWKSet
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet
+import com.nimbusds.jose.proc.JWSVerificationKeySelector
+import com.nimbusds.jose.proc.SecurityContext
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.proc.BadJWTException
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
+import com.nimbusds.jwt.proc.DefaultJWTProcessor
+import com.schibsted.account.android.webflows.jose.AsyncJwks
 
-object IdTokenValidator {
-
-    //https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
-    @Throws(TokenValidationError::class)
-    fun validate(idToken: String, validationContext: IdTokenValidationContext) {
-        //TODO: Implement
-    }
-
+internal sealed class IdTokenValidationResult {
+    data class Success(val claims: IdTokenClaims) : IdTokenValidationResult()
+    data class Failure(val message: String) : IdTokenValidationResult()
 }
 
-data class IdTokenValidationContext(
+internal object IdTokenValidator {
+    fun validate(
+        idToken: String,
+        jwks: AsyncJwks,
+        validationContext: IdTokenValidationContext,
+        callback: (IdTokenValidationResult) -> Unit
+    ) {
+        // https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
+        jwks.fetch { fetchedJwks ->
+            if (fetchedJwks == null) {
+                callback(IdTokenValidationResult.Failure("Failed to fetch JWKS to validate ID Token"))
+            } else {
+                callback(validate(idToken, fetchedJwks, validationContext))
+            }
+        }
+    }
+
+    private fun validate(
+        idToken: String,
+        jwks: JWKSet,
+        validationContext: IdTokenValidationContext
+    ): IdTokenValidationResult {
+        val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
+        val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
+            JWSAlgorithm.RS256,
+            ImmutableJWKSet<IdTokenValidationContext>(jwks)
+        )
+        jwtProcessor.jwsKeySelector = keySelector
+
+        val expectedClaims = JWTClaimsSet.Builder()
+            .claim("nonce", validationContext.nonce)
+            .build()
+        jwtProcessor.jwtClaimsSetVerifier = IdTokenClaimsVerifier(
+            validationContext.clientId,
+            expectedClaims,
+            setOf("sub", "exp")
+        )
+
+        val claims: JWTClaimsSet
+        // TODO replace with runCatching?
+        try {
+            claims = jwtProcessor.process(idToken, validationContext)
+        } catch (e: BadJWTException) {
+            return IdTokenValidationResult.Failure(e.message ?: "Failed to verify ID Token")
+        }
+
+        return IdTokenValidationResult.Success(
+            IdTokenClaims(
+                claims.issuer,
+                claims.subject,
+                claims.getStringClaim("legacy_user_id"),
+                claims.audience,
+                (claims.expirationTime.time / 1000).toInt(),
+                claims.getStringClaim("nonce"),
+                claims.getStringListClaim("amr")
+            )
+        )
+    }
+}
+
+internal class IdTokenClaimsVerifier(
+    clientId: String,
+    exactMatchClaims: JWTClaimsSet,
+    requiredClaims: Set<String>
+) : DefaultJWTClaimsVerifier<IdTokenValidationContext>(clientId, exactMatchClaims, requiredClaims) {
+    override fun verify(claims: JWTClaimsSet?, context: IdTokenValidationContext?) {
+        super.verify(claims, context)
+
+        // verify issuer, allowing trailing slash
+        if (context?.issuer?.removeSuffix("/") != claims?.issuer?.removeSuffix("/")) {
+            throw BadJWTException("Invalid issuer '${claims?.issuer}'")
+        }
+
+        // verify AMR
+        if (!contains(claims?.getStringListClaim("amr"), context?.expectedAmr)) {
+            throw BadJWTException("Missing expected AMR value: ${context?.expectedAmr}")
+        }
+    }
+
+    private fun contains(values: List<String>?, value: String?): Boolean {
+        val needle = value ?: return true // no value to search for
+        val haystack = values ?: return false // no values to search among
+
+        return haystack.contains(needle)
+    }
+}
+
+internal data class IdTokenValidationContext(
     val issuer: String,
     val clientId: String,
     val nonce: String?,
-    val expectedAMR: String
-
-)
+    val expectedAmr: String?
+) : SecurityContext

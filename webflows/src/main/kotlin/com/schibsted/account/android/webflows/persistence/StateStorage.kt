@@ -3,7 +3,6 @@ package com.schibsted.account.android.webflows.persistence
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.schibsted.account.android.webflows.client.MfaType
 
 internal class StateStorage(context: Context) {
     private val gson = Gson()

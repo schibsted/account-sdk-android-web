@@ -1,5 +1,6 @@
 package com.schibsted.account.android.webflows.client
 
+import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.Util
 import io.mockk.mockk
 import org.junit.Assert.*
@@ -19,6 +20,7 @@ class ClientTest {
     fun loginUrlShouldBeCorrect() {
         val client = Client(
             config,
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
         val queryParams = Util.parseQueryParameters(URL(client.generateLoginUrl()).query)
@@ -41,6 +43,7 @@ class ClientTest {
     fun loginUrlShouldContainExtraScopesSpecified() {
         val client = Client(
             config,
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
         val loginUrl = client.generateLoginUrl(extraScopeValues = setOf("scope1", "scope2"))
@@ -64,6 +67,7 @@ class ClientTest {
     fun loginUrlForMfaShouldContainAcrValues() {
         val client = Client(
             config,
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
         val loginUrl = client.generateLoginUrl(mfa = MfaType.OTP)
