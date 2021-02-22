@@ -72,7 +72,7 @@ class SchibstedAccountApiTest {
 
         withServer(httpResponse) { server ->
             val schaccApi = SchibstedAccountAPI(server.url("/"), OkHttpClient.Builder().build())
-            Await.await { done ->
+            await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
                     result.assertSuccess { assertEquals(tokenResponse, it) }
                     assertTokenRequest(tokenRequest, server.takeRequest())
