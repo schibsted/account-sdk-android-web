@@ -20,7 +20,7 @@ internal class StateStorage(context: Context) {
 
     inline fun <reified T> getValue(key: String): T? {
         val json = prefs.getString(key, null) ?: return null
-        return gson.fromJson(json, T::class.java);
+        return gson.fromJson(json, T::class.java)
     }
 
     fun removeValue(key: String) {

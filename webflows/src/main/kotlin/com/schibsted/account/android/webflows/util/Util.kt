@@ -27,7 +27,7 @@ internal object Util {
             }.map(letters::get)
                 .joinToString("")
 
-        return result;
+        return result
     }
 
     fun removeJwtSignature(jwt: String?): String {
