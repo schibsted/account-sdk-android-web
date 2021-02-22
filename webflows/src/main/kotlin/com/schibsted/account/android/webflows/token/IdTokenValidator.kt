@@ -10,10 +10,13 @@ import com.nimbusds.jwt.proc.BadJWTException
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
 import com.nimbusds.jwt.proc.DefaultJWTProcessor
 import com.schibsted.account.android.webflows.jose.AsyncJwks
+import com.schibsted.account.android.webflows.util.ResultOrError
 
-internal sealed class IdTokenValidationResult {
-    data class Success(val claims: IdTokenClaims) : IdTokenValidationResult()
-    data class Failure(val message: String) : IdTokenValidationResult()
+internal sealed class IdTokenValidationError {
+    abstract val message: String
+
+    data class FailedValidation(override val message: String) : IdTokenValidationError()
+    data class UnexpectedError(override val message: String) : IdTokenValidationError()
 }
 
 internal object IdTokenValidator {
@@ -21,12 +24,12 @@ internal object IdTokenValidator {
         idToken: String,
         jwks: AsyncJwks,
         validationContext: IdTokenValidationContext,
-        callback: (IdTokenValidationResult) -> Unit
+        callback: (ResultOrError<IdTokenClaims, IdTokenValidationError>) -> Unit
     ) {
         // https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
         jwks.fetch { fetchedJwks ->
             if (fetchedJwks == null) {
-                callback(IdTokenValidationResult.Failure("Failed to fetch JWKS to validate ID Token"))
+                callback(ResultOrError.Failure(IdTokenValidationError.UnexpectedError("Failed to fetch JWKS to validate ID Token")))
             } else {
                 callback(validate(idToken, fetchedJwks, validationContext))
             }
@@ -37,7 +40,7 @@ internal object IdTokenValidator {
         idToken: String,
         jwks: JWKSet,
         validationContext: IdTokenValidationContext
-    ): IdTokenValidationResult {
+    ): ResultOrError<IdTokenClaims, IdTokenValidationError> {
         val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
         val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
             JWSAlgorithm.RS256,
@@ -59,10 +62,14 @@ internal object IdTokenValidator {
         try {
             claims = jwtProcessor.process(idToken, validationContext)
         } catch (e: BadJWTException) {
-            return IdTokenValidationResult.Failure(e.message ?: "Failed to verify ID Token")
+            return ResultOrError.Failure(
+                IdTokenValidationError.FailedValidation(
+                    e.message ?: "Failed to verify ID Token"
+                )
+            )
         }
 
-        return IdTokenValidationResult.Success(
+        return ResultOrError.Success(
             IdTokenClaims(
                 claims.issuer,
                 claims.subject,

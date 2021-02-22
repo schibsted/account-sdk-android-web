@@ -9,15 +9,15 @@ import com.schibsted.account.android.webflows.api.UserTokenResponse
 import com.schibsted.account.android.webflows.client.ClientConfiguration
 import com.schibsted.account.android.webflows.jose.AsyncJwks
 import com.schibsted.account.android.webflows.jose.RemoteJwks
-import com.schibsted.account.android.webflows.token.TokenError.IdTokenValidationError
-import com.schibsted.account.android.webflows.token.TokenError.TokenRequestError
+import com.schibsted.account.android.webflows.token.TokenError.*
 import com.schibsted.account.android.webflows.util.ResultOrError
 import com.schibsted.account.android.webflows.util.ResultOrError.Failure
 import com.schibsted.account.android.webflows.util.ResultOrError.Success
 
 internal sealed class TokenError {
     data class TokenRequestError(val message: String) : TokenError()
-    data class IdTokenValidationError(val message: String) : TokenError()
+    data class IdTokenNotValid(val cause: IdTokenValidationError) : TokenError()
+    object NoIdTokenReceived : TokenError()
 }
 
 internal data class UserTokensResult(
@@ -75,7 +75,7 @@ internal class TokenHandler(
         val idToken = tokenResponse.id_token
         if (idToken == null) {
             Log.e(Logging.SDK_TAG, "Missing ID Token")
-            callback(Failure(IdTokenValidationError("Missing ID Token in token response")))
+            callback(Failure(NoIdTokenReceived))
             return
         }
 
@@ -87,13 +87,13 @@ internal class TokenHandler(
         )
 
         IdTokenValidator.validate(idToken, jwks, idTokenValidationContext) { result ->
-            when (result) {
-                is IdTokenValidationResult.Success -> {
+            result
+                .onSuccess {
                     val tokens = UserTokens(
                         tokenResponse.access_token,
                         tokenResponse.refresh_token,
                         tokenResponse.id_token,
-                        result.claims
+                        it
                     )
                     callback(
                         Success(
@@ -105,9 +105,7 @@ internal class TokenHandler(
                         )
                     )
                 }
-                is IdTokenValidationResult.Failure ->
-                    callback(Failure(IdTokenValidationError(result.message)))
-            }
+                .onFailure { callback(Failure(IdTokenNotValid(it))) }
         }
     }
 }
