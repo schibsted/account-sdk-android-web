@@ -13,6 +13,7 @@ import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.user.UserSession
 import com.schibsted.account.android.webflows.util.ResultOrError
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.security.MessageDigest
 import java.util.*
@@ -50,7 +51,7 @@ class Client {
         this.storage = storage
         tokenHandler = TokenHandler(
             clientConfiguration,
-            SchibstedAccountAPI(clientConfiguration.serverUrl, client)
+            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), client)
         )
     }
 

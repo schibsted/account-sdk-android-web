@@ -27,6 +27,11 @@ sourceSets {
     test.java.srcDirs += 'src/test/kotlin'
 }
 
+ext {
+    okHttpVersion = "4.9.1"
+}
+
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -35,13 +40,13 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:2.3.0"
     implementation "com.squareup.retrofit2:converter-gson:2.3.0"
-    api "com.squareup.okhttp3:okhttp:4.9.1"
+    api "com.squareup.okhttp3:okhttp:${okHttpVersion}"
 
     implementation 'com.nimbusds:nimbus-jose-jwt:9.5'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'io.mockk:mockk:1.10.5'
+    testImplementation "com.squareup.okhttp3:mockwebserver:${okHttpVersion}"
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
 }

@@ -18,3 +18,10 @@ internal data class UserTokenResponse(
                 "expires_in: ${expires_in})"
     }
 }
+
+internal data class UserTokenRequest(
+    val authCode: String,
+    val codeVerifier: String,
+    val clientId: String,
+    val redirectUri: String
+)
