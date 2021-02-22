@@ -3,6 +3,7 @@ package com.schibsted.account.android.webflows.token
 import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
+import com.schibsted.account.android.webflows.api.HttpError
 import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
 import com.schibsted.account.android.webflows.api.UserTokenRequest
 import com.schibsted.account.android.webflows.api.UserTokenResponse
@@ -15,7 +16,7 @@ import com.schibsted.account.android.webflows.util.ResultOrError.Failure
 import com.schibsted.account.android.webflows.util.ResultOrError.Success
 
 internal sealed class TokenError {
-    data class TokenRequestError(val message: String) : TokenError()
+    data class TokenRequestError(val cause: HttpError) : TokenError()
     data class IdTokenNotValid(val cause: IdTokenValidationError) : TokenError()
     object NoIdTokenReceived : TokenError()
 }
@@ -60,7 +61,7 @@ internal class TokenHandler(
                 .onSuccess { handleTokenResponse(it, authState, callback) }
                 .onFailure { err ->
                     Log.d(Logging.SDK_TAG, "Token request error response: $err")
-                    callback(Failure(TokenRequestError("Token request failed: $err")))
+                    callback(Failure(TokenRequestError(err)))
                 }
         }
     }
