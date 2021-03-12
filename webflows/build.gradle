@@ -8,8 +8,6 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -19,9 +17,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField('String', 'VERSION_NAME', "\"$version\"")
+        }
+
+        debug {
+            buildConfigField('String', 'VERSION_NAME', "\"$version\"")
         }
     }
 }
+
+def version = ['sh', '-c', 'git describe --tag 2> /dev/null || git rev-parse --short HEAD'].execute().text.trim()
 
 sourceSets {
     main.java.srcDirs += 'src/main/kotlin'

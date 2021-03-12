@@ -164,4 +164,19 @@ class SchibstedAccountApiTest {
             }
         }
     }
+
+    @Test
+    fun customUserAgentHeaderIsAddedToRequest() {
+        val response = MockResponse().setResponseCode(500).setBody("Something went wrong")
+        withServer(response) { server ->
+            val schaccApi = SchibstedAccountAPI(server.url("/"), OkHttpClient.Builder().build())
+            await { done ->
+                schaccApi.getJwks { result ->
+                    val userAgentHeader = server.takeRequest().getHeader("User-Agent")
+                    assertTrue(userAgentHeader!!.contains("AccountSDKAndroidWeb"))
+                    done()
+                }
+            }
+        }
+    }
 }

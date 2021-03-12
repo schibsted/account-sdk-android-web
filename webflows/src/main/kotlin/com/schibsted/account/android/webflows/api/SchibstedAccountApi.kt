@@ -1,10 +1,13 @@
 package com.schibsted.account.android.webflows.api
 
+import android.os.Build
 import com.google.gson.*
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.shaded.json.parser.ParseException
+import com.schibsted.account.android.webflows.BuildConfig
 import com.schibsted.account.android.webflows.util.ResultOrError
 import okhttp3.HttpUrl
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,11 +19,24 @@ import java.lang.reflect.Type
 
 private typealias ApiResult<T> = ResultOrError<T, HttpError>
 
+private class SDKUserAgentHeaderInterceptor : Interceptor {
+    val userAgentHeaderValue: String = "AccountSDKAndroidWeb/${BuildConfig.VERSION_NAME} " +
+            "(Linux; Android ${Build.VERSION.RELEASE}; API ${Build.VERSION.SDK_INT}; " +
+            "${Build.MANUFACTURER}; ${Build.MODEL})"
+
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+        val request = chain.request().newBuilder()
+            .header("User-Agent", userAgentHeaderValue)
+            .build()
+        return chain.proceed(request)
+    }
+}
+
 internal class SchibstedAccountAPI(baseUrl: HttpUrl, okHttpClient: OkHttpClient) {
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl.toString())
         .addConverterFactory(createGsonConverterFactory())
-        .client(okHttpClient)
+        .client(apiHttpClient(okHttpClient.newBuilder()))
         .build()
 
     private fun createGsonConverterFactory(): GsonConverterFactory {
@@ -29,6 +45,12 @@ internal class SchibstedAccountAPI(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             .create()
 
         return GsonConverterFactory.create(gson)
+    }
+
+    private fun apiHttpClient(builder: OkHttpClient.Builder): OkHttpClient {
+        return builder
+            .addInterceptor(SDKUserAgentHeaderInterceptor())
+            .build()
     }
 
     private val schaccService = retrofit.create(SchibstedAccountService::class.java)
