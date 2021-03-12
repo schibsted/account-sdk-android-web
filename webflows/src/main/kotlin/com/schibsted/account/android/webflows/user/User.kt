@@ -4,14 +4,22 @@ import com.schibsted.account.android.webflows.client.Client
 
 class User {
     private val client: Client
-    private val userSession: UserSession
+    val session: UserSession
 
-    internal constructor(client: Client, userSession: UserSession) {
+    constructor(client: Client, userSession: UserSession) {
         this.client = client
-        this.userSession = userSession
+        this.session = userSession
+    }
+
+    fun logout() {
+        client.destroySession()
     }
 
     override fun toString(): String {
-        return "User(uuid=${userSession.userTokens.idTokenClaims.sub})"
+        return "User(uuid=${session.userTokens.idTokenClaims.sub})"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return (other is User) && session.userTokens == other.session.userTokens
     }
 }

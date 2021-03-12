@@ -18,13 +18,26 @@ class MainActivity : AppCompatActivity() {
 
         val client = Client(applicationContext, clientConfig)
 
-        val button = findViewById<Button>(R.id.loginButton)
-        button.setOnClickListener {
+        val loginButton = findViewById<Button>(R.id.loginButton)
+        loginButton.setOnClickListener {
             val loginUrl = client.generateLoginUrl()
             Log.i(LOG_TAG, "Login url: $loginUrl")
 
             val customTabsIntent = CustomTabsIntent.Builder().build()
             customTabsIntent.launchUrl(this, Uri.parse(loginUrl))
+        }
+
+        val resumeButton = findViewById<Button>(R.id.resumeButton)
+        resumeButton.setOnClickListener {
+            val user = client.resumeLastLoggedInUser()
+            if (user != null) {
+                val intent = Intent(this, LoggedInActivity::class.java).apply {
+                    putExtra(USER_SESSION_EXTRA, user.session)
+                }
+                startActivity(intent)
+            } else {
+                Log.i(LOG_TAG, "User could not be resumed")
+            }
         }
     }
 
@@ -35,5 +48,7 @@ class MainActivity : AppCompatActivity() {
             "602525f2b41fa31789a95aa8",
             "com.sdk-example.pre.602525f2b41fa31789a95aa8://login"
         )
+
+        const val USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION"
     }
 }

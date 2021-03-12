@@ -3,6 +3,7 @@ package com.schibsted.account.android.webflows.persistence
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import kotlin.reflect.KClass
 
 internal class StateStorage(context: Context) {
     private val gson = Gson()
@@ -18,9 +19,9 @@ internal class StateStorage(context: Context) {
         editor.apply()
     }
 
-    inline fun <reified T> getValue(key: String): T? {
+    fun <T: Any> getValue(key: String, c: KClass<T>): T? {
         val json = prefs.getString(key, null) ?: return null
-        return gson.fromJson(json, T::class.java)
+        return gson.fromJson(json, c.java)
     }
 
     fun removeValue(key: String) {

@@ -6,13 +6,15 @@ import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.MfaType
-import com.schibsted.account.android.webflows.util.Util
 import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
+import com.schibsted.account.android.webflows.persistence.EncryptedSharedPrefsStorage
+import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.user.UserSession
 import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.security.MessageDigest
@@ -21,7 +23,9 @@ import java.util.*
 sealed class LoginError {
     object AuthStateReadError : LoginError()
     object UnsolicitedResponse : LoginError()
-    data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) : LoginError()
+    data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) :
+        LoginError()
+
     data class TokenErrorResponse(val messsage: String) : LoginError()
     data class UnexpectedError(val message: String) : LoginError()
 }
@@ -30,7 +34,8 @@ typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 class Client {
     private val clientConfiguration: ClientConfiguration
     private val tokenHandler: TokenHandler
-    private val storage: StateStorage
+    private val stateStorage: StateStorage
+    private val sessionStorage: SessionStorage
 
     constructor (
         context: Context,
@@ -39,20 +44,25 @@ class Client {
     ) : this(
         clientConfiguration,
         StateStorage(context.applicationContext),
-        client
+        EncryptedSharedPrefsStorage(context.applicationContext),
+        client,
+        TokenHandler(
+            clientConfiguration,
+            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), client)
+        )
     )
 
     internal constructor (
         clientConfiguration: ClientConfiguration,
-        storage: StateStorage,
-        client: OkHttpClient
+        stateStorage: StateStorage,
+        sessionStorage: SessionStorage,
+        client: OkHttpClient,
+        tokenHandler: TokenHandler,
     ) {
         this.clientConfiguration = clientConfiguration
-        this.storage = storage
-        tokenHandler = TokenHandler(
-            clientConfiguration,
-            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), client)
-        )
+        this.stateStorage = stateStorage
+        this.sessionStorage = sessionStorage
+        this.tokenHandler = tokenHandler
     }
 
     fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {
@@ -60,7 +70,7 @@ class Client {
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
 
-        storage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, mfa))
+        stateStorage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, mfa))
 
         val scopes = extraScopeValues.union(setOf("openid", "offline_access"))
         val scopeString = scopes.joinToString(" ")
@@ -95,18 +105,19 @@ class Client {
 
     fun handleAuthenticationResponse(authResponseParameters: String, callback: LoginResultHandler) {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
-        val stored = storage.getValue<AuthState>(AUTH_STATE_KEY)
+        val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
             ?: return callback(ResultOrError.Failure(LoginError.AuthStateReadError))
 
         if (stored.state != authResponse["state"]) {
             callback(ResultOrError.Failure(LoginError.UnsolicitedResponse))
             return
         }
-        storage.removeValue(AUTH_STATE_KEY)
+        stateStorage.removeValue(AUTH_STATE_KEY)
 
         val error = authResponse["error"]
         if (error != null) {
-            val oauthError = LoginError.AuthenticationErrorResponse(error, authResponse["error_description"])
+            val oauthError =
+                LoginError.AuthenticationErrorResponse(error, authResponse["error_description"])
             callback(ResultOrError.Failure(oauthError))
             return
         }
@@ -122,14 +133,22 @@ class Client {
                 Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
                 val userSession =
                     UserSession(clientConfiguration.clientId, tokenResponse.userTokens, Date())
+                sessionStorage.save(userSession)
                 callback(ResultOrError.Success(User(this, userSession)))
             }.onFailure { err ->
                 Log.d(Logging.SDK_TAG, "Token error response: $err")
                 callback(ResultOrError.Failure(LoginError.TokenErrorResponse(err.toString())))
             }
         }
+    }
 
-        // TODO store tokens
+    fun resumeLastLoggedInUser(): User? {
+        val session = sessionStorage.get(clientConfiguration.clientId) ?: return null
+        return User(this, session)
+    }
+
+    fun destroySession() {
+        sessionStorage.remove(clientConfiguration.clientId)
     }
 
     internal companion object {

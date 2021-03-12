@@ -1,13 +1,16 @@
 package com.schibsted.account.android.webflows.token
 
+import android.os.Parcelable
 import com.schibsted.account.android.webflows.util.Util
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 internal data class UserTokens(
     val accessToken: String,
     val refreshToken: String?,
     val idToken: String,
     val idTokenClaims: IdTokenClaims,
-) {
+) : Parcelable {
     override fun toString(): String {
         return "UserTokens(\n" +
                 "accessToken: ${Util.removeJwtSignature(accessToken)},\n" +
