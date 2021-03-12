@@ -9,7 +9,7 @@ internal data class UserTokens(
     val accessToken: String,
     val refreshToken: String?,
     val idToken: String,
-    val idTokenClaims: IdTokenClaims,
+    val idTokenClaims: IdTokenClaims
 ) : Parcelable {
     override fun toString(): String {
         return "UserTokens(\n" +

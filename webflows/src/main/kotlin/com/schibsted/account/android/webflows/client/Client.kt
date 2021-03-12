@@ -12,7 +12,7 @@ import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.user.User
-import com.schibsted.account.android.webflows.user.UserSession
+import com.schibsted.account.android.webflows.user.StoredUserSession
 import com.schibsted.account.android.webflows.util.ResultOrError
 import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -132,9 +132,9 @@ class Client {
             result.onSuccess { tokenResponse ->
                 Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
                 val userSession =
-                    UserSession(clientConfiguration.clientId, tokenResponse.userTokens, Date())
+                    StoredUserSession(clientConfiguration.clientId, tokenResponse.userTokens, Date())
                 sessionStorage.save(userSession)
-                callback(ResultOrError.Success(User(this, userSession)))
+                callback(ResultOrError.Success(User(this, tokenResponse.userTokens)))
             }.onFailure { err ->
                 Log.d(Logging.SDK_TAG, "Token error response: $err")
                 callback(ResultOrError.Failure(LoginError.TokenErrorResponse(err.toString())))
@@ -144,7 +144,7 @@ class Client {
 
     fun resumeLastLoggedInUser(): User? {
         val session = sessionStorage.get(clientConfiguration.clientId) ?: return null
-        return User(this, session)
+        return User(this, session.userTokens)
     }
 
     fun destroySession() {

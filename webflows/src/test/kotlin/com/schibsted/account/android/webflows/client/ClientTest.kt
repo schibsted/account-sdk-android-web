@@ -10,6 +10,7 @@ import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenError
 import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.token.UserTokensResult
+import com.schibsted.account.android.webflows.user.StoredUserSession
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.user.UserSession
 import com.schibsted.account.android.webflows.util.ResultOrError
@@ -133,8 +134,7 @@ class ClientTest {
         )
         client.handleAuthenticationResponse("code=$authCode&state=$state") {
             it.onSuccess { user ->
-                assertEquals(clientConfig.clientId, user.session.clientId)
-                assertEquals(Fixtures.userTokens, user.session.userTokens)
+                assertEquals(UserSession(Fixtures.userTokens), user.session)
             }
         }
 
@@ -153,19 +153,17 @@ class ClientTest {
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         val client = getClient(sessionStorage = sessionStorageMock)
 
-        User(client, UserSession(clientConfig.clientId, Fixtures.userTokens, Date())).logout()
+        User(client, UserSession(Fixtures.userTokens)).logout()
         verify { sessionStorageMock.remove(clientConfig.clientId) }
     }
 
     @Test
     fun existingSessionIsResumeable() {
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        val userSession = UserSession(clientConfig.clientId, Fixtures.userTokens, Date())
+        val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
         val client = getClient(sessionStorage = sessionStorageMock)
 
-        val expectedUser =
-            User(client, UserSession(clientConfig.clientId, Fixtures.userTokens, Date()))
-        assertEquals(expectedUser, client.resumeLastLoggedInUser())
+        assertEquals(User(client, UserSession(Fixtures.userTokens)), client.resumeLastLoggedInUser())
     }
 }
