@@ -147,7 +147,7 @@ class Client {
         return User(this, session.userTokens)
     }
 
-    fun destroySession() {
+    internal fun destroySession() {
         sessionStorage.remove(clientConfiguration.clientId)
     }
 
