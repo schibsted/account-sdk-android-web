@@ -3,10 +3,7 @@ package com.schibsted.account.android.webflows.token
 import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
-import com.schibsted.account.android.webflows.api.HttpError
-import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
-import com.schibsted.account.android.webflows.api.UserTokenRequest
-import com.schibsted.account.android.webflows.api.UserTokenResponse
+import com.schibsted.account.android.webflows.api.*
 import com.schibsted.account.android.webflows.client.ClientConfiguration
 import com.schibsted.account.android.webflows.jose.AsyncJwks
 import com.schibsted.account.android.webflows.jose.RemoteJwks
@@ -63,6 +60,25 @@ internal class TokenHandler(
                     Log.d(Logging.SDK_TAG, "Token request error response: $err")
                     callback(Failure(TokenRequestError(err)))
                 }
+        }
+    }
+
+    fun makeTokenRequest(
+        refreshToken: String,
+        scope: String? = null
+    ): ResultOrError<UserTokenResponse, TokenRequestError> {
+        val tokenRequest = RefreshTokenRequest(
+            refreshToken,
+            scope,
+            clientConfiguration.clientId
+        )
+        val result = schibstedAccountApi.makeTokenRequest(tokenRequest)
+        return when (result) {
+            is Success -> result
+            is Failure -> {
+                Log.d(Logging.SDK_TAG, "Token request error response: ${result.error}")
+                Failure(TokenRequestError(result.error))
+            }
         }
     }
 

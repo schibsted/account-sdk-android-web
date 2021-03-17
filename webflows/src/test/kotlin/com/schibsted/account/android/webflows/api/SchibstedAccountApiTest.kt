@@ -1,5 +1,6 @@
 package com.schibsted.account.android.webflows.api
 
+import Fixtures
 import assertError
 import assertSuccess
 import await
@@ -8,11 +9,11 @@ import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import withServer
 
 
 class SchibstedAccountApiTest {
@@ -23,7 +24,7 @@ class SchibstedAccountApiTest {
         "redirectUri"
     )
 
-    private fun assertTokenRequest(
+    private fun assertAuthCodeTokenRequest(
         expectedTokenRequest: UserTokenRequest,
         actualRequest: RecordedRequest
     ) {
@@ -40,17 +41,8 @@ class SchibstedAccountApiTest {
         assertEquals(expectTokenRequest, tokenRequestParams)
     }
 
-    private fun withServer(response: MockResponse, func: (MockWebServer) -> Unit) {
-        val server = MockWebServer()
-        server.enqueue(response)
-
-        server.start()
-        func(server)
-        server.shutdown()
-    }
-
     @Test
-    fun makeTokenRequestSuccess() {
+    fun makeAuthCodeTokenRequestSuccess() {
         val tokenResponse = UserTokenResponse(
             "accessToken1",
             "refreshToken1",
@@ -75,9 +67,52 @@ class SchibstedAccountApiTest {
             await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
                     result.assertSuccess { assertEquals(tokenResponse, it) }
-                    assertTokenRequest(tokenRequest, server.takeRequest())
+                    assertAuthCodeTokenRequest(tokenRequest, server.takeRequest())
                     done()
                 }
+            }
+        }
+    }
+
+    @Test
+    fun makeRefreshTokenRequestSuccess() {
+        val tokenResponse = UserTokenResponse(
+            "accessToken1",
+            "refreshToken1",
+            null,
+            null,
+            3600
+        )
+        val httpResponse = MockResponse().setBody(
+            """
+            {
+                "access_token": "${tokenResponse.access_token}",
+                "refresh_token": "${tokenResponse.refresh_token}",
+                "expires_in": "${tokenResponse.expires_in}"
+            }
+            """.trimIndent()
+        )
+
+        val tokenRequest = RefreshTokenRequest(
+            "refreshToken",
+            null,
+            Fixtures.clientConfig.clientId
+        )
+        withServer(httpResponse) { server ->
+            val schaccApi = SchibstedAccountAPI(server.url("/"), OkHttpClient.Builder().build())
+            await { done ->
+                val result = schaccApi.makeTokenRequest(tokenRequest)
+                result.assertSuccess { assertEquals(tokenResponse, it) }
+
+                val tokenRequestParams =
+                    Util.parseQueryParameters(server.takeRequest().body.readUtf8())
+                val expectedParams = mapOf(
+                    "client_id" to Fixtures.clientConfig.clientId,
+                    "grant_type" to "refresh_token",
+                    "refresh_token" to tokenRequest.refreshToken
+                )
+                assertEquals(expectedParams, tokenRequestParams)
+                done()
             }
         }
     }

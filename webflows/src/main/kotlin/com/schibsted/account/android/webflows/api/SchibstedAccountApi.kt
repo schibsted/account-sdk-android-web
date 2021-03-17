@@ -15,6 +15,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.io.IOException
 import java.lang.reflect.Type
 
 private typealias ApiResult<T> = ResultOrError<T, HttpError>
@@ -70,6 +71,24 @@ internal class SchibstedAccountAPI(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         schaccService.tokenRequest(params).enqueue(ApiResultCallback(callback))
     }
 
+    fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
+        val params = mutableMapOf(
+            "client_id" to tokenRequest.clientId,
+            "grant_type" to "refresh_token",
+            "refresh_token" to tokenRequest.refreshToken,
+        )
+
+        if (tokenRequest.scope != null) {
+            params["scope"] = tokenRequest.scope
+        }
+
+        return try {
+            ApiResultCallback.responseToResult(schaccService.tokenRequest(params).execute())
+        } catch (e: IOException) {
+            ResultOrError.Failure(HttpError.UnexpectedError(e))
+        }
+    }
+
     fun getJwks(callback: (ApiResult<JWKSet>) -> Unit) {
         schaccService.jwks().enqueue(ApiResultCallback(callback))
     }
@@ -81,15 +100,16 @@ private class ApiResultCallback<T>(private val callback: (ApiResult<T>) -> Unit)
     }
 
     override fun onResponse(call: Call<T>, response: Response<T>) {
-        val body = response.body()
-            ?: return callback(
-                ResultOrError.Failure(
-                    HttpError.ErrorResponse(
-                        response.code(), response.errorBody()?.string()
-                    )
-                )
+        callback(responseToResult(response))
+    }
+
+    companion object {
+        fun <T> responseToResult(response: Response<T>): ResultOrError<T, HttpError> {
+            val body = response.body() ?: return ResultOrError.Failure(
+                HttpError.ErrorResponse(response.code(), response.errorBody()?.string())
             )
-        callback(ResultOrError.Success(body))
+            return ResultOrError.Success(body)
+        }
     }
 }
 

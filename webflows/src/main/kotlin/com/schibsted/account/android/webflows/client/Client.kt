@@ -6,13 +6,15 @@ import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.MfaType
+import com.schibsted.account.android.webflows.api.HttpError
 import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
 import com.schibsted.account.android.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenHandler
-import com.schibsted.account.android.webflows.user.User
+import com.schibsted.account.android.webflows.token.UserTokens
 import com.schibsted.account.android.webflows.user.StoredUserSession
+import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.ResultOrError
 import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -29,9 +31,18 @@ sealed class LoginError {
     data class TokenErrorResponse(val messsage: String) : LoginError()
     data class UnexpectedError(val message: String) : LoginError()
 }
+
+sealed class RefreshTokenError {
+    object NoRefreshToken : RefreshTokenError()
+    object ConcurrentRefreshFailure : RefreshTokenError()
+    data class RefreshRequestFailed(val error: HttpError) : RefreshTokenError()
+}
+
 typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 
 class Client {
+    internal val httpClient: OkHttpClient
+
     private val clientConfiguration: ClientConfiguration
     private val tokenHandler: TokenHandler
     private val stateStorage: StateStorage
@@ -63,6 +74,7 @@ class Client {
         this.stateStorage = stateStorage
         this.sessionStorage = sessionStorage
         this.tokenHandler = tokenHandler
+        this.httpClient = client
     }
 
     fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {
@@ -131,8 +143,11 @@ class Client {
         ) { result ->
             result.onSuccess { tokenResponse ->
                 Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
-                val userSession =
-                    StoredUserSession(clientConfiguration.clientId, tokenResponse.userTokens, Date())
+                val userSession = StoredUserSession(
+                    clientConfiguration.clientId,
+                    tokenResponse.userTokens,
+                    Date()
+                )
                 sessionStorage.save(userSession)
                 callback(ResultOrError.Success(User(this, tokenResponse.userTokens)))
             }.onFailure { err ->
@@ -149,6 +164,34 @@ class Client {
 
     internal fun destroySession() {
         sessionStorage.remove(clientConfiguration.clientId)
+    }
+
+    internal fun refreshTokensForUser(user: User): ResultOrError<UserTokens, RefreshTokenError> {
+        val refreshToken = user.tokens.refreshToken ?: return ResultOrError.Failure(
+            RefreshTokenError.NoRefreshToken
+        )
+
+        val result = tokenHandler.makeTokenRequest(refreshToken, scope = null)
+        return when (result) {
+            is ResultOrError.Success -> {
+                val newAccessToken = result.value.access_token
+                val newRefreshToken = result.value.refresh_token ?: refreshToken
+                val userTokens = user.tokens.copy(
+                    accessToken = newAccessToken,
+                    refreshToken = newRefreshToken
+                )
+                user.tokens = userTokens
+                val userSession =
+                    StoredUserSession(clientConfiguration.clientId, userTokens, Date())
+                sessionStorage.save(userSession)
+                Log.i(Logging.SDK_TAG, "Refreshed user tokens: $result")
+                ResultOrError.Success(userTokens)
+            }
+            is ResultOrError.Failure -> {
+                Log.e(Logging.SDK_TAG, "Failed to refresh token: $result")
+                ResultOrError.Failure(RefreshTokenError.RefreshRequestFailed(result.error.cause))
+            }
+        }
     }
 
     internal companion object {

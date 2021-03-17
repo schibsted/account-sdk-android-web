@@ -25,3 +25,9 @@ internal data class UserTokenRequest(
     val clientId: String,
     val redirectUri: String
 )
+
+internal data class RefreshTokenRequest(
+    val refreshToken: String,
+    val scope: String?,
+    val clientId: String
+)

@@ -2,6 +2,7 @@ package com.schibsted.account.android.webflows.client
 
 import Fixtures
 import Fixtures.clientConfig
+import Fixtures.getClient
 import android.util.Log
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.MfaType
@@ -19,7 +20,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import okhttp3.OkHttpClient
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -27,15 +27,6 @@ import java.net.URL
 import java.util.*
 
 class ClientTest {
-    private fun getClient(
-        stateStorage: StateStorage = mockk(relaxed = true),
-        sessionStorage: SessionStorage = mockk(relaxed = true),
-        okHttpClient: OkHttpClient = mockk(relaxed = true),
-        tokenHandler: TokenHandler = mockk(relaxed = true)
-    ): Client {
-        return Client(clientConfig, stateStorage, sessionStorage, okHttpClient, tokenHandler)
-    }
-
     companion object {
         @BeforeClass
         @JvmStatic

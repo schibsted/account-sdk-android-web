@@ -2,9 +2,13 @@ package com.schibsted.account.android.webflows.user
 
 import android.os.Parcelable
 import com.schibsted.account.android.webflows.client.Client
+import com.schibsted.account.android.webflows.client.RefreshTokenError
 import com.schibsted.account.android.webflows.token.UserTokens
-
+import com.schibsted.account.android.webflows.util.BestEffortRunOnceTask
+import com.schibsted.account.android.webflows.util.ResultOrError
 import kotlinx.parcelize.Parcelize
+import okhttp3.*
+import java.io.IOException
 
 
 @Parcelize
@@ -14,7 +18,10 @@ data class UserSession internal constructor(
 
 class User {
     private val client: Client
-    private val tokens: UserTokens
+    internal var tokens: UserTokens
+    private val httpClient: OkHttpClient
+
+    private val tokenRefreshTask: BestEffortRunOnceTask<ResultOrError<UserTokens, RefreshTokenError>>
 
     val session: UserSession
         get() {
@@ -26,10 +33,37 @@ class User {
     internal constructor(client: Client, tokens: UserTokens) {
         this.client = client
         this.tokens = tokens
+        this.httpClient = client.httpClient.newBuilder()
+            .addInterceptor(AuthenticatedRequestInterceptor(this))
+            .authenticator(AccessTokenAuthenticator(this))
+            .build()
+        this.tokenRefreshTask = BestEffortRunOnceTask {
+            client.refreshTokensForUser(this)
+        }
     }
 
     fun logout() {
         client.destroySession()
+    }
+
+    fun makeAuthenticatedRequest(
+        request: Request,
+        callback: (ResultOrError<Response, Throwable>) -> Unit
+    ) {
+        httpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                callback(ResultOrError.Failure(e))
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                callback(ResultOrError.Success(response))
+            }
+        })
+    }
+
+    internal fun refreshTokens(): ResultOrError<UserTokens, RefreshTokenError> {
+        val result = tokenRefreshTask.run()
+        return result ?: ResultOrError.Failure(RefreshTokenError.ConcurrentRefreshFailure)
     }
 
     override fun toString(): String {
