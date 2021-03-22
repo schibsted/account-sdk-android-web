@@ -43,8 +43,7 @@ class UserTest {
 
     @Test
     fun makeAuthenticatedRequestReturnsResponseToCallback() {
-        val httpClient = OkHttpClient.Builder().build()
-        val user = User(Fixtures.getClient(okHttpClient = httpClient), Fixtures.userTokens)
+        val user = User(Fixtures.getClient(), Fixtures.userTokens)
 
         val responseData = "Test data"
         withServer(MockResponse().setResponseCode(200).setBody(responseData)) { server ->
@@ -65,8 +64,7 @@ class UserTest {
 
     @Test
     fun makeAuthenticatedRequestReturnsConnectionErrorToCallback() {
-        val httpClient = OkHttpClient.Builder().build()
-        val user = User(Fixtures.getClient(okHttpClient = httpClient), Fixtures.userTokens)
+        val user = User(Fixtures.getClient(), Fixtures.userTokens)
 
         val request = Request.Builder().url("http://localhost:1").build()
 
@@ -95,11 +93,9 @@ class UserTest {
         val sessionStorageMock: SessionStorage = mockk(relaxed = true) {
             every { save(any()) } returns Unit
         }
-        val httpClient = OkHttpClient.Builder().build()
         val user =
             User(
                 Fixtures.getClient(
-                    okHttpClient = httpClient,
                     tokenHandler = tokenHandler,
                     sessionStorage = sessionStorageMock
                 ),
@@ -162,15 +158,7 @@ class UserTest {
                 ResultOrError.Success(tokensResult)
             }
         }
-        val httpClient = OkHttpClient.Builder().build()
-        val user =
-            User(
-                Fixtures.getClient(
-                    okHttpClient = httpClient,
-                    tokenHandler = tokenHandler,
-                ),
-                Fixtures.userTokens
-            )
+        val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
 
         val responses = arrayOf(
             MockResponse().setResponseCode(401).setBody("Unauthorized"),
@@ -207,12 +195,7 @@ class UserTest {
 
     @Test
     fun makeAuthenticatedRequestForwards401ResponseWhenNoRefreshToken() {
-        val httpClient = OkHttpClient.Builder().build()
-        val user =
-            User(
-                Fixtures.getClient(okHttpClient = httpClient),
-                Fixtures.userTokens.copy(refreshToken = null)
-            )
+        val user = User(Fixtures.getClient(), Fixtures.userTokens.copy(refreshToken = null))
 
         withServer(MockResponse().setResponseCode(401).setBody("Unauthorized")) { server ->
             val request = Request.Builder().url(server.url("/")).build()
@@ -241,12 +224,7 @@ class UserTest {
                 ResultOrError.Failure(error)
             }
         }
-        val httpClient = OkHttpClient.Builder().build()
-        val user =
-            User(
-                Fixtures.getClient(okHttpClient = httpClient, tokenHandler = tokenHandler),
-                Fixtures.userTokens
-            )
+        val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
 
         withServer(MockResponse().setResponseCode(401).setBody("Unauthorized")) { server ->
             val request = Request.Builder().url(server.url("/")).build()

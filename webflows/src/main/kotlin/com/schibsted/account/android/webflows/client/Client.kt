@@ -52,7 +52,7 @@ class Client {
     constructor (
         context: Context,
         clientConfiguration: ClientConfiguration,
-        httpClient: OkHttpClient = OkHttpClient.Builder().build()
+        httpClient: OkHttpClient
     ) {
         this.clientConfiguration = clientConfiguration
         stateStorage = StateStorage(context.applicationContext)
@@ -67,7 +67,7 @@ class Client {
         clientConfiguration: ClientConfiguration,
         stateStorage: StateStorage,
         sessionStorage: SessionStorage,
-        client: OkHttpClient,
+        httpClient: OkHttpClient,
         tokenHandler: TokenHandler,
         schibstedAccountAPI: SchibstedAccountAPI
     ) {
@@ -75,7 +75,7 @@ class Client {
         this.stateStorage = stateStorage
         this.sessionStorage = sessionStorage
         this.tokenHandler = tokenHandler
-        this.httpClient = client
+        this.httpClient = httpClient
         this.schibstedAccountAPI = schibstedAccountAPI
     }
 

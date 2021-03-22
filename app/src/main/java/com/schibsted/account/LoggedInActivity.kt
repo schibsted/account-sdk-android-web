@@ -16,7 +16,7 @@ class LoggedInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_logged_in)
 
-        val client = Client(applicationContext, MainActivity.clientConfig)
+        val client = Client(applicationContext, MainActivity.clientConfig, HttpClient.instance)
 
         val logoutButton = findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {

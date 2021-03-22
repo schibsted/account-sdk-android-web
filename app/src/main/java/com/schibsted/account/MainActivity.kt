@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val client = Client(applicationContext, clientConfig)
+        val client = Client(applicationContext, clientConfig, HttpClient.instance)
 
         val loginButton = findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {

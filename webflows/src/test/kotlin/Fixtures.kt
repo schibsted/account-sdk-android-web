@@ -30,7 +30,7 @@ internal object Fixtures {
     fun getClient(
         stateStorage: StateStorage = mockk(relaxed = true),
         sessionStorage: SessionStorage = mockk(relaxed = true),
-        okHttpClient: OkHttpClient = mockk(relaxed = true),
+        httpClient: OkHttpClient = this.httpClient,
         tokenHandler: TokenHandler = mockk(relaxed = true),
         schibstedAccountAPI: SchibstedAccountAPI = mockk(relaxed = true)
     ): Client {
@@ -38,9 +38,11 @@ internal object Fixtures {
             clientConfig,
             stateStorage,
             sessionStorage,
-            okHttpClient,
+            httpClient,
             tokenHandler,
             schibstedAccountAPI
         )
     }
+
+    val httpClient = OkHttpClient.Builder().build()
 }
