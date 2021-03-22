@@ -1,6 +1,8 @@
 package com.schibsted.account.android.webflows.user
 
 import android.os.Parcelable
+import com.schibsted.account.android.webflows.api.ApiResult
+import com.schibsted.account.android.webflows.api.UserProfileResponse
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.RefreshTokenError
 import com.schibsted.account.android.webflows.token.UserTokens
@@ -19,13 +21,21 @@ data class UserSession internal constructor(
 class User {
     private val client: Client
     internal var tokens: UserTokens
-    private val httpClient: OkHttpClient
+    internal val httpClient: OkHttpClient
 
     private val tokenRefreshTask: BestEffortRunOnceTask<ResultOrError<UserTokens, RefreshTokenError>>
 
     val session: UserSession
         get() {
             return UserSession(tokens)
+        }
+    val userId: String
+        get() {
+            return tokens.idTokenClaims.userId
+        }
+    val uuid: String
+        get() {
+            return tokens.idTokenClaims.sub
         }
 
     constructor(client: Client, session: UserSession) : this(client, session.tokens)
@@ -44,6 +54,10 @@ class User {
 
     fun logout() {
         client.destroySession()
+    }
+
+    fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {
+        client.schibstedAccountAPI.userProfile(this, callback)
     }
 
     fun makeAuthenticatedRequest(

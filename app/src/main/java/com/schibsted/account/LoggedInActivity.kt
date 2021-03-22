@@ -24,6 +24,20 @@ class LoggedInActivity : AppCompatActivity() {
             finish()
         }
 
+        val profileDataButton = findViewById<Button>(R.id.profileDataButton)
+        profileDataButton.setOnClickListener {
+            user?.fetchProfileData {
+                when (it) {
+                    is ResultOrError.Success -> {
+                        Log.i(LOG_TAG, "Profile data ${it.value}")
+                    }
+                    is ResultOrError.Failure -> {
+                        Log.i(LOG_TAG, "Failed to fetch profile data ${it.error}")
+                    }
+                }
+            }
+        }
+
         val userSession = intent.getParcelableExtra<UserSession>(MainActivity.USER_SESSION_EXTRA)
         if (userSession != null) {
             updateUser(User(client, userSession))

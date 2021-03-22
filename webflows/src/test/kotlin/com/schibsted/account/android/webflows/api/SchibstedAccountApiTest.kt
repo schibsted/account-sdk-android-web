@@ -5,6 +5,7 @@ import assertError
 import assertSuccess
 import await
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
+import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -209,6 +210,57 @@ class SchibstedAccountApiTest {
                 schaccApi.getJwks { result ->
                     val userAgentHeader = server.takeRequest().getHeader("User-Agent")
                     assertTrue(userAgentHeader!!.contains("AccountSDKAndroidWeb"))
+                    done()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun userProfileSuccess() {
+        val userProfileResponse = MockResponse().setBody(
+            """
+            {
+                "name": "SPP Container",
+                "version": "0.2",
+                "api": 2,
+                "object": "User",
+                "type": "element",
+                "code": 200,
+                "data": {
+                    "userId": "12345",
+                    "email": "test@example.com",
+                    "phoneNumber": "+46123456",
+                    "displayName": "Unit test",
+                    "name": {
+                        "familyName": "Test",
+                        "givenName": "Unit",
+                        "formatted": "Unit Test"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        withServer(userProfileResponse) { server ->
+            val schaccApi = SchibstedAccountAPI(server.url("/"), OkHttpClient.Builder().build())
+            await { done ->
+                val httpClient = OkHttpClient.Builder().build()
+                val user = User(Fixtures.getClient(okHttpClient = httpClient), Fixtures.userTokens)
+                schaccApi.userProfile(user) { result ->
+                    result.assertSuccess {
+                        val expectedProfileResponse = UserProfileResponse(
+                            "12345",
+                            "test@example.com",
+                            "+46123456",
+                            "Unit test",
+                            Name("Unit", "Test", "Unit Test")
+                        )
+                        assertEquals(expectedProfileResponse, it)
+                    }
+
+                    // request should contain user access token
+                    val authHeader = server.takeRequest().getHeader("Authorization")
+                    assertEquals("Bearer ${Fixtures.userTokens.accessToken}", authHeader)
                     done()
                 }
             }

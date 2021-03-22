@@ -42,6 +42,7 @@ typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 
 class Client {
     internal val httpClient: OkHttpClient
+    internal val schibstedAccountAPI: SchibstedAccountAPI
 
     private val clientConfiguration: ClientConfiguration
     private val tokenHandler: TokenHandler
@@ -51,17 +52,16 @@ class Client {
     constructor (
         context: Context,
         clientConfiguration: ClientConfiguration,
-        client: OkHttpClient = OkHttpClient.Builder().build()
-    ) : this(
-        clientConfiguration,
-        StateStorage(context.applicationContext),
-        EncryptedSharedPrefsStorage(context.applicationContext),
-        client,
-        TokenHandler(
-            clientConfiguration,
-            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), client)
-        )
-    )
+        httpClient: OkHttpClient = OkHttpClient.Builder().build()
+    ) {
+        this.clientConfiguration = clientConfiguration
+        stateStorage = StateStorage(context.applicationContext)
+        sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
+        schibstedAccountAPI =
+            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), httpClient)
+        tokenHandler = TokenHandler(clientConfiguration, schibstedAccountAPI)
+        this.httpClient = httpClient
+    }
 
     internal constructor (
         clientConfiguration: ClientConfiguration,
@@ -69,12 +69,14 @@ class Client {
         sessionStorage: SessionStorage,
         client: OkHttpClient,
         tokenHandler: TokenHandler,
+        schibstedAccountAPI: SchibstedAccountAPI
     ) {
         this.clientConfiguration = clientConfiguration
         this.stateStorage = stateStorage
         this.sessionStorage = sessionStorage
         this.tokenHandler = tokenHandler
         this.httpClient = client
+        this.schibstedAccountAPI = schibstedAccountAPI
     }
 
     fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {

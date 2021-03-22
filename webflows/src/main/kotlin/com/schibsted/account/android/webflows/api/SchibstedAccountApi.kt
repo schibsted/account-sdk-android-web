@@ -5,6 +5,7 @@ import com.google.gson.*
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.shaded.json.parser.ParseException
 import com.schibsted.account.android.webflows.BuildConfig
+import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.ResultOrError
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -18,7 +19,7 @@ import retrofit2.http.*
 import java.io.IOException
 import java.lang.reflect.Type
 
-private typealias ApiResult<T> = ResultOrError<T, HttpError>
+typealias ApiResult<T> = ResultOrError<T, HttpError>
 
 private class SDKUserAgentHeaderInterceptor : Interceptor {
     val userAgentHeaderValue: String = "AccountSDKAndroidWeb/${BuildConfig.VERSION_NAME} " +
@@ -32,6 +33,8 @@ private class SDKUserAgentHeaderInterceptor : Interceptor {
         return chain.proceed(request)
     }
 }
+
+private data class SchibstedAccountApiResponse<T>(val data: T)
 
 internal class SchibstedAccountAPI(baseUrl: HttpUrl, okHttpClient: OkHttpClient) {
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -92,6 +95,28 @@ internal class SchibstedAccountAPI(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
     fun getJwks(callback: (ApiResult<JWKSet>) -> Unit) {
         schaccService.jwks().enqueue(ApiResultCallback(callback))
     }
+
+    fun userProfile(user: User, callback: (ApiResult<UserProfileResponse>) -> Unit) {
+        proctectedSchaccApi(user) { service ->
+            service.userProfile(user.uuid)
+                .enqueue(ApiResultCallback { callback(unpackResponse(it)) })
+        }
+    }
+
+    private fun proctectedSchaccApi(
+        user: User,
+        block: (SchibstedAccountTokenProtectedService) -> Unit
+    ) {
+        val protectedSchaccService = retrofit.newBuilder()
+            .client(user.httpClient)
+            .build()
+            .create(SchibstedAccountTokenProtectedService::class.java)
+        block(protectedSchaccService)
+    }
+
+    private fun <T> unpackResponse(response: ApiResult<SchibstedAccountApiResponse<T>>): ApiResult<T> {
+        return response.map { it.data }
+    }
 }
 
 private class ApiResultCallback<T>(private val callback: (ApiResult<T>) -> Unit) : Callback<T> {
@@ -121,6 +146,11 @@ private interface SchibstedAccountService {
 
     @GET("/oauth/jwks")
     fun jwks(): Call<JWKSet>
+}
+
+private interface SchibstedAccountTokenProtectedService {
+    @GET("/api/2/user/{userId}")
+    fun userProfile(@Path("userId") userId: String): Call<SchibstedAccountApiResponse<UserProfileResponse>>
 }
 
 private class JWKSetDeserializer : JsonDeserializer<JWKSet> {
