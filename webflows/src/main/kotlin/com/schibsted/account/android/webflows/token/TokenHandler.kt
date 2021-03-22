@@ -34,7 +34,7 @@ internal data class UserTokensResult(
 
 internal class TokenHandler(
     private val clientConfiguration: ClientConfiguration,
-    private val schibstedAccountApi: SchibstedAccountAPI
+    private val schibstedAccountApi: SchibstedAccountApi
 ) {
     private val jwks: AsyncJwks
 

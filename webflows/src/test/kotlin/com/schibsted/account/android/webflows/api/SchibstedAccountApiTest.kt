@@ -8,7 +8,6 @@ import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
@@ -64,7 +63,7 @@ class SchibstedAccountApiTest {
         )
 
         withServer(httpResponse) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
                     result.assertSuccess { assertEquals(tokenResponse, it) }
@@ -100,7 +99,7 @@ class SchibstedAccountApiTest {
             Fixtures.clientConfig.clientId
         )
         withServer(httpResponse) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 val result = schaccApi.makeTokenRequest(tokenRequest)
                 result.assertSuccess { assertEquals(tokenResponse, it) }
@@ -121,7 +120,7 @@ class SchibstedAccountApiTest {
     @Test
     fun makeTokenRequestConnectionError() {
         val schaccApi =
-            SchibstedAccountAPI("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
+            SchibstedAccountApi("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
         await { done ->
             schaccApi.makeTokenRequest(tokenRequest) { result ->
                 result.assertError { assertTrue(it is HttpError.UnexpectedError) }
@@ -134,7 +133,7 @@ class SchibstedAccountApiTest {
     fun makeTokenRequestErrorResponse() {
         val response = MockResponse().setResponseCode(500).setBody("Something went wrong")
         withServer(response) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
                     result.assertError {
@@ -160,7 +159,7 @@ class SchibstedAccountApiTest {
             """.trimIndent()
         )
         withServer(jwksResponse) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.getJwks { result ->
                     result.assertSuccess { assertEquals(listOf(jwk), it.keys) }
@@ -173,7 +172,7 @@ class SchibstedAccountApiTest {
     @Test
     fun jwksConnectionError() {
         val schaccApi =
-            SchibstedAccountAPI("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
+            SchibstedAccountApi("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
         await { done ->
             schaccApi.getJwks { result ->
                 result.assertError { assertTrue(it is HttpError.UnexpectedError) }
@@ -186,7 +185,7 @@ class SchibstedAccountApiTest {
     fun jwksErrorResponse() {
         val response = MockResponse().setResponseCode(500).setBody("Something went wrong")
         withServer(response) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.getJwks { result ->
                     result.assertError {
@@ -205,7 +204,7 @@ class SchibstedAccountApiTest {
     fun customUserAgentHeaderIsAddedToRequest() {
         val response = MockResponse().setResponseCode(500).setBody("Something went wrong")
         withServer(response) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.getJwks { result ->
                     val userAgentHeader = server.takeRequest().getHeader("User-Agent")
@@ -242,7 +241,7 @@ class SchibstedAccountApiTest {
             """.trimIndent()
         )
         withServer(userProfileResponse) { server ->
-            val schaccApi = SchibstedAccountAPI(server.url("/"), Fixtures.httpClient)
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 val user = User(Fixtures.getClient(), Fixtures.userTokens)
                 schaccApi.userProfile(user) { result ->

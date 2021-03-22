@@ -7,7 +7,7 @@ import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.api.HttpError
-import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
+import com.schibsted.account.android.webflows.api.SchibstedAccountApi
 import com.schibsted.account.android.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
@@ -42,7 +42,7 @@ typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 
 class Client {
     internal val httpClient: OkHttpClient
-    internal val schibstedAccountAPI: SchibstedAccountAPI
+    internal val schibstedAccountApi: SchibstedAccountApi
 
     private val clientConfiguration: ClientConfiguration
     private val tokenHandler: TokenHandler
@@ -57,9 +57,9 @@ class Client {
         this.clientConfiguration = clientConfiguration
         stateStorage = StateStorage(context.applicationContext)
         sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        schibstedAccountAPI =
-            SchibstedAccountAPI(clientConfiguration.serverUrl.toString().toHttpUrl(), httpClient)
-        tokenHandler = TokenHandler(clientConfiguration, schibstedAccountAPI)
+        schibstedAccountApi =
+            SchibstedAccountApi(clientConfiguration.serverUrl.toString().toHttpUrl(), httpClient)
+        tokenHandler = TokenHandler(clientConfiguration, schibstedAccountApi)
         this.httpClient = httpClient
     }
 
@@ -69,14 +69,14 @@ class Client {
         sessionStorage: SessionStorage,
         httpClient: OkHttpClient,
         tokenHandler: TokenHandler,
-        schibstedAccountAPI: SchibstedAccountAPI
+        schibstedAccountApi: SchibstedAccountApi
     ) {
         this.clientConfiguration = clientConfiguration
         this.stateStorage = stateStorage
         this.sessionStorage = sessionStorage
         this.tokenHandler = tokenHandler
         this.httpClient = httpClient
-        this.schibstedAccountAPI = schibstedAccountAPI
+        this.schibstedAccountApi = schibstedAccountApi
     }
 
     fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {

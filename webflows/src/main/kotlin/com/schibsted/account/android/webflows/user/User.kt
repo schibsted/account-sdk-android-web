@@ -57,7 +57,7 @@ class User {
     }
 
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {
-        client.schibstedAccountAPI.userProfile(this, callback)
+        client.schibstedAccountApi.userProfile(this, callback)
     }
 
     fun makeAuthenticatedRequest(

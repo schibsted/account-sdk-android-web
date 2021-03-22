@@ -1,4 +1,4 @@
-import com.schibsted.account.android.webflows.api.SchibstedAccountAPI
+import com.schibsted.account.android.webflows.api.SchibstedAccountApi
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.ClientConfiguration
 import com.schibsted.account.android.webflows.persistence.SessionStorage
@@ -32,7 +32,7 @@ internal object Fixtures {
         sessionStorage: SessionStorage = mockk(relaxed = true),
         httpClient: OkHttpClient = this.httpClient,
         tokenHandler: TokenHandler = mockk(relaxed = true),
-        schibstedAccountAPI: SchibstedAccountAPI = mockk(relaxed = true)
+        schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true)
     ): Client {
         return Client(
             clientConfig,
@@ -40,7 +40,7 @@ internal object Fixtures {
             sessionStorage,
             httpClient,
             tokenHandler,
-            schibstedAccountAPI
+            schibstedAccountApi
         )
     }
 
