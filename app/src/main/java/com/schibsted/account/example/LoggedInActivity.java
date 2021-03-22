@@ -37,13 +37,28 @@ public class LoggedInActivity extends AppCompatActivity {
 
         Button profileDataButton = findViewById(R.id.profileDataButton);
         profileDataButton.setOnClickListener(v -> {
-            if (user != null)
+            if (user != null) {
                 user.fetchProfileData(wrap(result -> result
                                 .onSuccess(wrap(value -> Log.i(LOG_TAG, "Profile data " + value)))
                                 .onFailure(wrap(error -> Log.i(LOG_TAG, "Failed to fetch profile data " + error)))
                         )
                 );
+            }
         });
+
+        Button sessionExchangeButton = findViewById(R.id.sessionExchangeButton);
+        sessionExchangeButton.setOnClickListener(v -> {
+            if (user != null) {
+                user.webSessionUrl(ClientConfig.webClientId,
+                        ClientConfig.webClientRedirectUri,
+                        wrap(result -> result
+                                .onSuccess(wrap(value -> Log.i(LOG_TAG, "Session exchange URL: " + value)))
+                                .onFailure(wrap(error -> Log.i(LOG_TAG, "Failed to start session exchange " + error)))
+                        )
+                );
+            }
+        });
+
         UserSession userSession = getIntent().getParcelableExtra(MainActivity.USER_SESSION_EXTRA);
         if (userSession != null) {
             updateUser(new User(client, userSession));

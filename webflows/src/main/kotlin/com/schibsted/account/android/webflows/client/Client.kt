@@ -43,35 +43,35 @@ typealias LoginResultHandler = (ResultOrError<User, LoginError>) -> Unit
 class Client {
     internal val httpClient: OkHttpClient
     internal val schibstedAccountApi: SchibstedAccountApi
+    internal val configuration: ClientConfiguration
 
-    private val clientConfiguration: ClientConfiguration
     private val tokenHandler: TokenHandler
     private val stateStorage: StateStorage
     private val sessionStorage: SessionStorage
 
     constructor (
         context: Context,
-        clientConfiguration: ClientConfiguration,
+        configuration: ClientConfiguration,
         httpClient: OkHttpClient
     ) {
-        this.clientConfiguration = clientConfiguration
+        this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
         sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
         schibstedAccountApi =
-            SchibstedAccountApi(clientConfiguration.serverUrl.toString().toHttpUrl(), httpClient)
-        tokenHandler = TokenHandler(clientConfiguration, schibstedAccountApi)
+            SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
+        tokenHandler = TokenHandler(configuration, schibstedAccountApi)
         this.httpClient = httpClient
     }
 
     internal constructor (
-        clientConfiguration: ClientConfiguration,
+        configuration: ClientConfiguration,
         stateStorage: StateStorage,
         sessionStorage: SessionStorage,
         httpClient: OkHttpClient,
         tokenHandler: TokenHandler,
         schibstedAccountApi: SchibstedAccountApi
     ) {
-        this.clientConfiguration = clientConfiguration
+        this.configuration = configuration
         this.stateStorage = stateStorage
         this.sessionStorage = sessionStorage
         this.tokenHandler = tokenHandler
@@ -92,8 +92,8 @@ class Client {
 
         val codeChallenge = computeCodeChallenge(codeVerifier)
         val authParams: MutableMap<String, String> = mutableMapOf(
-            "client_id" to clientConfiguration.clientId,
-            "redirect_uri" to clientConfiguration.redirectUri,
+            "client_id" to configuration.clientId,
+            "redirect_uri" to configuration.redirectUri,
             "response_type" to "code",
             "state" to state,
             "scope" to scopeString,
@@ -108,7 +108,7 @@ class Client {
             authParams["prompt"] = "select_account"
         }
 
-        return "${clientConfiguration.serverUrl}/oauth/authorize?${Util.queryEncode(authParams)}"
+        return "${configuration.serverUrl}/oauth/authorize?${Util.queryEncode(authParams)}"
     }
 
     private fun computeCodeChallenge(codeVerifier: String): String {
@@ -147,7 +147,7 @@ class Client {
             result.onSuccess { tokenResponse ->
                 Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
                 val userSession = StoredUserSession(
-                    clientConfiguration.clientId,
+                    configuration.clientId,
                     tokenResponse.userTokens,
                     Date()
                 )
@@ -161,12 +161,12 @@ class Client {
     }
 
     fun resumeLastLoggedInUser(): User? {
-        val session = sessionStorage.get(clientConfiguration.clientId) ?: return null
+        val session = sessionStorage.get(configuration.clientId) ?: return null
         return User(this, session.userTokens)
     }
 
     internal fun destroySession() {
-        sessionStorage.remove(clientConfiguration.clientId)
+        sessionStorage.remove(configuration.clientId)
     }
 
     internal fun refreshTokensForUser(user: User): ResultOrError<UserTokens, RefreshTokenError> {
@@ -185,7 +185,7 @@ class Client {
                 )
                 user.tokens = userTokens
                 val userSession =
-                    StoredUserSession(clientConfiguration.clientId, userTokens, Date())
+                    StoredUserSession(configuration.clientId, userTokens, Date())
                 sessionStorage.save(userSession)
                 Log.i(Logging.SDK_TAG, "Refreshed user tokens: $result")
                 ResultOrError.Success(userTokens)

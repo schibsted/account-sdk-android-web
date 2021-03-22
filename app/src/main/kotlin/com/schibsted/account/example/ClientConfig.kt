@@ -9,4 +9,7 @@ object ClientConfig {
         "602525f2b41fa31789a95aa8",
         "com.sdk-example.pre.602525f2b41fa31789a95aa8://login"
     )
+
+    const val webClientId = "599fd705ed21dc0d55011d2a"
+    const val webClientRedirectUri = "https://pre.sdk-example.com/safepage"
 }

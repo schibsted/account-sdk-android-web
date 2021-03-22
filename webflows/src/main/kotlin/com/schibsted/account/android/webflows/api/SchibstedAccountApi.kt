@@ -84,6 +84,18 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         }
     }
 
+    fun sessionExchange(
+        user: User,
+        clientId: String,
+        redirectUri: String,
+        callback: (ApiResult<SessionExchangeResponse>) -> Unit
+    ) {
+        proctectedSchaccApi(user) { service ->
+            service.sessionExchange(clientId, redirectUri)
+                .enqueue(ApiResultCallback { callback(it.unpack()) })
+        }
+    }
+
     private fun proctectedSchaccApi(
         user: User,
         block: (SchibstedAccountTokenProtectedService) -> Unit

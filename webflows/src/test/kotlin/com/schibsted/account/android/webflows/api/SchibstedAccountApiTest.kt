@@ -267,4 +267,53 @@ class SchibstedAccountApiTest {
             }
         }
     }
+
+    @Test
+    fun sessionExchangeSuccess() {
+        val sessionExchangeResponse = MockResponse().setBody(
+            """
+            {
+                "name": "SPP Container",
+                "version": "0.2",
+                "api": 2,
+                "object": "User",
+                "type": "element",
+                "code": 200,
+                "data": {
+                    "code": "12345"
+                }
+            }
+            """.trimIndent()
+        )
+        withServer(sessionExchangeResponse) { server ->
+            val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
+            await { done ->
+                val user = User(Fixtures.getClient(), Fixtures.userTokens)
+                val clientId = "client1"
+                val redirectUri = "https://client1.example.com/redirect"
+                schaccApi.sessionExchange(user, clientId, redirectUri) { result ->
+                    result.assertSuccess {
+                        val expectedSessionExchangeResponse = SessionExchangeResponse("12345")
+                        assertEquals(expectedSessionExchangeResponse, it)
+                    }
+
+
+                    val request = server.takeRequest()
+                    // request should contain user access token
+                    val authHeader = request.getHeader("Authorization")
+                    assertEquals("Bearer ${Fixtures.userTokens.accessToken}", authHeader)
+
+                    val requestParams = Util.parseQueryParameters(request.body.readUtf8())
+                    assertEquals(
+                        mapOf(
+                            "clientId" to clientId,
+                            "redirectUri" to redirectUri,
+                            "type" to "session"
+                        ), requestParams
+                    )
+                    done()
+                }
+            }
+        }
+    }
 }

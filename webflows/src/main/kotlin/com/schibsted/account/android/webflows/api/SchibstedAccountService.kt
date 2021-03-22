@@ -19,4 +19,12 @@ internal interface SchibstedAccountTokenProtectedService {
 
     @GET("/api/2/user/{userId}")
     fun userProfile(@Path("userId") userId: String): Call<SchibstedAccountApiResponse<UserProfileResponse>>
+
+    @FormUrlEncoded
+    @POST("/api/2/oauth/exchange")
+    fun sessionExchange(
+        @Field("clientId") clientId: String,
+        @Field("redirectUri") redirectUri: String,
+        @Field("type") type: String = "session",
+    ): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
 }

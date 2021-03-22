@@ -11,6 +11,7 @@ import com.schibsted.account.android.webflows.util.ResultOrError
 import kotlinx.parcelize.Parcelize
 import okhttp3.*
 import java.io.IOException
+import java.net.URL
 
 
 @Parcelize
@@ -58,6 +59,18 @@ class User {
 
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {
         client.schibstedAccountApi.userProfile(this, callback)
+    }
+
+    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) {
+        client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
+            val result = it.map {
+                client.configuration.serverUrl
+                    .toURI()
+                    .resolve("/session/${it.code}")
+                    .toURL()
+            }
+            callback(result)
+        }
     }
 
     fun makeAuthenticatedRequest(
