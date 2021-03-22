@@ -1,6 +1,5 @@
 package com.schibsted.account.android.webflows.token
 
-import android.security.keystore.KeyProperties
 import assertError
 import assertSuccess
 import com.nimbusds.jose.JWSAlgorithm
@@ -16,9 +15,6 @@ import com.schibsted.account.android.webflows.jose.AsyncJwks
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.SecureRandom
 import java.util.*
 
 private class TestJwks(private val jwks: JWKSet?) : AsyncJwks {

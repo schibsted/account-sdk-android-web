@@ -155,6 +155,9 @@ class ClientTest {
         every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
         val client = getClient(sessionStorage = sessionStorageMock)
 
-        assertEquals(User(client, UserSession(Fixtures.userTokens)), client.resumeLastLoggedInUser())
+        assertEquals(
+            User(client, UserSession(Fixtures.userTokens)),
+            client.resumeLastLoggedInUser()
+        )
     }
 }

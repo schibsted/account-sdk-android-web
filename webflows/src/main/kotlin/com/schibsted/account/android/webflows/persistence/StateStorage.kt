@@ -19,7 +19,7 @@ internal class StateStorage(context: Context) {
         editor.apply()
     }
 
-    fun <T: Any> getValue(key: String, c: KClass<T>): T? {
+    fun <T : Any> getValue(key: String, c: KClass<T>): T? {
         val json = prefs.getString(key, null) ?: return null
         return gson.fromJson(json, c.java)
     }

@@ -1,20 +1,15 @@
 package com.schibsted.account.android.webflows.api
 
-import com.google.gson.*
+import com.google.gson.GsonBuilder
 import com.nimbusds.jose.jwk.JWKSet
-import com.nimbusds.jose.shaded.json.parser.ParseException
 import com.schibsted.account.android.webflows.api.SchibstedAccountTokenProtectedService.SchibstedAccountApiResponse
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.ResultOrError
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
-import java.lang.reflect.Type
 
 typealias ApiResult<T> = ResultOrError<T, HttpError>
 
