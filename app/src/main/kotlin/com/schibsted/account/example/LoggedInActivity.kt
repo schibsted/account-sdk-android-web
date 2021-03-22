@@ -1,9 +1,10 @@
-package com.schibsted.account
+package com.schibsted.account.example
 
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.schibsted.account.R
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.user.UserSession
@@ -16,7 +17,7 @@ class LoggedInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_logged_in)
 
-        val client = Client(applicationContext, MainActivity.clientConfig, HttpClient.instance)
+        val client = Client(applicationContext, ClientConfig.instance, HttpClient.instance)
 
         val logoutButton = findViewById<Button>(R.id.logoutButton)
         logoutButton.setOnClickListener {

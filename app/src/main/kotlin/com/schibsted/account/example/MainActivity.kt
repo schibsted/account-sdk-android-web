@@ -1,4 +1,4 @@
-package com.schibsted.account
+package com.schibsted.account.example
 
 import android.content.Intent
 import android.net.Uri
@@ -7,16 +7,15 @@ import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import com.schibsted.account.R
 import com.schibsted.account.android.webflows.client.Client
-import com.schibsted.account.android.webflows.client.ClientConfiguration
-import com.schibsted.account.android.webflows.client.Environment
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val client = Client(applicationContext, clientConfig, HttpClient.instance)
+        val client = Client(applicationContext, ClientConfig.instance, HttpClient.instance)
 
         val loginButton = findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
@@ -43,11 +42,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val LOG_TAG = "MainActivity"
-        val clientConfig = ClientConfiguration(
-            Environment.PRE,
-            "602525f2b41fa31789a95aa8",
-            "com.sdk-example.pre.602525f2b41fa31789a95aa8://login"
-        )
 
         const val USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION"
     }

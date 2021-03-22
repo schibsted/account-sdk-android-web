@@ -79,7 +79,8 @@ class Client {
         this.schibstedAccountApi = schibstedAccountApi
     }
 
-    fun generateLoginUrl(mfa: MfaType? = null, extraScopeValues: Set<String> = setOf()): String {
+    @JvmOverloads
+    fun generateLoginUrl(extraScopeValues: Set<String> = setOf(), mfa: MfaType? = null): String {
         val state = Util.randomString(10)
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)

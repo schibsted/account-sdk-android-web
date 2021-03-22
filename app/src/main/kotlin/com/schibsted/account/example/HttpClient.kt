@@ -1,4 +1,4 @@
-package com.schibsted.account
+package com.schibsted.account.example
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
