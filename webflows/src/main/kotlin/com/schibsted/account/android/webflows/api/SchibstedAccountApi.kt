@@ -93,8 +93,12 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         user: User,
         block: (SchibstedAccountTokenProtectedService) -> Unit
     ) {
+        val httpClient = user.httpClient.newBuilder()
+            .addInterceptor(SDKUserAgentHeaderInterceptor())
+            .build()
+
         val protectedSchaccService = retrofit.newBuilder()
-            .client(user.httpClient)
+            .client(httpClient)
             .build()
             .create(SchibstedAccountTokenProtectedService::class.java)
         block(protectedSchaccService)

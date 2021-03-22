@@ -256,9 +256,12 @@ class SchibstedAccountApiTest {
                         assertEquals(expectedProfileResponse, it)
                     }
 
-                    // request should contain user access token
-                    val authHeader = server.takeRequest().getHeader("Authorization")
+                    // request should contain user access token and custom User-Agent header
+                    val request = server.takeRequest()
+                    val authHeader = request.getHeader("Authorization")
                     assertEquals("Bearer ${Fixtures.userTokens.accessToken}", authHeader)
+                    val userAgentHeader = request.getHeader("User-Agent")
+                    assertTrue(userAgentHeader!!.contains("AccountSDKAndroidWeb"))
                     done()
                 }
             }
