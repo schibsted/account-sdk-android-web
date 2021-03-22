@@ -14,7 +14,7 @@ import com.schibsted.account.android.webflows.user.UserSession;
 
 import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
 
-public class LoggedInActivityJava extends AppCompatActivity {
+public class LoggedInActivity extends AppCompatActivity {
     private static String LOG_TAG = "LoggedInActivityJava";
 
     @Nullable
@@ -44,7 +44,7 @@ public class LoggedInActivityJava extends AppCompatActivity {
                         )
                 );
         });
-        UserSession userSession = getIntent().getParcelableExtra(MainActivityJava.USER_SESSION_EXTRA);
+        UserSession userSession = getIntent().getParcelableExtra(MainActivity.USER_SESSION_EXTRA);
         if (userSession != null) {
             updateUser(new User(client, userSession));
         } else {

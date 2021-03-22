@@ -14,7 +14,7 @@ import com.schibsted.account.R;
 import com.schibsted.account.android.webflows.client.Client;
 import com.schibsted.account.android.webflows.user.User;
 
-public class MainActivityJava extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     public static String USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION";
     private static String LOG_TAG = "MainActivityJava";
 
