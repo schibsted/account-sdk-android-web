@@ -31,9 +31,10 @@ class BestEffortRunOnceTaskTest {
 
     @Test
     fun runOnlyExecutesOperationOnce() {
-        val opMock = mockk<TestOperation<String>>()
+        val opMock = mockk<TestOperation<String>> {
+            every { doWork() } returnsMany listOf("First result", "Second result")
+        }
 
-        every { opMock.doWork() } returnsMany listOf("First result", "Second result")
         val results = runInParallel(3, BestEffortRunOnceTask {
             Thread.sleep(20) // artificial delay to force subsequent threads to wait for the first one
             opMock.doWork()
@@ -49,14 +50,14 @@ class BestEffortRunOnceTaskTest {
 
     @Test
     fun runRepeatsOperationIfLockTimesOut() {
-        val opMock = mockk<TestOperation<String>>()
-
         val results = listOf(
             "First result",
             "Second result",
             "Third result"
         )
-        every { opMock.doWork() } returnsMany results
+        val opMock = mockk<TestOperation<String>> {
+            every { doWork() } returnsMany results
+        }
         val actualResults = runInParallel(3, BestEffortRunOnceTask(10) {
             Thread.sleep(20)
             opMock.doWork()

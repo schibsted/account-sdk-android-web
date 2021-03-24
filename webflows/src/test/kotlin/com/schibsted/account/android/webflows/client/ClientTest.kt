@@ -150,8 +150,8 @@ class ClientTest {
 
     @Test
     fun existingSessionIsResumeable() {
-        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
         val client = getClient(sessionStorage = sessionStorageMock)
 
