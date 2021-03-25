@@ -28,7 +28,7 @@ sealed class LoginError {
     data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) :
         LoginError()
 
-    data class TokenErrorResponse(val messsage: String) : LoginError()
+    data class TokenErrorResponse(val message: String) : LoginError()
     data class UnexpectedError(val message: String) : LoginError()
 }
 
