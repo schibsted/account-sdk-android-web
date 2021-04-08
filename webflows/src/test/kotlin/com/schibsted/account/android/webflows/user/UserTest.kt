@@ -1,10 +1,7 @@
 package com.schibsted.account.android.webflows.user
 
-import Fixtures
 import android.util.Log
-import assertError
-import assertSuccess
-import await
+import com.schibsted.account.android.testutil.*
 import com.schibsted.account.android.webflows.api.HttpError
 import com.schibsted.account.android.webflows.api.UserTokenResponse
 import com.schibsted.account.android.webflows.client.Client
@@ -22,7 +19,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
-import withServer
 import java.net.ConnectException
 import java.util.*
 import kotlin.concurrent.thread

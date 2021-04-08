@@ -1,3 +1,4 @@
 include ':webflows'
 include ':app'
+include ':testsupport'
 rootProject.name = "Account SDK Android Web"

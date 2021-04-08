@@ -1,9 +1,12 @@
 package com.schibsted.account.android.webflows.client
 
-import Fixtures
-import Fixtures.clientConfig
-import Fixtures.getClient
+import android.content.Intent
+import com.schibsted.account.android.testutil.Fixtures
+import com.schibsted.account.android.testutil.Fixtures.clientConfig
+import com.schibsted.account.android.testutil.Fixtures.getClient
 import android.util.Log
+import com.schibsted.account.android.testutil.assertError
+import com.schibsted.account.android.testutil.assertSuccess
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.persistence.SessionStorage
@@ -36,6 +39,14 @@ class ClientTest {
             every { Log.d(any(), any()) } returns 0
             every { Log.i(any(), any()) } returns 0
             every { Log.e(any(), any()) } returns 0
+        }
+    }
+
+    private fun authResultIntent(authResponseParameters: String?): Intent {
+        return mockk {
+            every { data } returns mockk {
+                every { query } returns authResponseParameters
+            }
         }
     }
 
@@ -123,8 +134,9 @@ class ClientTest {
             stateStorage = stateStorageMock,
             tokenHandler = tokenHandler
         )
-        client.handleAuthenticationResponse("code=$authCode&state=$state") {
-            it.onSuccess { user ->
+
+        client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
+            it.assertSuccess { user ->
                 assertEquals(UserSession(Fixtures.userTokens), user.session)
             }
         }
@@ -136,6 +148,22 @@ class ClientTest {
                 val secondsSinceSessionCreated = (Date().time - storedSession.updatedAt.time) / 1000
                 assertTrue(secondsSinceSessionCreated < 1) // created within last second
             })
+        }
+    }
+
+    @Test
+    fun handleAuthenticationResponseShouldHandleMissingIntentData() {
+        getClient().handleAuthenticationResponse(authResultIntent(null)) {
+            it.assertError { error ->
+                when (error) {
+                    is LoginError.UnexpectedError -> {
+                        assertEquals("No authentication response", error.message)
+                    }
+                    else -> {
+                        fail("Incorrect error: $error")
+                    }
+                }
+            }
         }
     }
 

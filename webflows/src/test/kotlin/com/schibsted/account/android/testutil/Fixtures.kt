@@ -1,3 +1,6 @@
+package com.schibsted.account.android.testutil
+
+import android.content.Intent
 import com.schibsted.account.android.webflows.api.SchibstedAccountApi
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.ClientConfiguration
@@ -6,6 +9,7 @@ import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.IdTokenClaims
 import com.schibsted.account.android.webflows.token.TokenHandler
 import com.schibsted.account.android.webflows.token.UserTokens
+import io.mockk.every
 import io.mockk.mockk
 import okhttp3.OkHttpClient
 import java.net.URL
@@ -30,7 +34,7 @@ internal object Fixtures {
     fun getClient(
         stateStorage: StateStorage = mockk(relaxed = true),
         sessionStorage: SessionStorage = mockk(relaxed = true),
-        httpClient: OkHttpClient = this.httpClient,
+        httpClient: OkHttpClient = Fixtures.httpClient,
         tokenHandler: TokenHandler = mockk(relaxed = true),
         schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true)
     ): Client {

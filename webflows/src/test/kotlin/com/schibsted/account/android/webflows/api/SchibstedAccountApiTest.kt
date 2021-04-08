@@ -1,9 +1,9 @@
 package com.schibsted.account.android.webflows.api
 
-import Fixtures
-import assertError
-import assertSuccess
-import await
+import com.schibsted.account.android.testutil.Fixtures
+import com.schibsted.account.android.testutil.assertError
+import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.await
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.util.Util
@@ -13,7 +13,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import withServer
+import com.schibsted.account.android.testutil.withServer
 
 
 class SchibstedAccountApiTest {

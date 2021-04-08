@@ -1,7 +1,7 @@
 package com.schibsted.account.android.webflows.token
 
-import assertError
-import assertSuccess
+import com.schibsted.account.android.testutil.assertError
+import com.schibsted.account.android.testutil.assertSuccess
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject

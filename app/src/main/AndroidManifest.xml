@@ -2,13 +2,13 @@
     package="com.schibsted.account">
 
     <application
+        android:name=".example.ExampleApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
 
         <activity
             android:name="com.schibsted.account.example.MainActivity"
@@ -20,7 +20,10 @@
         </activity>
         <activity
             android:name="com.schibsted.account.example.LoggedInActivity"
-            android:label="@string/app_name">
+            android:label="Logged-in"/>
+
+        <activity
+            android:name="com.schibsted.account.android.webflows.activities.RedirectUriReceiverActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -29,6 +32,17 @@
                     android:host="login"/>
             </intent-filter>
         </activity>
-    </application>
 
+        <activity
+            android:name="com.schibsted.account.example.ManualLoginActivity"
+            android:label="Manual login">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.sdk-example.pre.602525f2b41fa31789a95aa8"
+                    android:host="manual-login"/>
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>

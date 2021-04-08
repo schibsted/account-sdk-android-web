@@ -1,11 +1,15 @@
 package com.schibsted.account.android.webflows.client
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.MfaType
+import com.schibsted.account.android.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.android.webflows.api.HttpError
 import com.schibsted.account.android.webflows.api.SchibstedAccountApi
 import com.schibsted.account.android.webflows.persistence.EncryptedSharedPrefsStorage
@@ -80,7 +84,32 @@ class Client {
     }
 
     @JvmOverloads
-    fun generateLoginUrl(extraScopeValues: Set<String> = setOf(), mfa: MfaType? = null): String {
+    fun getAuthenticationIntent(
+        context: Context,
+        extraScopeValues: Set<String> = setOf(),
+        mfa: MfaType? = null
+    ): Intent {
+        val customTabsIntent = CustomTabsIntent.Builder().build().apply {
+            intent.data = Uri.parse(generateLoginUrl(extraScopeValues, mfa))
+        }
+        return AuthorizationManagementActivity.createStartIntent(context, customTabsIntent.intent)
+    }
+
+    @JvmOverloads
+    fun launchAuth(
+        context: Context,
+        extraScopeValues: Set<String> = setOf(),
+        mfa: MfaType? = null
+    ) {
+        CustomTabsIntent.Builder()
+            .build()
+            .launchUrl(context, Uri.parse(generateLoginUrl(extraScopeValues, mfa)))
+    }
+
+    internal fun generateLoginUrl(
+        extraScopeValues: Set<String> = setOf(),
+        mfa: MfaType? = null
+    ): String {
         val state = Util.randomString(10)
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
@@ -108,7 +137,9 @@ class Client {
             authParams["prompt"] = "select_account"
         }
 
-        return "${configuration.serverUrl}/oauth/authorize?${Util.queryEncode(authParams)}"
+        val loginUrl = "${configuration.serverUrl}/oauth/authorize?${Util.queryEncode(authParams)}"
+        Log.d(Logging.SDK_TAG, "Login url: $loginUrl")
+        return loginUrl
     }
 
     private fun computeCodeChallenge(codeVerifier: String): String {
@@ -118,7 +149,19 @@ class Client {
         return Base64.encodeToString(digest, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
     }
 
-    fun handleAuthenticationResponse(authResponseParameters: String, callback: LoginResultHandler) {
+    fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
+        val authResponse = intent.data?.query ?: return callback(
+            ResultOrError.Failure(
+                LoginError.UnexpectedError("No authentication response")
+            )
+        )
+        handleAuthenticationResponse(authResponse, callback)
+    }
+
+    private fun handleAuthenticationResponse(
+        authResponseParameters: String,
+        callback: LoginResultHandler
+    ) {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
         val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
             ?: return callback(ResultOrError.Failure(LoginError.AuthStateReadError))

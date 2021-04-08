@@ -1,6 +1,7 @@
 package com.schibsted.account.android.webflows.user
 
 import android.os.Parcelable
+import com.schibsted.account.android.webflows.activities.AuthResultLiveData
 import com.schibsted.account.android.webflows.api.ApiResult
 import com.schibsted.account.android.webflows.api.UserProfileResponse
 import com.schibsted.account.android.webflows.client.Client
@@ -55,6 +56,7 @@ class User {
 
     fun logout() {
         client.destroySession()
+        AuthResultLiveData.getIfInitialised()?.logout()
     }
 
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {

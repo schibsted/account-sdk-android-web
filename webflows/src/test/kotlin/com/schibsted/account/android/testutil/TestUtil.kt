@@ -1,3 +1,5 @@
+package com.schibsted.account.android.testutil
+
 import com.schibsted.account.android.webflows.util.ResultOrError
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
