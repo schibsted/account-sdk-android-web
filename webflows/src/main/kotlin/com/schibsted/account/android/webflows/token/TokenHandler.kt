@@ -8,9 +8,9 @@ import com.schibsted.account.android.webflows.client.ClientConfiguration
 import com.schibsted.account.android.webflows.jose.AsyncJwks
 import com.schibsted.account.android.webflows.jose.RemoteJwks
 import com.schibsted.account.android.webflows.token.TokenError.*
-import com.schibsted.account.android.webflows.util.ResultOrError
-import com.schibsted.account.android.webflows.util.ResultOrError.Failure
-import com.schibsted.account.android.webflows.util.ResultOrError.Success
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 
 internal sealed class TokenError {
     data class TokenRequestError(val cause: HttpError) : TokenError()
@@ -31,6 +31,7 @@ internal data class UserTokensResult(
     }
 }
 
+internal typealias TokenRequestResult = Either<TokenError, UserTokensResult>
 
 internal class TokenHandler(
     private val clientConfiguration: ClientConfiguration,
@@ -45,7 +46,7 @@ internal class TokenHandler(
     fun makeTokenRequest(
         authCode: String,
         authState: AuthState,
-        callback: (ResultOrError<UserTokensResult, TokenError>) -> Unit
+        callback: (TokenRequestResult) -> Unit
     ) {
         val tokenRequest = UserTokenRequest(
             authCode,
@@ -55,10 +56,10 @@ internal class TokenHandler(
         )
         schibstedAccountApi.makeTokenRequest(tokenRequest) { result ->
             result
-                .onSuccess { handleTokenResponse(it, authState, callback) }
-                .onFailure { err ->
+                .foreach { handleTokenResponse(it, authState, callback) }
+                .left().foreach { err ->
                     Log.d(Logging.SDK_TAG, "Token request error response: $err")
-                    callback(Failure(TokenRequestError(err)))
+                    callback(Left(TokenRequestError(err)))
                 }
         }
     }
@@ -66,7 +67,7 @@ internal class TokenHandler(
     fun makeTokenRequest(
         refreshToken: String,
         scope: String? = null
-    ): ResultOrError<UserTokenResponse, TokenRequestError> {
+    ): Either<TokenRequestError, UserTokenResponse> {
         val tokenRequest = RefreshTokenRequest(
             refreshToken,
             scope,
@@ -74,10 +75,10 @@ internal class TokenHandler(
         )
         val result = schibstedAccountApi.makeTokenRequest(tokenRequest)
         return when (result) {
-            is Success -> result
-            is Failure -> {
-                Log.d(Logging.SDK_TAG, "Token request error response: ${result.error}")
-                Failure(TokenRequestError(result.error))
+            is Right -> result
+            is Left -> {
+                Log.d(Logging.SDK_TAG, "Token request error response: ${result.value}")
+                Left(TokenRequestError(result.value))
             }
         }
     }
@@ -85,14 +86,14 @@ internal class TokenHandler(
     private fun handleTokenResponse(
         tokenResponse: UserTokenResponse,
         authState: AuthState,
-        callback: (ResultOrError<UserTokensResult, TokenError>) -> Unit
+        callback: (TokenRequestResult) -> Unit
     ) {
         Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
 
         val idToken = tokenResponse.id_token
         if (idToken == null) {
             Log.e(Logging.SDK_TAG, "Missing ID Token")
-            callback(Failure(NoIdTokenReceived))
+            callback(Left(NoIdTokenReceived))
             return
         }
 
@@ -105,7 +106,7 @@ internal class TokenHandler(
 
         IdTokenValidator.validate(idToken, jwks, idTokenValidationContext) { result ->
             result
-                .onSuccess {
+                .foreach {
                     val tokens = UserTokens(
                         tokenResponse.access_token,
                         tokenResponse.refresh_token,
@@ -113,7 +114,7 @@ internal class TokenHandler(
                         it
                     )
                     callback(
-                        Success(
+                        Right(
                             UserTokensResult(
                                 tokens,
                                 tokenResponse.scope,
@@ -122,7 +123,7 @@ internal class TokenHandler(
                         )
                     )
                 }
-                .onFailure { callback(Failure(IdTokenNotValid(it))) }
+                .left().foreach { callback(Left(IdTokenNotValid(it))) }
         }
     }
 }

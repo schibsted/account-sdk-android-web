@@ -8,7 +8,8 @@ import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.token.TokenError
 import com.schibsted.account.android.webflows.token.TokenHandler
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -46,7 +47,7 @@ class UserTest {
 
             await { done ->
                 user.makeAuthenticatedRequest(request) { result ->
-                    result.assertSuccess { assertEquals(responseData, it.body!!.string()) }
+                    result.assertRight { assertEquals(responseData, it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
                         server.takeRequest().getHeader("Authorization")
@@ -65,7 +66,7 @@ class UserTest {
 
         await { done ->
             user.makeAuthenticatedRequest(request) { result ->
-                result.assertError { assertTrue(it is ConnectException) }
+                result.assertLeft { assertTrue(it is ConnectException) }
                 done()
             }
         }
@@ -82,7 +83,7 @@ class UserTest {
                     "openid offline_access",
                     10
                 )
-                ResultOrError.Success(tokensResult)
+                Right(tokensResult)
             }
         }
         val sessionStorageMock: SessionStorage = mockk(relaxed = true) {
@@ -107,7 +108,7 @@ class UserTest {
 
             await { done ->
                 user.makeAuthenticatedRequest(request) { result ->
-                    result.assertSuccess { assertEquals(responseData, it.body!!.string()) }
+                    result.assertRight { assertEquals(responseData, it.body!!.string()) }
 
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
@@ -150,7 +151,7 @@ class UserTest {
                     "openid offline_access",
                     10
                 )
-                ResultOrError.Success(tokensResult)
+                Right(tokensResult)
             }
         }
         val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
@@ -164,7 +165,7 @@ class UserTest {
 
             await { done ->
                 user.makeAuthenticatedRequest(request) { result ->
-                    result.assertSuccess { assertEquals("Still unauthorized", it.body!!.string()) }
+                    result.assertRight { assertEquals("Still unauthorized", it.body!!.string()) }
 
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
@@ -197,7 +198,7 @@ class UserTest {
 
             await { done ->
                 user.makeAuthenticatedRequest(request) { result ->
-                    result.assertSuccess { assertEquals("Unauthorized", it.body!!.string()) }
+                    result.assertRight { assertEquals("Unauthorized", it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
                         server.takeRequest().getHeader("Authorization")
@@ -216,7 +217,7 @@ class UserTest {
             every { makeTokenRequest(any(), null) } returns run {
                 val error =
                     TokenError.TokenRequestError(HttpError.UnexpectedError(Error("Refresh token request failed")))
-                ResultOrError.Failure(error)
+                Left(error)
             }
         }
         val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
@@ -226,7 +227,7 @@ class UserTest {
 
             await { done ->
                 user.makeAuthenticatedRequest(request) { result ->
-                    result.assertSuccess { assertEquals("Unauthorized", it.body!!.string()) }
+                    result.assertRight { assertEquals("Unauthorized", it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
                         server.takeRequest().getHeader("Authorization")
@@ -248,18 +249,18 @@ class UserTest {
         val user = User(client, Fixtures.userTokens)
         every { client.refreshTokensForUser(user) } answers {
             Thread.sleep(20) // artificial delay to simulate network request
-            ResultOrError.Success(Fixtures.userTokens.copy(accessToken = "accessToken1"))
+            Right(Fixtures.userTokens.copy(accessToken = "accessToken1"))
         } andThen {
-            ResultOrError.Success(Fixtures.userTokens.copy(accessToken = "accessToken2"))
+            Right(Fixtures.userTokens.copy(accessToken = "accessToken2"))
         }
 
         val t1 = thread {
             val result = user.refreshTokens()
-            result.assertSuccess { assertEquals("accessToken1", it.accessToken) }
+            result.assertRight { assertEquals("accessToken1", it.accessToken) }
         }
         val t2 = thread {
             val result = user.refreshTokens()
-            result.assertSuccess { assertEquals("accessToken1", it.accessToken) }
+            result.assertRight { assertEquals("accessToken1", it.accessToken) }
         }
 
         t1.join()

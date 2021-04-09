@@ -4,14 +4,15 @@ import com.google.gson.GsonBuilder
 import com.nimbusds.jose.jwk.JWKSet
 import com.schibsted.account.android.webflows.api.SchibstedAccountTokenProtectedService.SchibstedAccountApiResponse
 import com.schibsted.account.android.webflows.user.User
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
-typealias ApiResult<T> = ResultOrError<T, HttpError>
+typealias ApiResult<T> = Either<HttpError, T>
 
 private fun <T> ApiResult<SchibstedAccountApiResponse<T>>.unpack(): ApiResult<T> {
     return this.map { it.data }
@@ -69,7 +70,7 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         return try {
             responseToResult(schaccService.tokenRequest(params).execute())
         } catch (e: IOException) {
-            ResultOrError.Failure(HttpError.UnexpectedError(e))
+            Left(HttpError.UnexpectedError(e))
         }
     }
 

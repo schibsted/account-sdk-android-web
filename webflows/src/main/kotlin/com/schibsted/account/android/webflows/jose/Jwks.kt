@@ -10,8 +10,9 @@ internal interface AsyncJwks {
 internal class RemoteJwks(private val schibstedAccountApi: SchibstedAccountApi) : AsyncJwks {
     override fun fetch(callback: (JWKSet?) -> Unit) {
         schibstedAccountApi.getJwks {
-            it.onSuccess { jwks -> callback(jwks) }
-            it.onFailure { callback(null) }
+            it
+                .foreach { jwks -> callback(jwks) }
+                .left().foreach { callback(null) }
         }
     }
 }

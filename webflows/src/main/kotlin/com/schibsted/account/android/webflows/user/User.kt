@@ -8,7 +8,9 @@ import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.RefreshTokenError
 import com.schibsted.account.android.webflows.token.UserTokens
 import com.schibsted.account.android.webflows.util.BestEffortRunOnceTask
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import kotlinx.parcelize.Parcelize
 import okhttp3.*
 import java.io.IOException
@@ -20,12 +22,14 @@ data class UserSession internal constructor(
     internal val tokens: UserTokens
 ) : Parcelable
 
+private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>
+
 class User {
     private val client: Client
     internal var tokens: UserTokens
     internal val httpClient: OkHttpClient
 
-    private val tokenRefreshTask: BestEffortRunOnceTask<ResultOrError<UserTokens, RefreshTokenError>>
+    private val tokenRefreshTask: BestEffortRunOnceTask<TokenRefreshResult>
 
     val session: UserSession
         get() {
@@ -77,22 +81,22 @@ class User {
 
     fun makeAuthenticatedRequest(
         request: Request,
-        callback: (ResultOrError<Response, Throwable>) -> Unit
+        callback: (Either<Throwable, Response>) -> Unit
     ) {
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback(ResultOrError.Failure(e))
+                callback(Left(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
-                callback(ResultOrError.Success(response))
+                callback(Right(response))
             }
         })
     }
 
-    internal fun refreshTokens(): ResultOrError<UserTokens, RefreshTokenError> {
+    internal fun refreshTokens(): TokenRefreshResult {
         val result = tokenRefreshTask.run()
-        return result ?: ResultOrError.Failure(RefreshTokenError.ConcurrentRefreshFailure)
+        return result ?: Left(RefreshTokenError.ConcurrentRefreshFailure)
     }
 
     override fun toString(): String {

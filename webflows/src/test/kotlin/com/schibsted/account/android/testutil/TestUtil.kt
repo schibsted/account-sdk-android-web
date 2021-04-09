@@ -1,6 +1,8 @@
 package com.schibsted.account.android.testutil
 
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -20,14 +22,14 @@ fun await(timeoutSeconds: Long = 1, func: (() -> Unit) -> Unit) {
     }
 }
 
-fun <S, E> ResultOrError<S, E>.assertSuccess(func: (S) -> Unit) {
-    Assert.assertTrue("$this is not a Success", this is ResultOrError.Success)
-    func((this as ResultOrError.Success).value)
+fun <L, R> Either<L, R>.assertRight(func: (R) -> Unit) {
+    Assert.assertTrue("$this is not a Right", this is Right)
+    func((this as Right).value)
 }
 
-fun <S, E> ResultOrError<S, E>.assertError(func: (E) -> Unit) {
-    Assert.assertTrue("$this is not an Error", this is ResultOrError.Failure)
-    func((this as ResultOrError.Failure).error)
+fun <L, R> Either<L, R>.assertLeft(func: (L) -> Unit) {
+    Assert.assertTrue("$this is not a Left", this is Left)
+    func((this as Left).value)
 }
 
 fun withServer(vararg responses: MockResponse, func: (MockWebServer) -> Unit) {

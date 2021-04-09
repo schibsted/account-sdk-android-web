@@ -14,7 +14,7 @@ import com.schibsted.account.R;
 import com.schibsted.account.android.webflows.activities.AuthResultLiveData;
 import com.schibsted.account.android.webflows.activities.NotAuthed;
 import com.schibsted.account.android.webflows.user.User;
-import com.schibsted.account.android.webflows.util.ResultOrError;
+import com.schibsted.account.android.webflows.util.Either;
 
 import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
 
@@ -44,10 +44,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Login cancelled", Toast.LENGTH_SHORT).show();
         }
 
-        AuthResultLiveData.get().observe(this, (Observer<ResultOrError<? extends User, ? extends NotAuthed>>) result -> {
+        AuthResultLiveData.get().observe(this, (Observer<Either<? extends NotAuthed, ? extends User>>) result -> {
             result
-                    .onSuccess(wrap(this::startLoggedInActivity))
-                    .onFailure(wrap(error -> {
+                    .foreach(wrap(this::startLoggedInActivity))
+                    .left().foreach(wrap(error -> {
                         if (error == NotAuthed.NoLoggedInUser.INSTANCE) {
                             // no logged-in user could be resumed or user was logged-out
                             Log.i(LOG_TAG, "No logged-in user");

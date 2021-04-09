@@ -40,8 +40,8 @@ public class LoggedInActivity extends AppCompatActivity {
         profileDataButton.setOnClickListener(v -> {
             if (user != null) {
                 user.fetchProfileData(wrap(result -> result
-                                .onSuccess(wrap(value -> Log.i(LOG_TAG, "Profile data " + value)))
-                                .onFailure(wrap(error -> Log.i(LOG_TAG, "Failed to fetch profile data " + error)))
+                                .foreach(wrap(value -> Log.i(LOG_TAG, "Profile data " + value)))
+                                .left().foreach(wrap(error -> Log.i(LOG_TAG, "Failed to fetch profile data " + error)))
                         )
                 );
             }
@@ -53,8 +53,8 @@ public class LoggedInActivity extends AppCompatActivity {
                 user.webSessionUrl(ClientConfig.webClientId,
                         ClientConfig.webClientRedirectUri,
                         wrap(result -> result
-                                .onSuccess(wrap(value -> Log.i(LOG_TAG, "Session exchange URL: " + value)))
-                                .onFailure(wrap(error -> Log.i(LOG_TAG, "Failed to start session exchange " + error)))
+                                .foreach(wrap(value -> Log.i(LOG_TAG, "Session exchange URL: " + value)))
+                                .left().foreach(wrap(error -> Log.i(LOG_TAG, "Failed to start session exchange " + error)))
                         )
                 );
             }

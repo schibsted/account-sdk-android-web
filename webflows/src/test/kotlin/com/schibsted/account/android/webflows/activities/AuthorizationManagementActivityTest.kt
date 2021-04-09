@@ -13,12 +13,12 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.schibsted.account.android.testutil.Fixtures
-import com.schibsted.account.android.testutil.assertError
-import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.assertLeft
+import com.schibsted.account.android.testutil.assertRight
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.LoginResultHandler
 import com.schibsted.account.android.webflows.user.User
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -70,7 +70,7 @@ class AuthorizationManagementActivityTest {
         Intents.intending(IntentMatchers.hasExtras(Matchers.equalTo(authIntent.extras)))
             .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent()))
         launch<AuthorizationManagementActivity>(intent)
-        AuthResultLiveData.get().value!!.assertError { assertEquals(NotAuthed.AuthInProgress, it) }
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.AuthInProgress, it) }
     }
 
     @Test
@@ -88,13 +88,13 @@ class AuthorizationManagementActivityTest {
         val user = User(client, Fixtures.userTokens)
         every { client.handleAuthenticationResponse(any(), any()) } answers {
             val callback = secondArg<LoginResultHandler>()
-            callback(ResultOrError.Success(user))
+            callback(Right(user))
         }
         setupAuthorizationManagementActivity(client)
 
         launch<AuthorizationManagementActivity>(intent)
 
-        AuthResultLiveData.get().value!!.assertSuccess { assertEquals(user, it) }
+        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
         verify(exactly = 1) {
             client.handleAuthenticationResponse(withArg { intent ->
                 assertEquals(authResponse, intent.data)
@@ -110,7 +110,7 @@ class AuthorizationManagementActivityTest {
         val intent = Intent(ctx, AuthorizationManagementActivity::class.java)
 
         launch<AuthorizationManagementActivity>(intent)
-        AuthResultLiveData.get().value!!.assertError { assertEquals(NotAuthed.CancelledByUser, it) }
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.CancelledByUser, it) }
         verify(exactly = 1) { AuthorizationManagementActivity.cancelIntent.send() }
         verify(exactly = 0) { AuthorizationManagementActivity.completionIntent.send() }
     }

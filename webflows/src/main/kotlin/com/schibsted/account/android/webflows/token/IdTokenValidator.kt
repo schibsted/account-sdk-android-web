@@ -10,7 +10,9 @@ import com.nimbusds.jwt.proc.BadJWTException
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
 import com.nimbusds.jwt.proc.DefaultJWTProcessor
 import com.schibsted.account.android.webflows.jose.AsyncJwks
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 
 internal sealed class IdTokenValidationError {
     abstract val message: String
@@ -24,12 +26,12 @@ internal object IdTokenValidator {
         idToken: String,
         jwks: AsyncJwks,
         validationContext: IdTokenValidationContext,
-        callback: (ResultOrError<IdTokenClaims, IdTokenValidationError>) -> Unit
+        callback: (Either<IdTokenValidationError, IdTokenClaims>) -> Unit
     ) {
         // https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
         jwks.fetch { fetchedJwks ->
             if (fetchedJwks == null) {
-                callback(ResultOrError.Failure(IdTokenValidationError.UnexpectedError("Failed to fetch JWKS to validate ID Token")))
+                callback(Left(IdTokenValidationError.UnexpectedError("Failed to fetch JWKS to validate ID Token")))
             } else {
                 callback(validate(idToken, fetchedJwks, validationContext))
             }
@@ -40,7 +42,7 @@ internal object IdTokenValidator {
         idToken: String,
         jwks: JWKSet,
         validationContext: IdTokenValidationContext
-    ): ResultOrError<IdTokenClaims, IdTokenValidationError> {
+    ): Either<IdTokenValidationError, IdTokenClaims> {
         val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
         val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
             JWSAlgorithm.RS256,
@@ -62,14 +64,12 @@ internal object IdTokenValidator {
         try {
             claims = jwtProcessor.process(idToken, validationContext)
         } catch (e: BadJWTException) {
-            return ResultOrError.Failure(
-                IdTokenValidationError.FailedValidation(
-                    e.message ?: "Failed to verify ID Token"
-                )
+            return Left(
+                IdTokenValidationError.FailedValidation(e.message ?: "Failed to verify ID Token")
             )
         }
 
-        return ResultOrError.Success(
+        return Right(
             IdTokenClaims(
                 claims.issuer,
                 claims.subject,

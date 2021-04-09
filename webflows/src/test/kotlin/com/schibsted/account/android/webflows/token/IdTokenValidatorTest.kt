@@ -1,7 +1,7 @@
 package com.schibsted.account.android.webflows.token
 
-import com.schibsted.account.android.testutil.assertError
-import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.assertLeft
+import com.schibsted.account.android.testutil.assertRight
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
@@ -79,7 +79,7 @@ class IdTokenValidatorTest {
         val claims = defaultIdTokenClaims().build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertSuccess { assertEquals(idTokenClaims(claims), it) }
+            result.assertRight { assertEquals(idTokenClaims(claims), it) }
         }
     }
 
@@ -92,7 +92,7 @@ class IdTokenValidatorTest {
             .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertSuccess { assertEquals(idTokenClaims(claims), it) }
+            result.assertRight { assertEquals(idTokenClaims(claims), it) }
         }
     }
 
@@ -106,7 +106,7 @@ class IdTokenValidatorTest {
                 .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertError { assertErrorMessage("Missing expected AMR value", it.message) }
+                result.assertLeft { assertErrorMessage("Missing expected AMR value", it.message) }
             }
         }
     }
@@ -121,7 +121,7 @@ class IdTokenValidatorTest {
                 .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertError { assertErrorMessage("nonce", it.message) }
+                result.assertLeft { assertErrorMessage("nonce", it.message) }
             }
         }
     }
@@ -135,7 +135,7 @@ class IdTokenValidatorTest {
             .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertError { assertErrorMessage("Invalid issuer", it.message) }
+            result.assertLeft { assertErrorMessage("Invalid issuer", it.message) }
         }
     }
 
@@ -156,7 +156,7 @@ class IdTokenValidatorTest {
                 .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertSuccess { assertEquals(idTokenClaims(claims), it) }
+                result.assertRight { assertEquals(idTokenClaims(claims), it) }
             }
         }
     }
@@ -170,7 +170,7 @@ class IdTokenValidatorTest {
             .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertError { assertErrorMessage("audience", it.message) }
+            result.assertLeft { assertErrorMessage("audience", it.message) }
         }
     }
 
@@ -184,7 +184,7 @@ class IdTokenValidatorTest {
             .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertError { assertErrorMessage("Expired JWT", it.message) }
+            result.assertLeft { assertErrorMessage("Expired JWT", it.message) }
         }
     }
 

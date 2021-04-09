@@ -2,7 +2,8 @@ package com.schibsted.account.android.webflows.user
 
 import android.util.Log
 import com.schibsted.account.android.webflows.Logging
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import okhttp3.*
 
 
@@ -23,14 +24,14 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
 
         val tokenRefreshResult = user.refreshTokens()
         return when (tokenRefreshResult) {
-            is ResultOrError.Success -> {
+            is Right -> {
                 // retry request with fresh access token
                 val request = response.request.newBuilder()
                     .withBearerToken(user.tokens.accessToken)
                     .build()
                 request
             }
-            is ResultOrError.Failure -> {
+            is Left -> {
                 Log.e(Logging.SDK_TAG, "Failed to refresh user tokens: $tokenRefreshResult")
                 null
             }

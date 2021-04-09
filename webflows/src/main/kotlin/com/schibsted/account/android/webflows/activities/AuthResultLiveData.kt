@@ -6,7 +6,9 @@ import androidx.lifecycle.LiveData
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.LoginError
 import com.schibsted.account.android.webflows.user.User
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 
 sealed class NotAuthed {
     object CancelledByUser : NotAuthed()
@@ -15,6 +17,8 @@ sealed class NotAuthed {
     data class LoginFailed(val error: LoginError) : NotAuthed()
 }
 
+
+typealias AuthResult = Either<NotAuthed, User>
 /**
  * Holds current logged-in state of user.
  *
@@ -27,38 +31,32 @@ sealed class NotAuthed {
  *   4. User logs out: Failure(NotAuthed.NoLoggedInUser)
  */
 class AuthResultLiveData private constructor(private val client: Client) :
-    LiveData<ResultOrError<User, NotAuthed>>() {
+    LiveData<AuthResult>() {
 
-    internal fun update(result: ResultOrError<User, NotAuthed>) {
+    internal fun update(result: AuthResult) {
         value = result
     }
 
     init {
         val resumedUser = client.resumeLastLoggedInUser()
         value = if (resumedUser != null) {
-            ResultOrError.Success(resumedUser)
+            Right(resumedUser)
         } else {
-            ResultOrError.Failure(NotAuthed.NoLoggedInUser)
+            Left(NotAuthed.NoLoggedInUser)
         }
     }
 
     internal fun update(intent: Intent) {
         client.handleAuthenticationResponse(intent) { result ->
             when (result) {
-                is ResultOrError.Success -> update(result)
-                is ResultOrError.Failure -> update(
-                    ResultOrError.Failure(
-                        NotAuthed.LoginFailed(
-                            result.error
-                        )
-                    )
-                )
+                is Right -> update(result)
+                is Left -> update(Left(NotAuthed.LoginFailed(result.value)))
             }
         }
     }
 
     internal fun logout() {
-        value = ResultOrError.Failure(NotAuthed.NoLoggedInUser)
+        value = Left(NotAuthed.NoLoggedInUser)
     }
 
     companion object {

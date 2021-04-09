@@ -1,20 +1,21 @@
 package com.schibsted.account.android.webflows.api
 
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 internal fun <T> responseToResult(response: Response<T>): ApiResult<T> {
-    val body = response.body() ?: return ResultOrError.Failure(
+    val body = response.body() ?: return Left(
         HttpError.ErrorResponse(response.code(), response.errorBody()?.string())
     )
-    return ResultOrError.Success(body)
+    return Right(body)
 }
 
 internal class ApiResultCallback<T>(private val callback: (ApiResult<T>) -> Unit) : Callback<T> {
     override fun onFailure(call: Call<T>, t: Throwable) {
-        callback(ResultOrError.Failure(HttpError.UnexpectedError(t)))
+        callback(Left(HttpError.UnexpectedError(t)))
     }
 
     override fun onResponse(call: Call<T>, response: Response<T>) {

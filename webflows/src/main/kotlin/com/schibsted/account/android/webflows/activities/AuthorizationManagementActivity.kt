@@ -36,7 +36,7 @@ import android.os.Bundle
 import android.util.Log
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.client.Client
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Left
 
 /**
  * Stores state and handles events related to the authorization flow. It functions
@@ -130,7 +130,7 @@ class AuthorizationManagementActivity : Activity() {
     override fun onResume() {
         super.onResume()
 
-        AuthResultLiveData.get().update(ResultOrError.Failure(NotAuthed.AuthInProgress))
+        AuthResultLiveData.get().update(Left(NotAuthed.AuthInProgress))
 
         /*
          * If this is the first run of the activity, start the auth intent.
@@ -178,7 +178,7 @@ class AuthorizationManagementActivity : Activity() {
 
     private fun handleAuthorizationCanceled() {
         Log.d(Logging.SDK_TAG, "Authorization flow canceled by user")
-        AuthResultLiveData.get().update(ResultOrError.Failure(NotAuthed.CancelledByUser))
+        AuthResultLiveData.get().update(Left(NotAuthed.CancelledByUser))
         cancelIntent.send()
     }
 

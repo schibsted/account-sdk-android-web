@@ -1,8 +1,8 @@
 package com.schibsted.account.android.webflows.api
 
 import com.schibsted.account.android.testutil.Fixtures
-import com.schibsted.account.android.testutil.assertError
-import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.assertLeft
+import com.schibsted.account.android.testutil.assertRight
 import com.schibsted.account.android.testutil.await
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.schibsted.account.android.webflows.user.User
@@ -66,7 +66,7 @@ class SchibstedAccountApiTest {
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
-                    result.assertSuccess { assertEquals(tokenResponse, it) }
+                    result.assertRight { assertEquals(tokenResponse, it) }
                     assertAuthCodeTokenRequest(tokenRequest, server.takeRequest())
                     done()
                 }
@@ -102,7 +102,7 @@ class SchibstedAccountApiTest {
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 val result = schaccApi.makeTokenRequest(tokenRequest)
-                result.assertSuccess { assertEquals(tokenResponse, it) }
+                result.assertRight { assertEquals(tokenResponse, it) }
 
                 val tokenRequestParams =
                     Util.parseQueryParameters(server.takeRequest().body.readUtf8())
@@ -123,7 +123,7 @@ class SchibstedAccountApiTest {
             SchibstedAccountApi("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
         await { done ->
             schaccApi.makeTokenRequest(tokenRequest) { result ->
-                result.assertError { assertTrue(it is HttpError.UnexpectedError) }
+                result.assertLeft { assertTrue(it is HttpError.UnexpectedError) }
                 done()
             }
         }
@@ -136,7 +136,7 @@ class SchibstedAccountApiTest {
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.makeTokenRequest(tokenRequest) { result ->
-                    result.assertError {
+                    result.assertLeft {
                         assertTrue(it is HttpError.ErrorResponse)
                         val error = it as HttpError.ErrorResponse
                         assertEquals(500, error.code)
@@ -162,7 +162,7 @@ class SchibstedAccountApiTest {
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.getJwks { result ->
-                    result.assertSuccess { assertEquals(listOf(jwk), it.keys) }
+                    result.assertRight { assertEquals(listOf(jwk), it.keys) }
                     done()
                 }
             }
@@ -175,7 +175,7 @@ class SchibstedAccountApiTest {
             SchibstedAccountApi("http://localhost:1".toHttpUrl(), Fixtures.httpClient)
         await { done ->
             schaccApi.getJwks { result ->
-                result.assertError { assertTrue(it is HttpError.UnexpectedError) }
+                result.assertLeft { assertTrue(it is HttpError.UnexpectedError) }
                 done()
             }
         }
@@ -188,7 +188,7 @@ class SchibstedAccountApiTest {
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 schaccApi.getJwks { result ->
-                    result.assertError {
+                    result.assertLeft {
                         assertTrue(it is HttpError.ErrorResponse)
                         val error = it as HttpError.ErrorResponse
                         assertEquals(500, error.code)
@@ -245,7 +245,7 @@ class SchibstedAccountApiTest {
             await { done ->
                 val user = User(Fixtures.getClient(), Fixtures.userTokens)
                 schaccApi.userProfile(user) { result ->
-                    result.assertSuccess {
+                    result.assertRight {
                         val expectedProfileResponse = UserProfileResponse(
                             "12345",
                             "test@example.com",
@@ -292,7 +292,7 @@ class SchibstedAccountApiTest {
                 val clientId = "client1"
                 val redirectUri = "https://client1.example.com/redirect"
                 schaccApi.sessionExchange(user, clientId, redirectUri) { result ->
-                    result.assertSuccess {
+                    result.assertRight {
                         val expectedSessionExchangeResponse = SessionExchangeResponse("12345")
                         assertEquals(expectedSessionExchangeResponse, it)
                     }

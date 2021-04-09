@@ -4,16 +4,16 @@ import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.schibsted.account.android.testutil.Fixtures
-import com.schibsted.account.android.testutil.assertError
-import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.assertLeft
+import com.schibsted.account.android.testutil.assertRight
 import com.schibsted.account.android.webflows.client.Client
 import com.schibsted.account.android.webflows.client.LoginError
 import com.schibsted.account.android.webflows.client.LoginResultHandler
 import com.schibsted.account.android.webflows.user.User
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Left
+import com.schibsted.account.android.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
@@ -56,7 +56,7 @@ class AuthResultLiveDataTest {
         every { client.resumeLastLoggedInUser() } returns user
 
         AuthResultLiveData.create(client)
-        AuthResultLiveData.get().value!!.assertSuccess { assertEquals(user, it) }
+        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
     }
 
     @Test
@@ -65,7 +65,7 @@ class AuthResultLiveDataTest {
         every { client.resumeLastLoggedInUser() } returns null
 
         AuthResultLiveData.create(client)
-        AuthResultLiveData.get().value!!.assertError { assertEquals(NotAuthed.NoLoggedInUser, it) }
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
     }
 
     @Test
@@ -76,7 +76,7 @@ class AuthResultLiveDataTest {
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().logout()
-        AuthResultLiveData.get().value!!.assertError { assertEquals(NotAuthed.NoLoggedInUser, it) }
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
     }
 
     @Test
@@ -85,14 +85,14 @@ class AuthResultLiveDataTest {
         val user = User(client, Fixtures.userTokens)
         every { client.handleAuthenticationResponse(any(), any()) } answers {
             val callback = secondArg<LoginResultHandler>()
-            callback(ResultOrError.Success(user))
+            callback(Right(user))
         }
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().update(Intent().apply {
             data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
         })
-        AuthResultLiveData.get().value!!.assertSuccess { assertEquals(user, it) }
+        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
     }
 
     @Test
@@ -101,7 +101,7 @@ class AuthResultLiveDataTest {
         val client = mockk<Client>(relaxed = true) {
             every { handleAuthenticationResponse(any(), any()) } answers {
                 val callback = secondArg<LoginResultHandler>()
-                callback(ResultOrError.Failure(errorResult))
+                callback(Left(errorResult))
             }
         }
         AuthResultLiveData.create(client)
@@ -109,7 +109,7 @@ class AuthResultLiveDataTest {
         AuthResultLiveData.get().update(Intent().apply {
             data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
         })
-        AuthResultLiveData.get().value!!.assertError {
+        AuthResultLiveData.get().value!!.assertLeft {
             when (it) {
                 is NotAuthed.LoginFailed -> assertEquals(errorResult, it.error)
                 else -> fail("Unexpected error: $it")
@@ -124,9 +124,9 @@ class AuthResultLiveDataTest {
         every { client.resumeLastLoggedInUser() } returns user
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get().value!!.assertSuccess { assertEquals(user, it) }
+        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
         user.logout()
-        AuthResultLiveData.get().value!!.assertError {
+        AuthResultLiveData.get().value!!.assertLeft {
             assertEquals(
                 NotAuthed.NoLoggedInUser,
                 it

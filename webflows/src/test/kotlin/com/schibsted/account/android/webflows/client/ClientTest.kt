@@ -1,23 +1,23 @@
 package com.schibsted.account.android.webflows.client
 
 import android.content.Intent
+import android.util.Log
 import com.schibsted.account.android.testutil.Fixtures
 import com.schibsted.account.android.testutil.Fixtures.clientConfig
 import com.schibsted.account.android.testutil.Fixtures.getClient
-import android.util.Log
-import com.schibsted.account.android.testutil.assertError
-import com.schibsted.account.android.testutil.assertSuccess
+import com.schibsted.account.android.testutil.assertLeft
+import com.schibsted.account.android.testutil.assertRight
 import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
-import com.schibsted.account.android.webflows.token.TokenError
 import com.schibsted.account.android.webflows.token.TokenHandler
+import com.schibsted.account.android.webflows.token.TokenRequestResult
 import com.schibsted.account.android.webflows.token.UserTokensResult
 import com.schibsted.account.android.webflows.user.StoredUserSession
 import com.schibsted.account.android.webflows.user.User
 import com.schibsted.account.android.webflows.user.UserSession
-import com.schibsted.account.android.webflows.util.ResultOrError
+import com.schibsted.account.android.webflows.util.Either.Right
 import com.schibsted.account.android.webflows.util.Util
 import io.mockk.every
 import io.mockk.mockk
@@ -122,10 +122,10 @@ class ClientTest {
         val authCode = "testAuthCode"
         val tokenHandler: TokenHandler = mockk(relaxed = true) {
             every { makeTokenRequest(authCode, authState, any()) } answers {
-                val callback = thirdArg<(ResultOrError<UserTokensResult, TokenError>) -> Unit>()
+                val callback = thirdArg<(TokenRequestResult) -> Unit>()
                 val tokensResult =
                     UserTokensResult(Fixtures.userTokens, "openid offline_access", 10)
-                callback(ResultOrError.Success(tokensResult))
+                callback(Right(tokensResult))
             }
         }
 
@@ -136,7 +136,7 @@ class ClientTest {
         )
 
         client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
-            it.assertSuccess { user ->
+            it.assertRight { user ->
                 assertEquals(UserSession(Fixtures.userTokens), user.session)
             }
         }
@@ -154,7 +154,7 @@ class ClientTest {
     @Test
     fun handleAuthenticationResponseShouldHandleMissingIntentData() {
         getClient().handleAuthenticationResponse(authResultIntent(null)) {
-            it.assertError { error ->
+            it.assertLeft { error ->
                 when (error) {
                     is LoginError.UnexpectedError -> {
                         assertEquals("No authentication response", error.message)

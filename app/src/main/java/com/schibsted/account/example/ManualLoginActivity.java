@@ -1,6 +1,5 @@
 package com.schibsted.account.example;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -10,8 +9,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.schibsted.account.R;
-import com.schibsted.account.android.webflows.activities.NotAuthed;
-import com.schibsted.account.android.webflows.client.LoginError;
 import com.schibsted.account.android.webflows.client.Client;
 import com.schibsted.account.android.webflows.client.ClientConfiguration;
 import com.schibsted.account.android.webflows.user.User;
@@ -52,8 +49,8 @@ public class ManualLoginActivity extends AppCompatActivity {
             client.handleAuthenticationResponse(getIntent(), wrap(result -> {
                 Log.i(LOG_TAG, "Login complete");
                 result
-                        .onSuccess(wrap(this::startLoggedInActivity))
-                        .onFailure(wrap(error -> {
+                        .foreach(wrap(this::startLoggedInActivity))
+                        .left().foreach(wrap(error -> {
                                 Log.i(LOG_TAG, "Something went wrong: " + error);
                                 Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show();
                         }));
