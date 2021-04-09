@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 
 import com.schibsted.account.R;
-import com.schibsted.account.android.webflows.activities.AuthResultLiveData;
-import com.schibsted.account.android.webflows.activities.NotAuthed;
-import com.schibsted.account.android.webflows.user.User;
-import com.schibsted.account.android.webflows.util.Either;
+import com.schibsted.account.webflows.activities.AuthResultLiveData;
+import com.schibsted.account.webflows.activities.NotAuthed;
+import com.schibsted.account.webflows.user.User;
+import com.schibsted.account.webflows.util.Either;
 
 import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
 

@@ -4,9 +4,9 @@ import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Intent;
 
-import com.schibsted.account.android.webflows.activities.AuthorizationManagementActivity;
-import com.schibsted.account.android.webflows.client.Client;
-import com.schibsted.account.android.webflows.client.ClientConfiguration;
+import com.schibsted.account.webflows.activities.AuthorizationManagementActivity;
+import com.schibsted.account.webflows.client.Client;
+import com.schibsted.account.webflows.client.ClientConfiguration;
 
 public class ExampleApp extends Application {
     public static Client client;

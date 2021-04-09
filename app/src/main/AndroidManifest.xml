@@ -23,7 +23,7 @@
             android:label="Logged-in"/>
 
         <activity
-            android:name="com.schibsted.account.android.webflows.activities.RedirectUriReceiverActivity">
+            android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

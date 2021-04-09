@@ -1,14 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.schibsted.account.android.webflows">
+    package="com.schibsted.account.webflows">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
         <activity
-            android:name="com.schibsted.account.android.webflows.activities.AuthorizationManagementActivity"
+            android:name="com.schibsted.account.webflows.activities.AuthorizationManagementActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name="com.schibsted.account.android.webflows.activities.RedirectUriReceiverActivity" />
+        <activity android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity" />
     </application>
 
 </manifest>

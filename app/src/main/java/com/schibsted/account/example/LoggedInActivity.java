@@ -11,8 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.schibsted.account.R;
-import com.schibsted.account.android.webflows.user.User;
-import com.schibsted.account.android.webflows.user.UserSession;
+import com.schibsted.account.webflows.user.User;
+import com.schibsted.account.webflows.user.UserSession;
 
 import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
 

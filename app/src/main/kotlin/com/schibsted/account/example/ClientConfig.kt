@@ -1,7 +1,6 @@
 package com.schibsted.account.example
 
-import com.schibsted.account.android.webflows.client.ClientConfiguration
-import com.schibsted.account.android.webflows.client.Environment
+import com.schibsted.account.webflows.client.Environment
 
 object ClientConfig {
     @JvmStatic
