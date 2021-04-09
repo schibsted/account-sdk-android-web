@@ -6,9 +6,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import com.schibsted.account.android.webflows.AuthState
 import com.schibsted.account.android.webflows.Logging
-import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.android.webflows.api.HttpError
 import com.schibsted.account.android.webflows.api.SchibstedAccountApi

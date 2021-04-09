@@ -1,7 +1,7 @@
 package com.schibsted.account.android.webflows.token
 
 import android.util.Log
-import com.schibsted.account.android.webflows.AuthState
+import com.schibsted.account.android.webflows.client.AuthState
 import com.schibsted.account.android.webflows.Logging
 import com.schibsted.account.android.webflows.api.*
 import com.schibsted.account.android.webflows.client.ClientConfiguration

@@ -7,8 +7,6 @@ import com.schibsted.account.android.testutil.Fixtures.clientConfig
 import com.schibsted.account.android.testutil.Fixtures.getClient
 import com.schibsted.account.android.testutil.assertLeft
 import com.schibsted.account.android.testutil.assertRight
-import com.schibsted.account.android.webflows.AuthState
-import com.schibsted.account.android.webflows.MfaType
 import com.schibsted.account.android.webflows.persistence.SessionStorage
 import com.schibsted.account.android.webflows.persistence.StateStorage
 import com.schibsted.account.android.webflows.token.TokenHandler

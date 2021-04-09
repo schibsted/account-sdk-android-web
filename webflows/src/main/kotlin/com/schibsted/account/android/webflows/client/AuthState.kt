@@ -1,4 +1,4 @@
-package com.schibsted.account.android.webflows
+package com.schibsted.account.android.webflows.client
 
 internal data class AuthState(
     val state: String,
