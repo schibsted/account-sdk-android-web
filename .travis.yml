@@ -7,6 +7,12 @@ android:
     - android-29
     - build-tools-29.0.3
 
+env:
+  global:
+    # GH_TOKEN
+    - secure: "J12rRolhETfQK6KG6PflrFTtkM273Sp5xG8n2bn0OlqFG05+hWOTh/eGBH5LAC5XFfB4Tt8BCYCKCl9SqRAVJyx2As48T3DZROGFPCl7wNgWN2/i+bgDznPdmW3/5kn2vnsy+OU5Cj1bylSEKH/Ryii7geuWlpMus+O2R5L2eU3oycsrCUh4QD5T0iaV8zv5G+NKr/H0uQeJY+YGs8NUOjmouOM92WA7XE3ipYsaztm+k3LVexe3DhVWRCsQoR2JxT0Vh3KgH33Edc5A0vccSKYsST+LYZHU1WMtykhPlElxvMoQWszqkaT/eHLRBQxQP+a4zUHFkTcnMv3yx53C0Jy2Z+z+0nNSMTd7sdblRUWZMZAF2vxfOxVtPY+gom9AzlhaFkcKeLD3CJXeM0ge2PUniaFHFpREomPb1RwUygg+IEm8JqjZZ7se8rA8uB07/ltVRA9rJwK5dg6uclGSeFr+Z9NqZHnlLidXGNN/cnl9MZijcmMcNZut3tdIzmiR2S9GbFzvB4Z+3708S0Y/+VQIpYYXF4jXl1h70Iwiw2pE0wZz2JUdtAdwg4hEn1bZ8nTzA1Isw9pHOqXV+hEKF5Y1stEcgIaYlp4mStmG1PGs1dIfBwSSdX8C/HaO0D5rA4bOmUJzFo56vnVvHIY2XUaYjis7GpfZdnKz83I1RcE="
+
+
 script: ./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
 
 before_cache:
@@ -16,3 +22,23 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+
+before_deploy:
+  - >
+    if ! [ "$BEFORE_DEPLOY_RUN" ]; then
+      export BEFORE_DEPLOY_RUN=1
+      ./gradlew dokkaHtml
+      mkdir docs
+      cp -r webflows/build/dokka/html/. docs/.
+    fi
+
+deploy:
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GH_TOKEN
+    github_url: github.schibsted.io
+    verbose: true
+    local_dir: docs
+    on:
+      repo: spt-identity/account-sdk-android-web
+      branch: master

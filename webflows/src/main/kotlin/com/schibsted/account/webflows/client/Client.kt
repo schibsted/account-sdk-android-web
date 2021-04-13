@@ -27,12 +27,28 @@ import java.security.MessageDigest
 import java.util.*
 
 sealed class LoginError {
+    /** Failed to read stored [AuthState]. */
     object AuthStateReadError : LoginError()
+
+    /** Auth response not matching stored [AuthState]. */
     object UnsolicitedResponse : LoginError()
+
+    /**
+     * Authentication error response.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError" target="_top">Authentication Error Response</a>
+     */
     data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) :
         LoginError()
 
+    /**
+     * Token error response.
+     *
+     * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenErrorResponse" target="_top">Token Error Response</a>
+     */
     data class TokenErrorResponse(val message: String) : LoginError()
+
+    /** Something went wrong. */
     data class UnexpectedError(val message: String) : LoginError()
 }
 
@@ -44,6 +60,7 @@ sealed class RefreshTokenError {
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
 
+/**  Represents a client registered with Schibsted account. */
 class Client {
     internal val httpClient: OkHttpClient
     internal val schibstedAccountApi: SchibstedAccountApi
@@ -83,6 +100,15 @@ class Client {
         this.schibstedAccountApi = schibstedAccountApi
     }
 
+    /**
+     * Start login flow.
+     *
+     * Requires [AuthorizationManagementActivity.setup] to have been called before this.
+     *
+     * @param extraScopeValues Additional scope values to request. By default `openid` and
+     *  `offline_access` will always be included.
+     * @param mfa Optional MFA verification to prompt the user with.
+     */
     @JvmOverloads
     fun getAuthenticationIntent(
         context: Context,
@@ -95,6 +121,13 @@ class Client {
         return AuthorizationManagementActivity.createStartIntent(context, customTabsIntent.intent)
     }
 
+    /**
+     * Start auth activity manually.
+     *
+     * @param extraScopeValues Additional scope values to request. By default `openid` and
+     *  `offline_access` will always be included.
+     * @param mfa Optional MFA verification to prompt the user with.
+     */
     @JvmOverloads
     fun launchAuth(
         context: Context,
@@ -149,6 +182,12 @@ class Client {
         return Base64.encodeToString(digest, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
     }
 
+    /**
+     * Call this with the intent received via deep link to complete the login flow.
+     *
+     * This only needs to be used if manually starting the login flow using [launchAuth].
+     * If using [getAuthenticationIntent] this step will be handled for you.
+     */
     fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
         val authResponse = intent.data?.query ?: return callback(
             Left(LoginError.UnexpectedError("No authentication response"))
@@ -203,6 +242,7 @@ class Client {
         }
     }
 
+    /** Resume any previously logged-in user session */
     fun resumeLastLoggedInUser(): User? {
         val session = sessionStorage.get(configuration.clientId) ?: return null
         return User(this, session.userTokens)
