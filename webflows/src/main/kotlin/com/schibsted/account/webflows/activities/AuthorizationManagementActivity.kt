@@ -34,7 +34,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import com.schibsted.account.webflows.Logging
+import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.util.Either.Left
 

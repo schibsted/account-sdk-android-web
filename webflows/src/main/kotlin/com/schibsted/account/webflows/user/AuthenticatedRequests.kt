@@ -1,7 +1,7 @@
 package com.schibsted.account.webflows.user
 
 import android.util.Log
-import com.schibsted.account.webflows.Logging
+import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import okhttp3.*
