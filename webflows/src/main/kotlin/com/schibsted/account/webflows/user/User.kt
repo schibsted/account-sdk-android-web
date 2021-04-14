@@ -82,9 +82,9 @@ class User {
     /**
      * Generate URL with embedded one-time code for creating a web session for the current user.
      *
-     * @param clientId: which client to get the code on behalf of, e.g. client id for associated web application
-     * @param redirectUri: where to redirect the user after the session has been created
-     * @param callback: callback that receives the URL or an error in case of failure
+     * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
+     * @param redirectUri where to redirect the user after the session has been created
+     * @param callback callback that receives the URL or an error in case of failure
      */
     fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) {
         client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
@@ -104,8 +104,8 @@ class User {
      * If the initial request fails with a 401, a refresh token request is made to get a new access
      * token and the request will be retried with the new token if successful.
      *
-     * @param request: request to perform with authentication using user tokens
-     * @param callback: callback that receives the HTTP response or an error in case of failure
+     * @param request request to perform with authentication using user tokens
+     * @param callback callback that receives the HTTP response or an error in case of failure
      */
     fun makeAuthenticatedRequest(
         request: Request,
