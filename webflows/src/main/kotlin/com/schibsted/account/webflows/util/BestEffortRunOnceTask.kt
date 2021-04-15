@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 internal class BestEffortRunOnceTask<T>(
     private val timeoutMilliSeconds: Long = 1000,
-    private val block: () -> T
+    private val block: suspend () -> T
 ) {
     private val lock = ConditionVariable()
     private val inProgress = AtomicBoolean(false)
@@ -24,7 +24,7 @@ internal class BestEffortRunOnceTask<T>(
     @Volatile
     private var value: T? = null
 
-    fun run(): T? {
+    suspend fun run(): T? {
         return when {
             inProgress.compareAndSet(false, true) -> {
                 // only the first thread will run this

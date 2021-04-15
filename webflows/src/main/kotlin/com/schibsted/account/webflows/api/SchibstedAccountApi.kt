@@ -5,12 +5,11 @@ import com.nimbusds.jose.jwk.JWKSet
 import com.schibsted.account.webflows.api.SchibstedAccountTokenProtectedService.SchibstedAccountApiResponse
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
-import com.schibsted.account.webflows.util.Either.Left
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.IOException
 
 typealias ApiResult<T> = Either<HttpError, T>
 
@@ -41,10 +40,7 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
 
     private val schaccService = retrofit.create(SchibstedAccountService::class.java)
 
-    fun makeTokenRequest(
-        tokenRequest: UserTokenRequest,
-        callback: (ApiResult<UserTokenResponse>) -> Unit
-    ) {
+    suspend fun makeTokenRequest(tokenRequest: UserTokenRequest): ApiResult<UserTokenResponse> {
         val params = mapOf(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "authorization_code",
@@ -53,10 +49,10 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             "redirect_uri" to tokenRequest.redirectUri
         )
 
-        schaccService.tokenRequest(params).enqueue(ApiResultCallback(callback))
+        return safeApiCall { schaccService.tokenRequest(params) }
     }
 
-    fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
+    suspend fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
         val params = mutableMapOf(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "refresh_token",
@@ -67,40 +63,32 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             params["scope"] = tokenRequest.scope
         }
 
-        return try {
-            responseToResult(schaccService.tokenRequest(params).execute())
-        } catch (e: IOException) {
-            Left(HttpError.UnexpectedError(e))
+
+        return safeApiCall { schaccService.tokenRequest(params) }
+    }
+
+    suspend fun getJwks(): ApiResult<JWKSet> = safeApiCall { schaccService.jwks() }
+
+    suspend fun userProfile(user: User): ApiResult<UserProfileResponse> {
+        return proctectedSchaccApi(user) { service ->
+            safeApiCall { service.userProfile(user.uuid).data }
         }
     }
 
-    fun getJwks(callback: (ApiResult<JWKSet>) -> Unit) {
-        schaccService.jwks().enqueue(ApiResultCallback(callback))
-    }
-
-    fun userProfile(user: User, callback: (ApiResult<UserProfileResponse>) -> Unit) {
-        proctectedSchaccApi(user) { service ->
-            service.userProfile(user.uuid)
-                .enqueue(ApiResultCallback { callback(it.unpack()) })
-        }
-    }
-
-    fun sessionExchange(
+    suspend fun sessionExchange(
         user: User,
         clientId: String,
-        redirectUri: String,
-        callback: (ApiResult<SessionExchangeResponse>) -> Unit
-    ) {
-        proctectedSchaccApi(user) { service ->
-            service.sessionExchange(clientId, redirectUri)
-                .enqueue(ApiResultCallback { callback(it.unpack()) })
+        redirectUri: String
+    ): ApiResult<SessionExchangeResponse> {
+        return proctectedSchaccApi(user) { service ->
+            safeApiCall { service.sessionExchange(clientId, redirectUri).data }
         }
     }
 
-    private fun proctectedSchaccApi(
+    private suspend fun <T> proctectedSchaccApi(
         user: User,
-        block: (SchibstedAccountTokenProtectedService) -> Unit
-    ) {
+        block: suspend (SchibstedAccountTokenProtectedService) -> T
+    ): T {
         val httpClient = user.httpClient.newBuilder()
             .addInterceptor(SDKUserAgentHeaderInterceptor())
             .build()
@@ -109,6 +97,23 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             .client(httpClient)
             .build()
             .create(SchibstedAccountTokenProtectedService::class.java)
-        block(protectedSchaccService)
+        return block(protectedSchaccService)
+    }
+}
+
+private suspend fun <T> safeApiCall(apiCall: suspend () -> T): ApiResult<T> {
+    return try {
+        Either.Right(apiCall.invoke())
+    } catch (throwable: Throwable) {
+        when (throwable) {
+            is HttpException -> {
+                @Suppress("BlockingMethodInNonBlockingContext") // https://github.com/square/retrofit/issues/3255
+                val errorBody = throwable.response()?.errorBody()?.string()
+                Either.Left(HttpError.ErrorResponse(throwable.code(), errorBody))
+            }
+            else -> {
+                Either.Left(HttpError.UnexpectedError(throwable))
+            }
+        }
     }
 }

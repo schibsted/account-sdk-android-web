@@ -8,23 +8,23 @@ internal interface SchibstedAccountService {
     @Headers("X-OIDC: v1")
     @FormUrlEncoded
     @POST("/oauth/token")
-    fun tokenRequest(@FieldMap params: Map<String, String>): Call<UserTokenResponse>
+    suspend fun tokenRequest(@FieldMap params: Map<String, String>): UserTokenResponse
 
     @GET("/oauth/jwks")
-    fun jwks(): Call<JWKSet>
+    suspend fun jwks(): JWKSet
 }
 
 internal interface SchibstedAccountTokenProtectedService {
     data class SchibstedAccountApiResponse<T>(val data: T)
 
     @GET("/api/2/user/{userId}")
-    fun userProfile(@Path("userId") userId: String): Call<SchibstedAccountApiResponse<UserProfileResponse>>
+    suspend fun userProfile(@Path("userId") userId: String): SchibstedAccountApiResponse<UserProfileResponse>
 
     @FormUrlEncoded
     @POST("/api/2/oauth/exchange")
-    fun sessionExchange(
+    suspend fun sessionExchange(
         @Field("clientId") clientId: String,
         @Field("redirectUri") redirectUri: String,
         @Field("type") type: String = "session",
-    ): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
+    ): SchibstedAccountApiResponse<SessionExchangeResponse>
 }

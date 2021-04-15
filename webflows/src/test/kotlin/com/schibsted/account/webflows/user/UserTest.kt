@@ -2,7 +2,6 @@ package com.schibsted.account.webflows.user
 
 import android.util.Log
 import com.schibsted.account.testutil.*
-import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.client.Client
@@ -11,10 +10,8 @@ import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
+import io.mockk.*
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
@@ -76,7 +73,7 @@ class UserTest {
     @Test
     fun makeAuthenticatedRequestRefreshesTokenWhen401Response() {
         val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
+            coEvery { makeTokenRequest(any(), null) } returns run {
                 val tokensResult = UserTokenResponse(
                     "newAccessToken",
                     "newRefreshToken",
@@ -144,7 +141,7 @@ class UserTest {
     @Test
     fun makeAuthenticatedRequestDoesntRefreshOnRepeated401() {
         val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
+            coEvery { makeTokenRequest(any(), null) } returns run {
                 val tokensResult = UserTokenResponse(
                     "newAccessToken",
                     "newRefreshToken",
@@ -178,7 +175,7 @@ class UserTest {
                     )
 
                     // only tries to refresh once
-                    verify(exactly = 1) {
+                    coVerify(exactly = 1) {
                         tokenHandler.makeTokenRequest(
                             Fixtures.userTokens.refreshToken!!,
                             null
@@ -215,7 +212,7 @@ class UserTest {
     @Test
     fun makeAuthenticatedRequestForwardsOriginalResponseWhenTokenRefreshFails() {
         val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
+            coEvery { makeTokenRequest(any(), null) } returns run {
                 val error =
                     TokenError.TokenRequestError(HttpError.UnexpectedError(Error("Refresh token request failed")))
                 Left(error)
@@ -234,7 +231,7 @@ class UserTest {
                         server.takeRequest().getHeader("Authorization")
                     )
 
-                    verify(exactly = 1) {
+                    coVerify(exactly = 1) {
                         tokenHandler.makeTokenRequest(Fixtures.userTokens.refreshToken!!, null)
                     }
 
@@ -248,7 +245,7 @@ class UserTest {
     fun refreshTokensOnlyRefreshesOnceWhenConcurrentCalls() {
         val client: Client = mockk(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        every { client.refreshTokensForUser(user) } answers {
+        coEvery { client.refreshTokensForUser(user) } answers {
             Thread.sleep(20) // artificial delay to simulate network request
             Right(Fixtures.userTokens.copy(accessToken = "accessToken1"))
         } andThen {
@@ -256,16 +253,16 @@ class UserTest {
         }
 
         val t1 = thread {
-            val result = user.refreshTokens()
+            val result = runBlocking { user.refreshTokens() }
             result.assertRight { assertEquals("accessToken1", it.accessToken) }
         }
         val t2 = thread {
-            val result = user.refreshTokens()
+            val result = runBlocking { user.refreshTokens() }
             result.assertRight { assertEquals("accessToken1", it.accessToken) }
         }
 
         t1.join()
         t2.join()
-        verify(exactly = 1) { client.refreshTokensForUser(user) }
+        coVerify(exactly = 1) { client.refreshTokensForUser(user) }
     }
 }

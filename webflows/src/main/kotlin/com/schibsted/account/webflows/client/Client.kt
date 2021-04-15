@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
@@ -20,7 +19,9 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.util.Util
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import java.security.MessageDigest
@@ -192,20 +193,19 @@ class Client {
         val authResponse = intent.data?.query ?: return callback(
             Left(LoginError.UnexpectedError("No authentication response"))
         )
-        handleAuthenticationResponse(authResponse, callback)
+
+        Util.coroutineScope.launch {
+            callback(handleAuthenticationResponse(authResponse))
+        }
     }
 
-    private fun handleAuthenticationResponse(
-        authResponseParameters: String,
-        callback: LoginResultHandler
-    ) {
+    private suspend fun handleAuthenticationResponse(authResponseParameters: String): Either<LoginError, User> {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
         val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
-            ?: return callback(Left(LoginError.AuthStateReadError))
+            ?: return Left(LoginError.AuthStateReadError)
 
         if (stored.state != authResponse["state"]) {
-            callback(Left(LoginError.UnsolicitedResponse))
-            return
+            return Left(LoginError.UnsolicitedResponse)
         }
         stateStorage.removeValue(AUTH_STATE_KEY)
 
@@ -213,32 +213,30 @@ class Client {
         if (error != null) {
             val oauthError =
                 LoginError.AuthenticationErrorResponse(error, authResponse["error_description"])
-            callback(Left(oauthError))
-            return
+            return Left(oauthError)
         }
 
         val authCode = authResponse["code"]
-            ?: return callback(Left(LoginError.UnexpectedError("Missing authorization code in authentication response")))
+            ?: return Left(LoginError.UnexpectedError("Missing authorization code in authentication response"))
 
-        tokenHandler.makeTokenRequest(
-            authCode,
-            stored
-        ) { result ->
-            result
-                .foreach { tokenResponse ->
-                    Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
-                    val userSession = StoredUserSession(
-                        configuration.clientId,
-                        tokenResponse.userTokens,
-                        Date()
-                    )
-                    sessionStorage.save(userSession)
-                    callback(Right(User(this, tokenResponse.userTokens)))
-                }
-                .left().foreach { err ->
-                    Log.d(Logging.SDK_TAG, "Token error response: $err")
-                    callback(Left(LoginError.TokenErrorResponse(err.toString())))
-                }
+        val result = tokenHandler.makeTokenRequest(authCode, stored)
+        return when (result) {
+            is Right -> {
+                val tokenResponse = result.value
+                Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
+                val userSession = StoredUserSession(
+                    configuration.clientId,
+                    tokenResponse.userTokens,
+                    Date()
+                )
+                sessionStorage.save(userSession)
+                Right(User(this, tokenResponse.userTokens))
+            }
+            is Left -> {
+                val err = result.value
+                Log.d(Logging.SDK_TAG, "Token error response: $err")
+                Left(LoginError.TokenErrorResponse(err.toString()))
+            }
         }
     }
 
@@ -252,7 +250,7 @@ class Client {
         sessionStorage.remove(configuration.clientId)
     }
 
-    internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
+    internal suspend fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
         val refreshToken = user.tokens.refreshToken ?: return Left(RefreshTokenError.NoRefreshToken)
 
         val result = tokenHandler.makeTokenRequest(refreshToken, scope = null)

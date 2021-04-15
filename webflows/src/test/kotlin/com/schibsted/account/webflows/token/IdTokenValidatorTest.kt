@@ -12,14 +12,15 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
 import com.schibsted.account.webflows.jose.AsyncJwks
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
 
 private class TestJwks(private val jwks: JWKSet?) : AsyncJwks {
-    override fun fetch(callback: (JWKSet?) -> Unit) {
-        callback(jwks)
+    override suspend fun fetch(): JWKSet? {
+        return jwks
     }
 }
 
@@ -78,9 +79,8 @@ class IdTokenValidatorTest {
         val context = IdTokenValidationContext(issuer, clientId, nonce, null)
         val claims = defaultIdTokenClaims().build()
         val idToken = createIdToken(claims)
-        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertRight { assertEquals(idTokenClaims(claims), it) }
-        }
+        val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+        result.assertRight { assertEquals(idTokenClaims(claims), it) }
     }
 
     @Test
@@ -91,9 +91,8 @@ class IdTokenValidatorTest {
             .claim("amr", listOf(expectedAmrValue, "otherValue"))
             .build()
         val idToken = createIdToken(claims)
-        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertRight { assertEquals(idTokenClaims(claims), it) }
-        }
+        val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+        result.assertRight { assertEquals(idTokenClaims(claims), it) }
     }
 
     @Test
@@ -105,9 +104,8 @@ class IdTokenValidatorTest {
                 .claim("amr", amr)
                 .build()
             val idToken = createIdToken(claims)
-            IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertLeft { assertErrorMessage("Missing expected AMR value", it.message) }
-            }
+            val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+            result.assertLeft { assertErrorMessage("Missing expected AMR value", it.message) }
         }
     }
 
@@ -120,9 +118,8 @@ class IdTokenValidatorTest {
                 .claim("nonce", nonce)
                 .build()
             val idToken = createIdToken(claims)
-            IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertLeft { assertErrorMessage("nonce", it.message) }
-            }
+            val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+            result.assertLeft { assertErrorMessage("nonce", it.message) }
         }
     }
 
@@ -134,9 +131,8 @@ class IdTokenValidatorTest {
             .issuer("https://other.example.com")
             .build()
         val idToken = createIdToken(claims)
-        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertLeft { assertErrorMessage("Invalid issuer", it.message) }
-        }
+        val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+        result.assertLeft { assertErrorMessage("Invalid issuer", it.message) }
     }
 
     @Test
@@ -155,9 +151,8 @@ class IdTokenValidatorTest {
                 .issuer(idTokenIssuer)
                 .build()
             val idToken = createIdToken(claims)
-            IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-                result.assertRight { assertEquals(idTokenClaims(claims), it) }
-            }
+            val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+            result.assertRight { assertEquals(idTokenClaims(claims), it) }
         }
     }
 
@@ -169,9 +164,8 @@ class IdTokenValidatorTest {
             .audience("otherClient")
             .build()
         val idToken = createIdToken(claims)
-        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertLeft { assertErrorMessage("audience", it.message) }
-        }
+        val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+        result.assertLeft { assertErrorMessage("audience", it.message) }
     }
 
     @Test
@@ -183,9 +177,8 @@ class IdTokenValidatorTest {
             .expirationTime(Date(hourAgo))
             .build()
         val idToken = createIdToken(claims)
-        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertLeft { assertErrorMessage("Expired JWT", it.message) }
-        }
+        val result = runBlocking { IdTokenValidator.validate(idToken, TestJwks(jwks), context) }
+        result.assertLeft { assertErrorMessage("Expired JWT", it.message) }
     }
 
     companion object {

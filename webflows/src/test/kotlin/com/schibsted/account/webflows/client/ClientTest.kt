@@ -7,20 +7,17 @@ import com.schibsted.account.testutil.Fixtures.clientConfig
 import com.schibsted.account.testutil.Fixtures.getClient
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
+import com.schibsted.account.testutil.await
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.TokenHandler
-import com.schibsted.account.webflows.token.TokenRequestResult
 import com.schibsted.account.webflows.token.UserTokensResult
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
+import io.mockk.*
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -118,13 +115,9 @@ class ClientTest {
         }
 
         val authCode = "testAuthCode"
+        val tokensResult = UserTokensResult(Fixtures.userTokens, "openid offline_access", 10)
         val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(authCode, authState, any()) } answers {
-                val callback = thirdArg<(TokenRequestResult) -> Unit>()
-                val tokensResult =
-                    UserTokensResult(Fixtures.userTokens, "openid offline_access", 10)
-                callback(Right(tokensResult))
-            }
+            coEvery { makeTokenRequest(authCode, authState) } returns Right(tokensResult)
         }
 
         val client = getClient(
@@ -133,9 +126,12 @@ class ClientTest {
             tokenHandler = tokenHandler
         )
 
-        client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
-            it.assertRight { user ->
-                assertEquals(UserSession(Fixtures.userTokens), user.session)
+        await { done ->
+            client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
+                it.assertRight { user ->
+                    assertEquals(UserSession(Fixtures.userTokens), user.session)
+                }
+                done()
             }
         }
 

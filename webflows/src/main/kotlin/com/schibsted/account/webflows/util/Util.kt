@@ -1,5 +1,8 @@
 package com.schibsted.account.webflows.util
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import java.net.URLDecoder
 import kotlin.random.Random
 
@@ -42,4 +45,6 @@ internal object Util {
 
         return "${split[0]}.${split[1]}"
     }
+
+    internal val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 }

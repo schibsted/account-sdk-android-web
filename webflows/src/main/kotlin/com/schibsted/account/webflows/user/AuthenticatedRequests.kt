@@ -1,9 +1,10 @@
 package com.schibsted.account.webflows.user
 
 import android.util.Log
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Logging
+import kotlinx.coroutines.runBlocking
 import okhttp3.*
 
 
@@ -22,7 +23,7 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
             return null
         }
 
-        val tokenRefreshResult = user.refreshTokens()
+        val tokenRefreshResult = runBlocking { user.refreshTokens() }
         return when (tokenRefreshResult) {
             is Right -> {
                 // retry request with fresh access token

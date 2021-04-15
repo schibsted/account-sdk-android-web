@@ -11,6 +11,8 @@ import com.schibsted.account.webflows.util.BestEffortRunOnceTask
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Util
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import okhttp3.*
 import java.io.IOException
@@ -76,7 +78,10 @@ class User {
 
     /** Fetch user profile data. */
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {
-        client.schibstedAccountApi.userProfile(this, callback)
+        val user = this
+        Util.coroutineScope.launch {
+            callback(client.schibstedAccountApi.userProfile(user))
+        }
     }
 
     /**
@@ -87,13 +92,15 @@ class User {
      * @param callback callback that receives the URL or an error in case of failure
      */
     fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) {
-        client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
-            val result = it.map {
-                client.configuration.serverUrl
-                    .toURI()
-                    .resolve("/session/${it.code}")
-                    .toURL()
-            }
+        val user = this
+        Util.coroutineScope.launch {
+            val result = client.schibstedAccountApi.sessionExchange(user, clientId, redirectUri)
+                .map {
+                    client.configuration.serverUrl
+                        .toURI()
+                        .resolve("/session/${it.code}")
+                        .toURL()
+                }
             callback(result)
         }
     }
@@ -122,7 +129,7 @@ class User {
         })
     }
 
-    internal fun refreshTokens(): TokenRefreshResult {
+    internal suspend fun refreshTokens(): TokenRefreshResult {
         val result = tokenRefreshTask.run()
         return result ?: Left(RefreshTokenError.ConcurrentRefreshFailure)
     }

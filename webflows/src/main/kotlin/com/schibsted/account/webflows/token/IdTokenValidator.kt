@@ -21,28 +21,25 @@ internal sealed class IdTokenValidationError {
     data class UnexpectedError(override val message: String) : IdTokenValidationError()
 }
 
+internal typealias IdTokenValidationResult = Either<IdTokenValidationError, IdTokenClaims>
 internal object IdTokenValidator {
-    fun validate(
+    suspend fun validate(
         idToken: String,
         jwks: AsyncJwks,
-        validationContext: IdTokenValidationContext,
-        callback: (Either<IdTokenValidationError, IdTokenClaims>) -> Unit
-    ) {
+        validationContext: IdTokenValidationContext
+    ): IdTokenValidationResult {
         // https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
-        jwks.fetch { fetchedJwks ->
-            if (fetchedJwks == null) {
-                callback(Left(IdTokenValidationError.UnexpectedError("Failed to fetch JWKS to validate ID Token")))
-            } else {
-                callback(validate(idToken, fetchedJwks, validationContext))
-            }
-        }
+        val fetchedJwks = jwks.fetch()
+            ?: return Left(IdTokenValidationError.UnexpectedError("Failed to fetch JWKS to validate ID Token"))
+
+        return validate(idToken, fetchedJwks, validationContext)
     }
 
     private fun validate(
         idToken: String,
         jwks: JWKSet,
         validationContext: IdTokenValidationContext
-    ): Either<IdTokenValidationError, IdTokenClaims> {
+    ): IdTokenValidationResult {
         val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
         val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
             JWSAlgorithm.RS256,
