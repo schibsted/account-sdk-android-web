@@ -106,7 +106,8 @@ class Client {
      * Requires [AuthorizationManagementActivity.setup] to have been called before this.
      *
      * @param extraScopeValues Additional scope values to request. By default `openid` and
-     *  `offline_access` will always be included.
+     *  `offline_access` will always be included. For more information about possible values, see
+     *  <a href="https://docs.schibsted.io/schibsted-account/guides/authentication/#required-parameters">here</a>.
      * @param mfa Optional MFA verification to prompt the user with.
      */
     @JvmOverloads
@@ -125,7 +126,8 @@ class Client {
      * Start auth activity manually.
      *
      * @param extraScopeValues Additional scope values to request. By default `openid` and
-     *  `offline_access` will always be included.
+     *  `offline_access` will always be included. For more information about possible values, see
+     *  <a href="https://docs.schibsted.io/schibsted-account/guides/authentication/#required-parameters">here</a>.
      * @param mfa Optional MFA verification to prompt the user with.
      */
     @JvmOverloads
