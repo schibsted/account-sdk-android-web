@@ -2,8 +2,6 @@ package com.schibsted.account.webflows.api
 
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.schibsted.account.testutil.*
-import com.schibsted.account.testutil.Fixtures
-import com.schibsted.account.webflows.api.*
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -225,15 +223,69 @@ class SchibstedAccountApiTest {
                 "type": "element",
                 "code": 200,
                 "data": {
-                    "userId": "12345",
-                    "email": "test@example.com",
+                    "published": "1970-01-01 00:00:00",
+                    "gender": "withheld",
+                    "utcOffset": "+02:00",
+                    "addresses": {
+                        "home": {
+                            "type": "home",
+                            "formatted": "12345 Test, Sverige",
+                            "streetAddress": "Test",
+                            "locality": "Test locality",
+                            "region": "Test region",
+                            "postalCode": "12345",
+                            "country": "Sverige"
+                        }
+                    },
+                    "phoneNumbers": [
+                        {
+                            "value": "+46123456",
+                            "type": "other",
+                            "primary": "false",
+                            "verified": "false"
+                        }
+                    ],
                     "phoneNumber": "+46123456",
+                    "emailVerified": "1970-01-01 00:00:00",
+                    "phoneNumberVerified": false,
+                    "lastAuthenticated": "1970-01-01 00:00:00",
+                    "lastLoggedIn": "1970-01-01 00:00:00",
+                    "verified": "1970-01-01 00:00:00",
+                    "uuid": "96085e85-349b-4dbf-9809-fa721e7bae46",
+                    "userId": "12345",
                     "displayName": "Unit test",
+                    "email": "test@example.com",
+                    "birthday": "1970-01-01 00:00:00",
                     "name": {
                         "familyName": "Test",
                         "givenName": "Unit",
                         "formatted": "Unit Test"
-                    }
+                    },
+                    "accounts": {
+                        "client1": {
+                            "id": "client1",
+                            "domain": "example.com",
+                            "accountName": "Example",
+                            "connected": "1970-01-01 00:00:00"
+                        }
+                    },
+                    "merchants": [
+                        12345,
+                        54321
+                    ],
+                    "locale": "sv_SE",
+                    "emails": [
+                        {
+                            "value": "test@example.com",
+                            "type": "other",
+                            "primary": "true",
+                            "verified": "true",
+                            "verifiedTime": "1970-01-01 00:00:00"
+                        }
+                    ],
+                    "updated": "1971-01-01 00:00:00",
+                    "passwordChanged": "1970-01-01 00:00:00",
+                    "status": 1
                 }
             }
             """.trimIndent()
@@ -245,11 +297,55 @@ class SchibstedAccountApiTest {
                 schaccApi.userProfile(user) { result ->
                     result.assertRight {
                         val expectedProfileResponse = UserProfileResponse(
-                            "12345",
-                            "test@example.com",
-                            "+46123456",
-                            "Unit test",
-                            Name("Unit", "Test", "Unit Test")
+                            uuid = "96085e85-349b-4dbf-9809-fa721e7bae46",
+                            userId = "12345",
+                            status = 1,
+                            email = "test@example.com",
+                            emailVerified = "1970-01-01 00:00:00",
+                            emails = listOf(
+                                Email(
+                                    "test@example.com",
+                                    "other",
+                                    true,
+                                    true,
+                                    "1970-01-01 00:00:00"
+                                )
+                            ),
+                            phoneNumber = "+46123456",
+                            phoneNumberVerified = "false",
+                            phoneNumbers = listOf(PhoneNumber("+46123456", "other", false, false)),
+                            displayName = "Unit test",
+                            name = Name("Unit", "Test", "Unit Test"),
+                            addresses = mapOf(
+                                Address.AddressType.HOME to Address(
+                                    "12345 Test, Sverige",
+                                    "Test",
+                                    "12345",
+                                    "Test locality",
+                                    "Test region",
+                                    "Sverige",
+                                    Address.AddressType.HOME
+                                )
+                            ),
+                            gender = "withheld",
+                            birthday = "1970-01-01 00:00:00",
+                            accounts = mapOf(
+                                "client1" to Account(
+                                    "client1",
+                                    "Example",
+                                    "example.com",
+                                    "1970-01-01 00:00:00"
+                                )
+                            ),
+                            merchants = listOf(12345, 54321),
+                            published = "1970-01-01 00:00:00",
+                            verified = "1970-01-01 00:00:00",
+                            updated = "1971-01-01 00:00:00",
+                            passwordChanged = "1970-01-01 00:00:00",
+                            lastAuthenticated = "1970-01-01 00:00:00",
+                            lastLoggedIn = "1970-01-01 00:00:00",
+                            locale = "sv_SE",
+                            utcOffset = "+02:00"
                         )
                         assertEquals(expectedProfileResponse, it)
                     }
