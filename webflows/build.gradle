@@ -77,6 +77,7 @@ dependencies {
     testImplementation "androidx.test.espresso:espresso-core:${espressoVersion}"
     testImplementation "androidx.test.espresso:espresso-intents:${espressoVersion}"
     testImplementation project(":testsupport")
+    testImplementation 'org.json:json:20180813'
 }
 
 tasks.withType(Test) {

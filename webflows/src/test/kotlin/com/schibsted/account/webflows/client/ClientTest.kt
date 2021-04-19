@@ -7,14 +7,17 @@ import com.schibsted.account.testutil.Fixtures.clientConfig
 import com.schibsted.account.testutil.Fixtures.getClient
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
+import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
+import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.TokenRequestResult
 import com.schibsted.account.webflows.token.UserTokensResult
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
+import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
 import io.mockk.every
@@ -153,14 +156,37 @@ class ClientTest {
     fun handleAuthenticationResponseShouldHandleMissingIntentData() {
         getClient().handleAuthenticationResponse(authResultIntent(null)) {
             it.assertLeft { error ->
-                when (error) {
-                    is LoginError.UnexpectedError -> {
-                        assertEquals("No authentication response", error.message)
-                    }
-                    else -> {
-                        fail("Incorrect error: $error")
-                    }
-                }
+                assertEquals(LoginError.UnexpectedError("No authentication response"), error)
+            }
+        }
+    }
+
+    @Test
+    fun handleAuthenticationResponseShouldParseTokenErrorResponse() {
+        val tokenHandler: TokenHandler = mockk(relaxed = true) {
+            every { makeTokenRequest(any(), any(), any()) } answers {
+                val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                val errorResponse = HttpError.ErrorResponse(
+                    400,
+                    """{"error": "test", "error_description": "Something went wrong"}"""
+                )
+                callback(Left(TokenError.TokenRequestError(errorResponse)))
+            }
+        }
+        val authState = AuthState("testState", "testNonce", "codeVerifier", null)
+        val stateStorageMock: StateStorage = mockk(relaxUnitFun = true) {
+            every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
+        }
+        val client = getClient(
+            tokenHandler = tokenHandler,
+            stateStorage = stateStorageMock
+        )
+
+        client.handleAuthenticationResponse(authResultIntent("code=authCode&state=${authState.state}")) {
+            it.assertLeft { error ->
+                val expected =
+                    LoginError.TokenErrorResponse(OAuthError("test", "Something went wrong"))
+                assertEquals(expected, error)
             }
         }
     }

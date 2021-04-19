@@ -6,13 +6,13 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
+import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.user.StoredUserSession
@@ -20,11 +20,33 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import org.json.JSONObject
 import java.security.MessageDigest
 import java.util.*
+
+data class OAuthError(val error: String, val errorDescription: String?) {
+    companion object {
+        fun fromJson(json: String): OAuthError {
+            val parsed = JSONObject(json)
+            return OAuthError(
+                parsed.getString("error"),
+                parsed.optString("error_description")
+            )
+        }
+    }
+}
+
+private fun TokenError.toOauthError(): OAuthError? {
+    if (this is TokenError.TokenRequestError && cause is HttpError.ErrorResponse && cause.body != null) {
+        return OAuthError.fromJson(cause.body)
+    }
+
+    return null
+}
 
 sealed class LoginError {
     /** Failed to read stored [AuthState]. */
@@ -38,15 +60,15 @@ sealed class LoginError {
      *
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#AuthError" target="_top">Authentication Error Response</a>
      */
-    data class AuthenticationErrorResponse(val error: String, val errorDescription: String?) :
-        LoginError()
+
+    data class AuthenticationErrorResponse(val error: OAuthError) : LoginError()
 
     /**
      * Token error response.
      *
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenErrorResponse" target="_top">Token Error Response</a>
      */
-    data class TokenErrorResponse(val message: String) : LoginError()
+    data class TokenErrorResponse(val error: OAuthError) : LoginError()
 
     /** Something went wrong. */
     data class UnexpectedError(val message: String) : LoginError()
@@ -213,9 +235,8 @@ class Client {
 
         val error = authResponse["error"]
         if (error != null) {
-            val oauthError =
-                LoginError.AuthenticationErrorResponse(error, authResponse["error_description"])
-            callback(Left(oauthError))
+            val oauthError = OAuthError(error, authResponse["error_description"])
+            callback(Left(LoginError.AuthenticationErrorResponse(oauthError)))
             return
         }
 
@@ -239,7 +260,12 @@ class Client {
                 }
                 .left().foreach { err ->
                     Log.d(Logging.SDK_TAG, "Token error response: $err")
-                    callback(Left(LoginError.TokenErrorResponse(err.toString())))
+                    val oauthError = err.toOauthError()
+                    if (oauthError != null) {
+                        callback(Left(LoginError.TokenErrorResponse(oauthError)))
+                    } else {
+                        callback(Left(LoginError.UnexpectedError(err.toString())))
+                    }
                 }
         }
     }
