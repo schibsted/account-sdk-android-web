@@ -9,6 +9,9 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 
 sealed class NotAuthed {
     object CancelledByUser : NotAuthed()
@@ -46,11 +49,15 @@ class AuthResultLiveData private constructor(private val client: Client) :
         }
     }
 
-    internal fun update(intent: Intent) {
-        client.handleAuthenticationResponse(intent) { result ->
-            when (result) {
-                is Right -> update(result)
-                is Left -> update(Left(NotAuthed.LoginFailed(result.value)))
+    internal suspend fun update(intent: Intent) {
+        coroutineScope {
+            client.handleAuthenticationResponse(intent) { result ->
+                withContext(Dispatchers.Main) {
+                    when (result) {
+                        is Right -> update(result)
+                        is Left -> update(Left(NotAuthed.LoginFailed(result.value)))
+                    }
+                }
             }
         }
     }
