@@ -1,6 +1,7 @@
 package com.schibsted.account.webflows.user
 
 import android.os.Build
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -11,6 +12,7 @@ import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.RefreshTokenError
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
@@ -26,6 +28,7 @@ import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import java.net.ConnectException
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -274,6 +277,24 @@ class UserTest {
     }
 
     @Test
+    fun refreshTokensLogsOutOnInvalidGrantResponse() {
+        val client: Client = mockk(relaxed = true)
+        val user = User(client, Fixtures.userTokens)
+        val tokenRefreshResponse = Left(
+            RefreshTokenError.RefreshRequestFailed(
+                HttpError.ErrorResponse(
+                    400,
+                    """{"error": "invalid_grant", "error_description": "Invalid refresh token"}"""
+                )
+            )
+        )
+        every { client.refreshTokensForUser(user) } returns tokenRefreshResponse
+
+        assertEquals(Left(RefreshTokenError.UserWasLoggedOut), user.refreshTokens())
+        assertNull(user.tokens)
+    }
+
+    @Test
     fun logoutDestroysTokensAndSession() {
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         val client = Fixtures.getClient(sessionStorage = sessionStorageMock)
@@ -281,6 +302,7 @@ class UserTest {
 
         user.logout()
         assertNull(user.tokens)
+        assertFalse(user.isLoggedIn())
         val exc = assertThrows(IllegalStateException::class.java) { user.session }
         assertEquals("Can not use tokens of logged-out user!", exc.message)
         verify { sessionStorageMock.remove(Fixtures.clientConfig.clientId) }
@@ -294,6 +316,7 @@ class UserTest {
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().logout()
+        shadowOf(Looper.getMainLooper()).idle()
         AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
 
         AuthResultLiveDataTest.resetInstance()

@@ -1,16 +1,20 @@
 package com.schibsted.account.webflows.user
 
 import android.os.Parcelable
+import android.util.Log
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.api.ApiResult
+import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserProfileResponse
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.OAuthError
 import com.schibsted.account.webflows.client.RefreshTokenError
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.BestEffortRunOnceTask
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Logging.SDK_TAG
 import kotlinx.parcelize.Parcelize
 import okhttp3.*
 import java.io.IOException
@@ -75,6 +79,14 @@ class User {
         AuthResultLiveData.getIfInitialised()?.logout()
     }
 
+    /**
+     * Check if this User is logged-in.
+     *
+     * The user may have been logged out either explicitly via [logout] or automatically if no valid
+     * tokens could be obtained (e.g. due to expired or invalidated refresh token).
+     */
+    fun isLoggedIn(): Boolean = tokens != null
+
     /** Fetch user profile data. */
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) = onlyIfLoggedIn {
         client.schibstedAccountApi.userProfile(this, callback)
@@ -128,6 +140,19 @@ class User {
 
     internal fun refreshTokens(): TokenRefreshResult {
         val result = tokenRefreshTask.run()
+        fun shouldLogout(result: TokenRefreshResult?): Boolean {
+            return result is Left &&
+                    result.value is RefreshTokenError.RefreshRequestFailed &&
+                    result.value.error is HttpError.ErrorResponse &&
+                    result.value.error.body != null &&
+                    OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
+        }
+
+        if (shouldLogout(result)) {
+            Log.i(SDK_TAG, "Invalid refresh token, logging user out")
+            logout()
+            return Left(RefreshTokenError.UserWasLoggedOut)
+        }
         return result ?: Left(RefreshTokenError.ConcurrentRefreshFailure)
     }
 

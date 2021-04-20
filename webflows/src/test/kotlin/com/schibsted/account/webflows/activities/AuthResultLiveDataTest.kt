@@ -2,6 +2,7 @@ package com.schibsted.account.webflows.activities
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.assertLeft
@@ -18,6 +19,7 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(AndroidJUnit4::class)
 class AuthResultLiveDataTest {
@@ -114,7 +116,10 @@ class AuthResultLiveDataTest {
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
+
         user.logout()
+        shadowOf(Looper.getMainLooper()).idle()
+
         AuthResultLiveData.get().value!!.assertLeft {
             assertEquals(
                 NotAuthed.NoLoggedInUser,

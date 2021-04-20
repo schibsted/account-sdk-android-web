@@ -159,3 +159,20 @@ To do that, follow these steps:
    ```kotlin
    loginButton.setOnClickListener { _ -> client.launchAuth(this) }
    ```
+
+## Included functionality
+* Single-sign on via web flows, offering one-click login for returning users (via shared cookies in
+  CustomTabs).
+    * With support for custom scope values, MFA, etc. See
+      [here](https://docs.schibsted.io/schibsted-account/guides/authentication/) for more information.
+* Automatic and transparent management of user tokens.
+    * Authenticated requests to backend services can be done via
+      [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html).
+      The SDK will automatically inject the user access token as a Bearer token in the HTTP
+      Authorization request header.
+      If the access token is rejected with a `401 Unauthorized` response (e.g. due to having
+      expired), the SDK will try to use the refresh token to obtain a new access token and then
+      retry the request once more.
+
+      **Note:** If the refresh token request fails, due to the refresh token itself having expired
+      or been invalidated by the user, the SDK will log the user out.

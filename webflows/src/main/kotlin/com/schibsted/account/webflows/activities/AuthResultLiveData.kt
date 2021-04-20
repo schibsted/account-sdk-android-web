@@ -55,8 +55,13 @@ class AuthResultLiveData private constructor(private val client: Client) :
         }
     }
 
+    /**
+     * Change state to [NotAuthed.NoLoggedInUser].
+     *
+     * Internally uses [LiveData.postValue] so can safely be called from background threads.
+     */
     internal fun logout() {
-        value = Left(NotAuthed.NoLoggedInUser)
+        postValue(Left(NotAuthed.NoLoggedInUser))
     }
 
     companion object {

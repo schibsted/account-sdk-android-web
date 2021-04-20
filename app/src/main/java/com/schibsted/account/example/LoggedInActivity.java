@@ -32,7 +32,7 @@ public class LoggedInActivity extends AppCompatActivity {
 
         Button logoutButton = findViewById(R.id.logoutButton);
         logoutButton.setOnClickListener(v -> {
-            if (user != null) {
+            if (user != null && user.isLoggedIn()) {
                 user.logout();
             }
             finish();
@@ -40,7 +40,7 @@ public class LoggedInActivity extends AppCompatActivity {
 
         Button profileDataButton = findViewById(R.id.profileDataButton);
         profileDataButton.setOnClickListener(v -> {
-            if (user != null) {
+            if (user != null && user.isLoggedIn()) {
                 user.fetchProfileData(wrap(result -> result
                                 .foreach(wrap(value -> Log.i(LOG_TAG, "Profile data " + value)))
                                 .left().foreach(wrap(error -> Log.i(LOG_TAG, "Failed to fetch profile data " + error)))
@@ -51,7 +51,7 @@ public class LoggedInActivity extends AppCompatActivity {
 
         Button sessionExchangeButton = findViewById(R.id.sessionExchangeButton);
         sessionExchangeButton.setOnClickListener(v -> {
-            if (user != null) {
+            if (user != null && user.isLoggedIn()) {
                 user.webSessionUrl(ClientConfig.webClientId,
                         ClientConfig.webClientRedirectUri,
                         wrap(result -> result
@@ -64,7 +64,7 @@ public class LoggedInActivity extends AppCompatActivity {
 
         Button accountPagesButton = findViewById(R.id.accountPagesButton);
         accountPagesButton.setOnClickListener(v -> {
-            if (user != null) {
+            if (user != null && user.isLoggedIn()) {
                 new CustomTabsIntent.Builder()
                         .build()
                         .launchUrl(this, Uri.parse(user.accountPagesUrl().toString()));

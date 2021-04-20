@@ -77,6 +77,7 @@ sealed class LoginError {
 sealed class RefreshTokenError {
     object NoRefreshToken : RefreshTokenError()
     object ConcurrentRefreshFailure : RefreshTokenError()
+    object UserWasLoggedOut : RefreshTokenError()
     data class RefreshRequestFailed(val error: HttpError) : RefreshTokenError()
     data class UnexpectedError(val message: String) : RefreshTokenError()
 }
