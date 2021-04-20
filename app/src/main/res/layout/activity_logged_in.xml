@@ -1,49 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".example.LoggedInActivity">
 
-  <TextView
-      android:id="@+id/loggedInText"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="70dp"
-      android:text="You're logged in!"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/loggedInText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:text="You're logged in!"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-  <Button
-      android:id="@+id/profileDataButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Fetch profile data"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toTopOf="@id/loggedInText"
-      app:layout_constraintBottom_toBottomOf="parent" />
 
-  <Button
-      android:id="@+id/sessionExchangeButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Start session exchange"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toTopOf="@id/profileDataButton"
-      app:layout_constraintBottom_toBottomOf="parent" />
+    <LinearLayout
+        android:id="@+id/buttonsGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loggedInText">
 
-  <Button
-      android:id="@+id/logoutButton"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Logout"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toTopOf="@id/sessionExchangeButton"
-      app:layout_constraintBottom_toBottomOf="parent" />
+        <Button
+            android:id="@+id/profileDataButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fetch profile data" />
+
+        <Button
+            android:id="@+id/sessionExchangeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start session exchange" />
+
+        <Button
+            android:id="@+id/accountPagesButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Account pages" />
+
+        <Button
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

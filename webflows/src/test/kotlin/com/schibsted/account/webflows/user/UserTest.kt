@@ -298,4 +298,13 @@ class UserTest {
 
         AuthResultLiveDataTest.resetInstance()
     }
+
+    @Test
+    fun accountPagesUrlIsCorrect() {
+        val user = User(Fixtures.getClient(), Fixtures.userTokens)
+        assertEquals(
+            "${Fixtures.clientConfig.serverUrl}/account/summary",
+            user.accountPagesUrl().toString()
+        )
+    }
 }

@@ -87,16 +87,19 @@ class User {
      * @param redirectUri where to redirect the user after the session has been created
      * @param callback callback that receives the URL or an error in case of failure
      */
-    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) = onlyIfLoggedIn {
-        client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
-            val result = it.map {
-                client.configuration.serverUrl
-                    .toURI()
-                    .resolve("/session/${it.code}")
-                    .toURL()
+    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) =
+        onlyIfLoggedIn {
+            client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
+                val result = it.map { schibstedAccountUrl("/session/${it.code}") }
+                callback(result)
             }
-            callback(result)
         }
+
+    /**
+     * Generate URL for Schibsted account pages.
+     */
+    fun accountPagesUrl(): URL = onlyIfLoggedIn {
+        schibstedAccountUrl("/account/summary")
     }
 
     /**
@@ -146,5 +149,12 @@ class User {
             ?: throw IllegalStateException("Can not use tokens of logged-out user!")
 
         return block(currentTokens)
+    }
+
+    private fun schibstedAccountUrl(path: String): URL {
+        return client.configuration.serverUrl
+            .toURI()
+            .resolve(path)
+            .toURL()
     }
 }

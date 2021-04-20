@@ -2,6 +2,7 @@ package com.schibsted.account.example;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.schibsted.account.R;
 import com.schibsted.account.webflows.user.User;
@@ -57,6 +59,15 @@ public class LoggedInActivity extends AppCompatActivity {
                                 .left().foreach(wrap(error -> Log.i(LOG_TAG, "Failed to start session exchange " + error)))
                         )
                 );
+            }
+        });
+
+        Button accountPagesButton = findViewById(R.id.accountPagesButton);
+        accountPagesButton.setOnClickListener(v -> {
+            if (user != null) {
+                new CustomTabsIntent.Builder()
+                        .build()
+                        .launchUrl(this, Uri.parse(user.accountPagesUrl().toString()));
             }
         });
 
