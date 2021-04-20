@@ -106,9 +106,9 @@ class AuthorizationManagementActivityTest {
     }
 
     @Test
-    fun testUserCancelActionResultingEmptyIntentShouldSendCancelIntent() {
+    fun testUserCancelActionShouldSendCancelIntent() {
         val ctx = getApplicationContext<Context>()
-        val intent = Intent(ctx, AuthorizationManagementActivity::class.java)
+        val intent = Intent(ctx, AuthorizationManagementActivity::class.java) // intent without data
 
         launch<AuthorizationManagementActivity>(intent)
         AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.CancelledByUser, it) }
