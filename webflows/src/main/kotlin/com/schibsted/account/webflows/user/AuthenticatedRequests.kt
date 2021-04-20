@@ -1,16 +1,16 @@
 package com.schibsted.account.webflows.user
 
 import android.util.Log
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import com.schibsted.account.webflows.util.Logging
 import okhttp3.*
 
 
 internal class AuthenticatedRequestInterceptor(private val user: User) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val requestWithToken = chain.request().newBuilder()
-            .withBearerToken(user.tokens.accessToken)
+            .withBearerToken(user.tokens?.accessToken)
             .build()
         return chain.proceed(requestWithToken)
     }
@@ -27,7 +27,7 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
             is Right -> {
                 // retry request with fresh access token
                 val request = response.request.newBuilder()
-                    .withBearerToken(user.tokens.accessToken)
+                    .withBearerToken(user.tokens?.accessToken)
                     .build()
                 request
             }
@@ -39,8 +39,12 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
     }
 }
 
-private fun Request.Builder.withBearerToken(token: String): Request.Builder = apply {
-    header("Authorization", "Bearer $token")
+private fun Request.Builder.withBearerToken(token: String?): Request.Builder = apply {
+    if (token != null) {
+        header("Authorization", "Bearer $token")
+    } else {
+        Log.e(Logging.SDK_TAG, "No access token to include in request")
+    }
 }
 
 private val Response.retryCount: Int

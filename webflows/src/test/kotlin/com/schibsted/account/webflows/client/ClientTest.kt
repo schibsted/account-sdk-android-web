@@ -1,13 +1,17 @@
 package com.schibsted.account.webflows.client
 
 import android.content.Intent
+import android.os.Build
+import android.os.ConditionVariable
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.Fixtures.clientConfig
 import com.schibsted.account.testutil.Fixtures.getClient
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
 import com.schibsted.account.webflows.api.HttpError
+import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.TokenError
@@ -29,6 +33,7 @@ import org.junit.BeforeClass
 import org.junit.Test
 import java.net.URL
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 class ClientTest {
     companion object {
@@ -192,15 +197,6 @@ class ClientTest {
     }
 
     @Test
-    fun logoutDeletesSessionFromStorage() {
-        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        val client = getClient(sessionStorage = sessionStorageMock)
-
-        User(client, UserSession(Fixtures.userTokens)).logout()
-        verify { sessionStorageMock.remove(clientConfig.clientId) }
-    }
-
-    @Test
     fun existingSessionIsResumeable() {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
@@ -211,5 +207,38 @@ class ClientTest {
             User(client, UserSession(Fixtures.userTokens)),
             client.resumeLastLoggedInUser()
         )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    @Test
+    fun refreshTokensHandlesConcurrentLogout() {
+        val lock = ConditionVariable(false)
+        val tokenHandler = mockk<TokenHandler>(relaxed = true) {
+            every { makeTokenRequest(any(), any()) } answers {
+                lock.block(10) // wait until after logout is complete
+                Right(UserTokenResponse("", "", "", "", 0))
+            }
+        }
+        val client = getClient(tokenHandler = tokenHandler)
+        val user = User(client, Fixtures.userTokens)
+
+        /*
+         * Run token refresh operation in separate thread, manually forcing the operation to block
+         * until the user has been logged out
+         */
+        val refreshTask = CompletableFuture.supplyAsync {
+            val result = client.refreshTokensForUser(user)
+            result.assertLeft {
+                assertEquals(
+                    RefreshTokenError.UnexpectedError("User has logged-out during token refresh"),
+                    it
+                )
+            }
+        }
+        val logoutTask = CompletableFuture.supplyAsync {
+            user.logout()
+            lock.open() // unblock refresh token response
+        }
+        CompletableFuture.allOf(refreshTask, logoutTask).join()
     }
 }

@@ -78,6 +78,7 @@ sealed class RefreshTokenError {
     object NoRefreshToken : RefreshTokenError()
     object ConcurrentRefreshFailure : RefreshTokenError()
     data class RefreshRequestFailed(val error: HttpError) : RefreshTokenError()
+    data class UnexpectedError(val message: String) : RefreshTokenError()
 }
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
@@ -281,23 +282,29 @@ class Client {
     }
 
     internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
-        val refreshToken = user.tokens.refreshToken ?: return Left(RefreshTokenError.NoRefreshToken)
+        val refreshToken = user.tokens?.refreshToken ?: return Left(RefreshTokenError.NoRefreshToken)
 
         val result = tokenHandler.makeTokenRequest(refreshToken, scope = null)
         return when (result) {
             is Right -> {
-                val newAccessToken = result.value.access_token
-                val newRefreshToken = result.value.refresh_token ?: refreshToken
-                val userTokens = user.tokens.copy(
-                    accessToken = newAccessToken,
-                    refreshToken = newRefreshToken
-                )
-                user.tokens = userTokens
-                val userSession =
-                    StoredUserSession(configuration.clientId, userTokens, Date())
-                sessionStorage.save(userSession)
-                Log.i(Logging.SDK_TAG, "Refreshed user tokens: $result")
-                Right(userTokens)
+                val tokens = user.tokens
+                if (tokens != null) {
+                    val newAccessToken = result.value.access_token
+                    val newRefreshToken = result.value.refresh_token ?: refreshToken
+                    val userTokens = tokens.copy(
+                        accessToken = newAccessToken,
+                        refreshToken = newRefreshToken
+                    )
+                    user.tokens = userTokens
+                    val userSession =
+                        StoredUserSession(configuration.clientId, userTokens, Date())
+                    sessionStorage.save(userSession)
+                    Log.i(Logging.SDK_TAG, "Refreshed user tokens: $result")
+                    Right(userTokens)
+                } else {
+                    Log.i(Logging.SDK_TAG, "User has logged-out during token refresh, discarding new tokens.")
+                    Left(RefreshTokenError.UnexpectedError("User has logged-out during token refresh"))
+                }
             }
             is Left -> {
                 Log.e(Logging.SDK_TAG, "Failed to refresh token: $result")

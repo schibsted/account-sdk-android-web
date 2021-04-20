@@ -69,17 +69,6 @@ class AuthResultLiveDataTest {
     }
 
     @Test
-    fun logoutUpdatesState() {
-        val client = mockk<Client>(relaxed = true)
-        val user = User(client, Fixtures.userTokens)
-        every { client.resumeLastLoggedInUser() } returns user
-        AuthResultLiveData.create(client)
-
-        AuthResultLiveData.get().logout()
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
-    }
-
-    @Test
     fun updateHandlesSuccessResult() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)

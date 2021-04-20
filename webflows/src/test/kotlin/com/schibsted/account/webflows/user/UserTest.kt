@@ -1,8 +1,13 @@
 package com.schibsted.account.webflows.user
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.schibsted.account.testutil.*
-import com.schibsted.account.testutil.Fixtures
+import com.schibsted.account.webflows.activities.AuthResultLiveData
+import com.schibsted.account.webflows.activities.AuthResultLiveDataTest
+import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.client.Client
@@ -17,14 +22,15 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.net.ConnectException
 import java.util.*
-import kotlin.concurrent.thread
+import java.util.concurrent.CompletableFuture
 
+@RunWith(AndroidJUnit4::class)
 class UserTest {
     companion object {
         @BeforeClass
@@ -244,6 +250,7 @@ class UserTest {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     @Test
     fun refreshTokensOnlyRefreshesOnceWhenConcurrentCalls() {
         val client: Client = mockk(relaxed = true)
@@ -255,17 +262,40 @@ class UserTest {
             Right(Fixtures.userTokens.copy(accessToken = "accessToken2"))
         }
 
-        val t1 = thread {
-            val result = user.refreshTokens()
-            result.assertRight { assertEquals("accessToken1", it.accessToken) }
-        }
-        val t2 = thread {
+        val refreshTask = {
             val result = user.refreshTokens()
             result.assertRight { assertEquals("accessToken1", it.accessToken) }
         }
 
-        t1.join()
-        t2.join()
+        val refreshTask1 = CompletableFuture.supplyAsync(refreshTask)
+        val refreshTask2 = CompletableFuture.supplyAsync(refreshTask)
+        CompletableFuture.allOf(refreshTask1, refreshTask2).join()
         verify(exactly = 1) { client.refreshTokensForUser(user) }
+    }
+
+    @Test
+    fun logoutDestroysTokensAndSession() {
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
+        val client = Fixtures.getClient(sessionStorage = sessionStorageMock)
+        val user = User(client, UserSession(Fixtures.userTokens))
+
+        user.logout()
+        assertNull(user.tokens)
+        val exc = assertThrows(IllegalStateException::class.java) { user.session }
+        assertEquals("Can not use tokens of logged-out user!", exc.message)
+        verify { sessionStorageMock.remove(Fixtures.clientConfig.clientId) }
+    }
+
+    @Test
+    fun logoutUpdatesAuthResultLiveData() {
+        val client = mockk<Client>(relaxed = true)
+        val user = User(client, Fixtures.userTokens)
+        every { client.resumeLastLoggedInUser() } returns user
+        AuthResultLiveData.create(client)
+
+        AuthResultLiveData.get().logout()
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
+
+        AuthResultLiveDataTest.resetInstance()
     }
 }

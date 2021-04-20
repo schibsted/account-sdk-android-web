@@ -27,26 +27,26 @@ private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>
 /** Representation of logged-in user. */
 class User {
     private val client: Client
-    internal var tokens: UserTokens
+    internal var tokens: UserTokens?
     internal val httpClient: OkHttpClient
 
     private val tokenRefreshTask: BestEffortRunOnceTask<TokenRefreshResult>
 
     val session: UserSession
-        get() {
-            return UserSession(tokens)
+        get() = onlyIfLoggedIn { tokens ->
+            UserSession(tokens)
         }
 
     /** User integer id (as string) */
     val userId: String
-        get() {
-            return tokens.idTokenClaims.userId
+        get() = onlyIfLoggedIn { tokens ->
+            tokens.idTokenClaims.userId
         }
 
     /** User UUID */
     val uuid: String
-        get() {
-            return tokens.idTokenClaims.sub
+        get() = onlyIfLoggedIn { tokens ->
+            tokens.idTokenClaims.sub
         }
 
     constructor(client: Client, session: UserSession) : this(client, session.tokens)
@@ -70,12 +70,13 @@ class User {
      * configured (via [com.schibsted.account.webflows.activities.AuthorizationManagementActivity.setup]).
      */
     fun logout() {
+        tokens = null
         client.destroySession()
         AuthResultLiveData.getIfInitialised()?.logout()
     }
 
     /** Fetch user profile data. */
-    fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) {
+    fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) = onlyIfLoggedIn {
         client.schibstedAccountApi.userProfile(this, callback)
     }
 
@@ -86,7 +87,7 @@ class User {
      * @param redirectUri where to redirect the user after the session has been created
      * @param callback callback that receives the URL or an error in case of failure
      */
-    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) {
+    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) = onlyIfLoggedIn {
         client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
             val result = it.map {
                 client.configuration.serverUrl
@@ -110,7 +111,7 @@ class User {
     fun makeAuthenticatedRequest(
         request: Request,
         callback: (Either<Throwable, Response>) -> Unit
-    ) {
+    ) = onlyIfLoggedIn {
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 callback(Left(e))
@@ -128,10 +129,22 @@ class User {
     }
 
     override fun toString(): String {
-        return "User(uuid=${tokens.idTokenClaims.sub})"
+        val uuid = tokens?.idTokenClaims?.sub
+        if (uuid != null) {
+            return "User(uuid=$uuid)"
+        }
+
+        return "User(logged-out)"
     }
 
     override fun equals(other: Any?): Boolean {
         return (other is User) && tokens == other.tokens
+    }
+
+    private fun <T> onlyIfLoggedIn(block: (UserTokens) -> T): T {
+        val currentTokens = tokens
+            ?: throw IllegalStateException("Can not use tokens of logged-out user!")
+
+        return block(currentTokens)
     }
 }
