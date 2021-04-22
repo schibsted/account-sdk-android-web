@@ -120,6 +120,10 @@ class User {
      * If the initial request fails with a 401, a refresh token request is made to get a new access
      * token and the request will be retried with the new token if successful.
      *
+     * If the refresh token request fails with an OAuth 'invalid_grant' error response, meaning the
+     * refresh token has expired or been invalidated, the user will be logged-out (and all existing
+     * tokens will be destroyed).
+     *
      * @param request request to perform with authentication using user tokens
      * @param callback callback that receives the HTTP response or an error in case of failure
      */
