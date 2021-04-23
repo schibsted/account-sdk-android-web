@@ -1,3 +1,8 @@
+# 0.0.3 (2021-04-23)
+- Update API docs about authenticated requests and logout behavior. (#38)
+- Improve user profile response parsing. (#39)
+
+
 # 0.0.2 (2021-04-20)
 - Parse full user profile data response. (#33)
 - User logout: Discard tokens after User.logout. (#35)
