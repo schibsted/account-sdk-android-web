@@ -1,0 +1,65 @@
+{
+  "published": "1970-01-01 00:00:00",
+  "gender": "withheld",
+  "utcOffset": "+02:00",
+  "addresses": {
+    "home": {
+      "type": "home",
+      "formatted": "12345 Test, Sverige",
+      "streetAddress": "Test",
+      "locality": "Test locality",
+      "region": "Test region",
+      "postalCode": "12345",
+      "country": "Sverige"
+    }
+  },
+  "phoneNumbers": [
+    {
+      "value": "+46123456",
+      "type": "other",
+      "primary": "false",
+      "verified": "false"
+    }
+  ],
+  "phoneNumber": "+46123456",
+  "emailVerified": "1970-01-01 00:00:00",
+  "phoneNumberVerified": false,
+  "lastAuthenticated": "1970-01-01 00:00:00",
+  "lastLoggedIn": "1970-01-01 00:00:00",
+  "verified": "1970-01-01 00:00:00",
+  "uuid": "96085e85-349b-4dbf-9809-fa721e7bae46",
+  "userId": "12345",
+  "displayName": "Unit test",
+  "email": "test@example.com",
+  "birthday": "1970-01-01 00:00:00",
+  "name": {
+    "familyName": "Test",
+    "givenName": "Unit",
+    "formatted": "Unit Test"
+  },
+  "accounts": {
+    "client1": {
+      "id": "client1",
+      "domain": "example.com",
+      "accountName": "Example",
+      "connected": "1970-01-01 00:00:00"
+    }
+  },
+  "merchants": [
+    12345,
+    54321
+  ],
+  "locale": "sv_SE",
+  "emails": [
+    {
+      "value": "test@example.com",
+      "type": "other",
+      "primary": "true",
+      "verified": "true",
+      "verifiedTime": "1970-01-01 00:00:00"
+    }
+  ],
+  "updated": "1971-01-01 00:00:00",
+  "passwordChanged": "1970-01-01 00:00:00",
+  "status": 1
+}

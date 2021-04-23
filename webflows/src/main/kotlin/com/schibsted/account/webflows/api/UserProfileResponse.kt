@@ -1,6 +1,10 @@
 package com.schibsted.account.webflows.api
 
+import com.google.gson.TypeAdapter
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
+import com.google.gson.stream.JsonReader
+import com.google.gson.stream.JsonWriter
 import java.util.*
 
 data class UserProfileResponse(
@@ -8,15 +12,18 @@ data class UserProfileResponse(
     val userId: String? = null,
     val status: Int? = null,
     val email: String? = null,
+    @JsonAdapter(StringOrIgnoreTypeAdapter::class)
     val emailVerified: String? = null,
     val emails: List<Email>? = null,
     val phoneNumber: String? = null,
+    @JsonAdapter(StringOrIgnoreTypeAdapter::class)
     val phoneNumberVerified: String? = null,
     val phoneNumbers: List<PhoneNumber>? = null,
     val displayName: String? = null,
     val name: Name? = null,
     val addresses: Map<Address.AddressType, Address>? = null,
     val gender: String? = null,
+    @JsonAdapter(BirthdayTypeAdapter::class)
     val birthday: String? = null,
     val accounts: Map<String, Account>? = null,
     val merchants: List<Int>? = null,
@@ -27,24 +34,32 @@ data class UserProfileResponse(
     val lastAuthenticated: String? = null,
     val lastLoggedIn: String? = null,
     val locale: String? = null,
-    val utcOffset: String? = null,
+    val utcOffset: String? = null
 )
+
+interface Identifier {
+    val value: String?
+    val type: String?
+    val primary: Boolean?
+    val verified: Boolean?
+    val verifiedTime: String?
+}
 
 data class Email(
-    val value: String? = null,
-    val type: String? = null,
-    val primary: Boolean? = null,
-    val verified: Boolean? = null,
-    val verifiedTime: String? = null
-)
+    override val value: String? = null,
+    override val type: String? = null,
+    override val primary: Boolean? = null,
+    override val verified: Boolean? = null,
+    override val verifiedTime: String? = null
+) : Identifier
 
 data class PhoneNumber(
-    val value: String? = null,
-    val type: String? = null,
-    val primary: Boolean? = null,
-    val verified: Boolean? = null,
-    val verifiedTime: String? = null
-)
+    override val value: String? = null,
+    override val type: String? = null,
+    override val primary: Boolean? = null,
+    override val verified: Boolean? = null,
+    override val verifiedTime: String? = null
+) : Identifier
 
 data class Name(
     val givenName: String? = null,
@@ -78,5 +93,40 @@ data class Address(
         INVOICE;
 
         override fun toString(): String = super.toString().toLowerCase(Locale.ROOT)
+    }
+}
+
+private class BirthdayTypeAdapter : TypeAdapter<String>() {
+    override fun write(out: JsonWriter, value: String?) {
+        if (value != null) {
+            out.value(value)
+        }
+    }
+
+    override fun read(`in`: JsonReader): String? {
+        val value = `in`.nextString()
+
+        return if (value == "0000-00-00") {
+            null
+        } else {
+            value
+        }
+    }
+}
+
+private class StringOrIgnoreTypeAdapter : TypeAdapter<String>() {
+    override fun write(out: JsonWriter, value: String?) {
+        if (value != null) {
+            out.value(value)
+        }
+    }
+
+    override fun read(`in`: JsonReader): String? {
+        return try {
+            `in`.nextString()
+        } catch (e: IllegalStateException) {
+            `in`.skipValue()
+            null
+        }
     }
 }
