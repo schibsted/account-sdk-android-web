@@ -129,19 +129,12 @@ class Client {
      *
      * Requires [AuthorizationManagementActivity.setup] to have been called before this.
      *
-     * @param extraScopeValues Additional scope values to request. By default `openid` and
-     *  `offline_access` will always be included. For more information about possible values, see
-     *  <a href="https://docs.schibsted.io/schibsted-account/guides/authentication/#required-parameters">here</a>.
-     * @param mfa Optional MFA verification to prompt the user with.
+     * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun getAuthenticationIntent(
-        context: Context,
-        extraScopeValues: Set<String> = setOf(),
-        mfa: MfaType? = null
-    ): Intent {
+    fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
         val customTabsIntent = CustomTabsIntent.Builder().build().apply {
-            intent.data = Uri.parse(generateLoginUrl(extraScopeValues, mfa))
+            intent.data = Uri.parse(generateLoginUrl(authRequest))
         }
         return AuthorizationManagementActivity.createStartIntent(context, customTabsIntent.intent)
     }
@@ -149,33 +142,23 @@ class Client {
     /**
      * Start auth activity manually.
      *
-     * @param extraScopeValues Additional scope values to request. By default `openid` and
-     *  `offline_access` will always be included. For more information about possible values, see
-     *  <a href="https://docs.schibsted.io/schibsted-account/guides/authentication/#required-parameters">here</a>.
-     * @param mfa Optional MFA verification to prompt the user with.
+     * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun launchAuth(
-        context: Context,
-        extraScopeValues: Set<String> = setOf(),
-        mfa: MfaType? = null
-    ) {
+    fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
         CustomTabsIntent.Builder()
             .build()
-            .launchUrl(context, Uri.parse(generateLoginUrl(extraScopeValues, mfa)))
+            .launchUrl(context, Uri.parse(generateLoginUrl(authRequest)))
     }
 
-    internal fun generateLoginUrl(
-        extraScopeValues: Set<String> = setOf(),
-        mfa: MfaType? = null
-    ): String {
+    internal fun generateLoginUrl(authRequest: AuthRequest): String {
         val state = Util.randomString(10)
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
 
-        stateStorage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, mfa))
+        stateStorage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, authRequest.mfa))
 
-        val scopes = extraScopeValues.union(setOf("openid", "offline_access"))
+        val scopes = authRequest.extraScopeValues.union(setOf("openid", "offline_access"))
         val scopeString = scopes.joinToString(" ")
 
         val codeChallenge = computeCodeChallenge(codeVerifier)
@@ -190,8 +173,12 @@ class Client {
             "code_challenge_method" to "S256"
         )
 
-        if (mfa != null) {
-            authParams["acr_values"] = mfa.value
+        if (authRequest.loginHint != null) {
+            authParams["login_hint"] = authRequest.loginHint
+        }
+
+        if (authRequest.mfa != null) {
+            authParams["acr_values"] = authRequest.mfa.value
         } else {
             authParams["prompt"] = "select_account"
         }
