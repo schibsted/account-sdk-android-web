@@ -1,3 +1,8 @@
+# 1.0.0 (2021-06-11)
+- Add support for 'login_hint' parameter. (#40)
+- Move "login URL" creation logic to separate class. (#41)
+
+
 # 0.0.3 (2021-04-23)
 - Update API docs about authenticated requests and logout behavior. (#38)
 - Improve user profile response parsing. (#39)
