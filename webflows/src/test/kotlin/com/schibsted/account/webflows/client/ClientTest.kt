@@ -57,56 +57,6 @@ class ClientTest {
     }
 
     @Test
-    fun loginUrlShouldBeCorrect() {
-        val client = getClient()
-        val queryParams = Util.parseQueryParameters(URL(client.generateLoginUrl(AuthRequest())).query)
-
-        assertEquals(clientConfig.clientId, queryParams["client_id"])
-        assertEquals(clientConfig.redirectUri, queryParams["redirect_uri"])
-        assertEquals("code", queryParams["response_type"])
-        assertEquals("select_account", queryParams["prompt"])
-        assertEquals(
-            setOf("openid", "offline_access"),
-            queryParams.getValue("scope").split(" ").toSet()
-        )
-        assertNotNull(queryParams["state"])
-        assertNotNull(queryParams["nonce"])
-        assertNotNull(queryParams["code_challenge"])
-        assertEquals("S256", queryParams["code_challenge_method"])
-    }
-
-    @Test
-    fun loginUrlShouldContainLoginHintIfSpecified() {
-        val client = getClient()
-        val loginUrl = client.generateLoginUrl(AuthRequest(loginHint = "test@example.com"))
-        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
-
-        assertEquals("test@example.com", queryParams["login_hint"])
-    }
-
-    @Test
-    fun loginUrlShouldContainExtraScopesSpecified() {
-        val client = getClient()
-        val loginUrl = client.generateLoginUrl(AuthRequest(extraScopeValues = setOf("scope1", "scope2")))
-        val queryParams = Util.parseQueryParameters((URL(loginUrl).query))
-
-        assertEquals(
-            setOf("openid", "offline_access", "scope1", "scope2"),
-            queryParams.getValue("scope").split(" ").toSet()
-        )
-    }
-
-    @Test
-    fun loginUrlForMfaShouldContainAcrValues() {
-        val client = getClient()
-        val loginUrl = client.generateLoginUrl(AuthRequest(mfa = MfaType.OTP))
-        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
-
-        assertNull(queryParams["prompt"])
-        assertEquals(MfaType.OTP.value, queryParams["acr_values"])
-    }
-
-    @Test
     fun handleAuthenticationResponseShouldReturnUserToCallback() {
         val state = "testState"
         val nonce = "testNonce"

@@ -3,7 +3,6 @@ package com.schibsted.account.webflows.client
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
@@ -25,7 +24,6 @@ import com.schibsted.account.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.json.JSONObject
-import java.security.MessageDigest
 import java.util.*
 
 data class OAuthError(val error: String, val errorDescription: String?) {
@@ -93,6 +91,7 @@ class Client {
     private val tokenHandler: TokenHandler
     private val stateStorage: StateStorage
     private val sessionStorage: SessionStorage
+    private val urlBuilder: UrlBuilder
 
     constructor (
         context: Context,
@@ -106,6 +105,7 @@ class Client {
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
         tokenHandler = TokenHandler(configuration, schibstedAccountApi)
         this.httpClient = httpClient
+        this.urlBuilder = UrlBuilder(configuration, stateStorage, AUTH_STATE_KEY)
     }
 
     internal constructor (
@@ -122,6 +122,7 @@ class Client {
         this.tokenHandler = tokenHandler
         this.httpClient = httpClient
         this.schibstedAccountApi = schibstedAccountApi
+        this.urlBuilder = UrlBuilder(configuration, stateStorage, AUTH_STATE_KEY)
     }
 
     /**
@@ -134,7 +135,7 @@ class Client {
     @JvmOverloads
     fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
         val customTabsIntent = CustomTabsIntent.Builder().build().apply {
-            intent.data = Uri.parse(generateLoginUrl(authRequest))
+            intent.data = generateLoginUrl(authRequest)
         }
         return AuthorizationManagementActivity.createStartIntent(context, customTabsIntent.intent)
     }
@@ -148,51 +149,13 @@ class Client {
     fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
         CustomTabsIntent.Builder()
             .build()
-            .launchUrl(context, Uri.parse(generateLoginUrl(authRequest)))
+            .launchUrl(context, generateLoginUrl(authRequest))
     }
 
-    internal fun generateLoginUrl(authRequest: AuthRequest): String {
-        val state = Util.randomString(10)
-        val nonce = Util.randomString(10)
-        val codeVerifier = Util.randomString(60)
-
-        stateStorage.setValue(AUTH_STATE_KEY, AuthState(state, nonce, codeVerifier, authRequest.mfa))
-
-        val scopes = authRequest.extraScopeValues.union(setOf("openid", "offline_access"))
-        val scopeString = scopes.joinToString(" ")
-
-        val codeChallenge = computeCodeChallenge(codeVerifier)
-        val authParams: MutableMap<String, String> = mutableMapOf(
-            "client_id" to configuration.clientId,
-            "redirect_uri" to configuration.redirectUri,
-            "response_type" to "code",
-            "state" to state,
-            "scope" to scopeString,
-            "nonce" to nonce,
-            "code_challenge" to codeChallenge,
-            "code_challenge_method" to "S256"
-        )
-
-        if (authRequest.loginHint != null) {
-            authParams["login_hint"] = authRequest.loginHint
-        }
-
-        if (authRequest.mfa != null) {
-            authParams["acr_values"] = authRequest.mfa.value
-        } else {
-            authParams["prompt"] = "select_account"
-        }
-
-        val loginUrl = "${configuration.serverUrl}/oauth/authorize?${Util.queryEncode(authParams)}"
+    private fun generateLoginUrl(authRequest: AuthRequest): Uri {
+        val loginUrl = urlBuilder.loginUrl(authRequest)
         Log.d(Logging.SDK_TAG, "Login url: $loginUrl")
-        return loginUrl
-    }
-
-    private fun computeCodeChallenge(codeVerifier: String): String {
-        val md = MessageDigest.getInstance("SHA-256")
-        md.update(codeVerifier.toByteArray())
-        val digest = md.digest()
-        return Base64.encodeToString(digest, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+        return Uri.parse(loginUrl)
     }
 
     /**
