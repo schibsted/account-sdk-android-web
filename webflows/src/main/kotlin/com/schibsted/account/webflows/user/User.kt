@@ -30,6 +30,9 @@ private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>
 
 /** Representation of logged-in user. */
 class User {
+    // Use the `onlyIfLoggedIn` helper closure for methods that should only be
+    // available when `User` is logged-in!
+
     private val client: Client
     internal var tokens: UserTokens?
     internal val httpClient: OkHttpClient

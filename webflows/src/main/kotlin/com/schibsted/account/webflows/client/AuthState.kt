@@ -1,5 +1,11 @@
 package com.schibsted.account.webflows.client
 
+/**
+ * OAuth data to be persisted for an ongoing authentication flow.
+ *
+ * After the authentication has completed, and the user has been redirected back to the app, this
+ * data should be used to verify the authentication response and to make the token request.
+ */
 internal data class AuthState(
     val state: String,
     val nonce: String,

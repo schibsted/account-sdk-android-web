@@ -5,6 +5,11 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import kotlin.reflect.KClass
 
+/**
+ * Auxiliary storage to keep state during the login flow.
+ *
+ * Uses Shared Preferences as backing storage to persist the data.
+ */
 internal class StateStorage(context: Context) {
     private val gson = Gson()
 

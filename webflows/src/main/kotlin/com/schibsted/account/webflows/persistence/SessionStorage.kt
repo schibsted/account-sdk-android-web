@@ -7,6 +7,12 @@ import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.schibsted.account.webflows.user.StoredUserSession
 
+/**
+ * User session storage.
+ *
+ * A user session holds all the user tokens (access, refresh and id token) issued to the client.
+ * They must be stored securely, e.g. in encrypted.
+ */
 internal interface SessionStorage {
     fun save(session: StoredUserSession)
     fun get(clientId: String): StoredUserSession?

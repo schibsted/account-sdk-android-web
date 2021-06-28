@@ -60,7 +60,6 @@ internal object IdTokenValidator {
         )
 
         val claims: JWTClaimsSet
-        // TODO replace with runCatching?
         try {
             claims = jwtProcessor.process(idToken, validationContext)
         } catch (e: BadJWTException) {
