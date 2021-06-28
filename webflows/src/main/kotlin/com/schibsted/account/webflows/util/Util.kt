@@ -4,10 +4,10 @@ import java.net.URLDecoder
 import kotlin.random.Random
 
 internal object Util {
-    fun String.utf8(): String = java.net.URLEncoder.encode(this, "UTF-8")
-
     fun queryEncode(params: Map<String, String>): String {
-        return params.map { (k: String, v: String) -> "${k.utf8()}=${v.utf8()}" }.joinToString("&")
+        fun urlEncode(s: String): String = java.net.URLEncoder.encode(s, "UTF-8")
+
+        return params.map { (k: String, v: String) -> "${urlEncode(k)}=${urlEncode(v)}" }.joinToString("&")
     }
 
     fun parseQueryParameters(queryString: String): Map<String, String> {
