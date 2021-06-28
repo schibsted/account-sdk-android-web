@@ -26,6 +26,13 @@ class UserProfileResponseTest {
     }
 
     @Test
+    fun userProfileResponseHandlesEmptyAddressArray() {
+        val jsonString = """{"addresses": []}"""
+        val parsed = Gson().fromJson(jsonString, UserProfileResponse::class.java)
+        assertEquals(true, parsed.addresses?.isEmpty())
+    }
+
+    @Test
     fun fullUserProfileResponse() {
         val jsonString = javaClass.getResource("/user-profile-response.json")!!.readText()
         val parsed = Gson().fromJson(jsonString, UserProfileResponse::class.java)
