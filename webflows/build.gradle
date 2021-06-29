@@ -19,8 +19,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -101,10 +101,17 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
+                artifact(sourceJar)
+
                 artifactId = 'account-sdk-android-web'
                 groupId = 'com.schibsted.account'
                 version = gitVersion
             }
         }
     }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.java.srcDirs
+    classifier "sources"
 }
