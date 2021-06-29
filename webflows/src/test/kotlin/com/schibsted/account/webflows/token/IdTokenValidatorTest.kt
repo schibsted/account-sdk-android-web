@@ -60,7 +60,7 @@ class IdTokenValidatorTest {
             claims.subject,
             claims.getStringClaim("legacy_user_id"),
             claims.audience,
-            (claims.expirationTime.time / 1000).toInt(),
+            (claims.expirationTime.time / 1000),
             claims.getStringClaim("nonce"),
             claims.getStringListClaim("amr")
         )

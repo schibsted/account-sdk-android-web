@@ -9,7 +9,7 @@ internal data class IdTokenClaims(
     val sub: String,
     val userId: String,
     val aud: List<String>,
-    val exp: Int,
+    val exp: Long,
     val nonce: String?,
     val amr: List<String>?
 ) : Parcelable
