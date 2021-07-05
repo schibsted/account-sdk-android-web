@@ -312,7 +312,10 @@ class UserTest {
     fun logoutUpdatesAuthResultLiveData() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        every { client.resumeLastLoggedInUser() } returns user
+        every { client.resumeLastLoggedInUser(any()) } answers {
+            val callback = firstArg<(User?) -> Unit>()
+            callback(user)
+        }
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().logout()

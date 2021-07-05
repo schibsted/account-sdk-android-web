@@ -46,16 +46,18 @@ internal object IdTokenValidator {
         val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
         val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
             JWSAlgorithm.RS256,
-            ImmutableJWKSet<IdTokenValidationContext>(jwks)
+            ImmutableJWKSet(jwks)
         )
         jwtProcessor.jwsKeySelector = keySelector
 
         val expectedClaims = JWTClaimsSet.Builder()
-            .claim("nonce", validationContext.nonce)
-            .build()
+        if (validationContext.nonce != null) {
+            expectedClaims.claim("nonce", validationContext.nonce)
+        }
+
         jwtProcessor.jwtClaimsSetVerifier = IdTokenClaimsVerifier(
             validationContext.clientId,
-            expectedClaims,
+            expectedClaims.build(),
             setOf("sub", "exp")
         )
 

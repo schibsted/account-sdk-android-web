@@ -107,7 +107,11 @@ class Client {
         stateStorage = StateStorage(context.applicationContext)
 
         if (sessionStorageConfig != null) {
-            sessionStorage = MigratingSessionStorage(context.applicationContext, sessionStorageConfig.legacyClientId)
+            sessionStorage = MigratingSessionStorage(
+                context.applicationContext,
+                this,
+                sessionStorageConfig.legacyClientId
+            )
         } else {
             sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
         }
@@ -205,21 +209,11 @@ class Client {
 
         val authCode = authResponse["code"]
             ?: return callback(Left(LoginError.UnexpectedError("Missing authorization code in authentication response")))
-
-        tokenHandler.makeTokenRequest(
-            authCode,
-            stored
-        ) { result ->
-            result
-                .foreach { tokenResponse ->
-                    Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
-                    val userSession = StoredUserSession(
-                        configuration.clientId,
-                        tokenResponse.userTokens,
-                        Date()
-                    )
-                    sessionStorage.save(userSession)
-                    callback(Right(User(this, tokenResponse.userTokens)))
+        makeTokenRequest(authCode, stored) { storedUserSession ->
+            storedUserSession
+                .foreach { session ->
+                    sessionStorage.save(session)
+                    callback(Right(User(this, session.userTokens)))
                 }
                 .left().foreach { err ->
                     Log.d(Logging.SDK_TAG, "Token error response: $err")
@@ -233,10 +227,33 @@ class Client {
         }
     }
 
+    internal fun makeTokenRequest(
+        authCode: String,
+        authState: AuthState,
+        callback: (Either<TokenError, StoredUserSession>) -> Unit
+    ) {
+        tokenHandler.makeTokenRequest(authCode, authState) { result ->
+            val session: Either<TokenError, StoredUserSession> = result.map { tokenResponse ->
+                Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
+                StoredUserSession(
+                    configuration.clientId,
+                    tokenResponse.userTokens,
+                    Date()
+                )
+            }
+            callback(session)
+        }
+    }
+
     /** Resume any previously logged-in user session */
-    fun resumeLastLoggedInUser(): User? {
-        val session = sessionStorage.get(configuration.clientId) ?: return null
-        return User(this, session.userTokens)
+    fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
+        sessionStorage.get(configuration.clientId) {
+            if (it == null) {
+                callback(null)
+            } else {
+                callback(User(this, it.userTokens))
+            }
+        }
     }
 
     internal fun destroySession() {
@@ -273,6 +290,17 @@ class Client {
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
             }
         }
+    }
+
+    internal fun copy(newClientConfiguration: ClientConfiguration): Client {
+        return Client(
+            newClientConfiguration,
+            stateStorage,
+            sessionStorage,
+            httpClient,
+            tokenHandler,
+            schibstedAccountApi
+        )
     }
 
     internal companion object {

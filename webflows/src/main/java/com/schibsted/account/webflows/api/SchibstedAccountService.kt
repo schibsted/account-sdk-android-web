@@ -27,4 +27,11 @@ internal interface SchibstedAccountTokenProtectedService {
         @Field("redirectUri") redirectUri: String,
         @Field("type") type: String = "session",
     ): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
+
+    @FormUrlEncoded
+    @POST("/api/2/oauth/exchange")
+    fun codeExchange(
+        @Field("clientId") clientId: String,
+        @Field("type") type: String = "code",
+    ): Call<SchibstedAccountApiResponse<CodeExchangeResponse>>
 }

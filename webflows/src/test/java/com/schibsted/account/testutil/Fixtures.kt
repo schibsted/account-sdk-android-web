@@ -30,6 +30,7 @@ internal object Fixtures {
     val userTokens = UserTokens("accessToken", "refreshToken", "idToken", idTokenClaims)
 
     fun getClient(
+        clientConfiguration: ClientConfiguration = clientConfig,
         stateStorage: StateStorage = mockk(relaxed = true),
         sessionStorage: SessionStorage = mockk(relaxed = true),
         httpClient: OkHttpClient = Fixtures.httpClient,
@@ -37,7 +38,7 @@ internal object Fixtures {
         schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true)
     ): Client {
         return Client(
-            clientConfig,
+            clientConfiguration,
             stateStorage,
             sessionStorage,
             httpClient,

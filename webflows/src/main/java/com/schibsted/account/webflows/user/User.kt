@@ -111,6 +111,20 @@ class User {
         }
 
     /**
+     * Requests a OAuth authorization code for the current user.
+     *
+     * The code is short-lived and one-time use only.
+     * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
+     * @param callback callback that receives the one time code
+     */
+    fun oneTimeCode(clientId: String, callback: (ApiResult<String>) -> Unit) =
+        onlyIfLoggedIn {
+            client.schibstedAccountApi.codeExchange(this, clientId) {
+                callback(it.map { it.code })
+            }
+        }
+
+    /**
      * Generate URL for Schibsted account pages.
      */
     fun accountPagesUrl(): URL = onlyIfLoggedIn {

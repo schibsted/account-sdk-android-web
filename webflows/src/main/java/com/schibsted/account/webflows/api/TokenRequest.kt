@@ -21,7 +21,7 @@ internal data class UserTokenResponse(
 
 internal data class UserTokenRequest(
     val authCode: String,
-    val codeVerifier: String,
+    val codeVerifier: String?,
     val clientId: String,
     val redirectUri: String
 )

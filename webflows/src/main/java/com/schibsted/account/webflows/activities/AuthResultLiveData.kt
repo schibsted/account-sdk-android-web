@@ -38,11 +38,12 @@ class AuthResultLiveData private constructor(private val client: Client) :
     }
 
     init {
-        val resumedUser = client.resumeLastLoggedInUser()
-        value = if (resumedUser != null) {
-            Right(resumedUser)
-        } else {
-            Left(NotAuthed.NoLoggedInUser)
+        client.resumeLastLoggedInUser { resumedUser ->
+            value = if (resumedUser != null) {
+                Right(resumedUser)
+            } else {
+                Left(NotAuthed.NoLoggedInUser)
+            }
         }
     }
 

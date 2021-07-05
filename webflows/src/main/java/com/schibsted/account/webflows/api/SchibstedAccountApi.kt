@@ -45,19 +45,22 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         tokenRequest: UserTokenRequest,
         callback: (ApiResult<UserTokenResponse>) -> Unit
     ) {
-        val params = mapOf(
+        val params = mutableMapOf<String, String>(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "authorization_code",
             "code" to tokenRequest.authCode,
-            "code_verifier" to tokenRequest.codeVerifier,
             "redirect_uri" to tokenRequest.redirectUri
         )
+
+        if (tokenRequest.codeVerifier != null) {
+            params["code_verifier"] = tokenRequest.codeVerifier
+        }
 
         schaccService.tokenRequest(params).enqueue(ApiResultCallback(callback))
     }
 
     fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
-        val params = mutableMapOf(
+        val params = mutableMapOf<String, String>(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "refresh_token",
             "refresh_token" to tokenRequest.refreshToken,
@@ -93,6 +96,16 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
     ) {
         proctectedSchaccApi(user) { service ->
             service.sessionExchange(clientId, redirectUri)
+                .enqueue(ApiResultCallback { callback(it.unpack()) })
+        }
+    }
+
+    fun codeExchange(
+        user: User, clientId: String,
+        callback: (ApiResult<CodeExchangeResponse>) -> Unit
+    ) {
+        proctectedSchaccApi(user) { service ->
+            service.codeExchange(clientId)
                 .enqueue(ApiResultCallback { callback(it.unpack()) })
         }
     }

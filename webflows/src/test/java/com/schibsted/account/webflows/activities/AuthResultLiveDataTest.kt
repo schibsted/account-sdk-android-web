@@ -55,7 +55,10 @@ class AuthResultLiveDataTest {
     fun initResumesLoggedInUser() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        every { client.resumeLastLoggedInUser() } returns user
+        every { client.resumeLastLoggedInUser(any()) } answers {
+            val callback = firstArg<(User?) -> Unit>()
+            callback(user)
+        }
 
         AuthResultLiveData.create(client)
         AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
@@ -64,7 +67,10 @@ class AuthResultLiveDataTest {
     @Test
     fun initResumesNoLoggedInUser() {
         val client = mockk<Client>(relaxed = true)
-        every { client.resumeLastLoggedInUser() } returns null
+        every { client.resumeLastLoggedInUser(any()) } answers {
+            val callback = firstArg<(User?) -> Unit>()
+            callback(null)
+        }
 
         AuthResultLiveData.create(client)
         AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
@@ -112,7 +118,10 @@ class AuthResultLiveDataTest {
     fun userLogoutUpdatesAuthResultLiveData() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        every { client.resumeLastLoggedInUser() } returns user
+        every { client.resumeLastLoggedInUser(any()) } answers {
+            val callback = firstArg<(User?) -> Unit>()
+            callback(user)
+        }
         AuthResultLiveData.create(client)
 
         AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }

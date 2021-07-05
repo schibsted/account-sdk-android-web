@@ -15,7 +15,7 @@ import com.schibsted.account.webflows.user.StoredUserSession
  */
 internal interface SessionStorage {
     fun save(session: StoredUserSession)
-    fun get(clientId: String): StoredUserSession?
+    fun get(clientId: String, callback: (StoredUserSession?) -> Unit)
     fun remove(clientId: String)
 }
 
@@ -43,9 +43,9 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
         editor.apply()
     }
 
-    override fun get(clientId: String): StoredUserSession? {
-        val json = prefs.getString(clientId, null) ?: return null
-        return gson.fromJson(json, StoredUserSession::class.java)
+    override fun get(clientId: String, callback: (StoredUserSession?) -> Unit){
+        val json = prefs.getString(clientId, null) ?: return callback(null)
+        callback(gson.fromJson(json, StoredUserSession::class.java))
     }
 
     override fun remove(clientId: String) {

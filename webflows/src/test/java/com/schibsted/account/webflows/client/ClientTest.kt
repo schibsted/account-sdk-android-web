@@ -23,7 +23,6 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import com.schibsted.account.webflows.util.Util
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -31,7 +30,6 @@ import io.mockk.verify
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
-import java.net.URL
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -141,13 +139,19 @@ class ClientTest {
     fun existingSessionIsResumeable() {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<(StoredUserSession?) -> Unit>()
+            callback(userSession)
+        }
         val client = getClient(sessionStorage = sessionStorageMock)
 
-        assertEquals(
-            User(client, UserSession(Fixtures.userTokens)),
-            client.resumeLastLoggedInUser()
-        )
+        client.resumeLastLoggedInUser { result ->
+            assertEquals(
+                User(client, UserSession(Fixtures.userTokens)),
+                result
+            )
+            assertFalse(true) // TODO does this get called
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
