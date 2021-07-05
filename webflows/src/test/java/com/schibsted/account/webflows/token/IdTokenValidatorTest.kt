@@ -1,16 +1,13 @@
 package com.schibsted.account.webflows.token
 
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
-import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
+import com.schibsted.account.testutil.createJws
 import com.schibsted.account.webflows.jose.AsyncJwks
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -45,13 +42,7 @@ class IdTokenValidatorTest {
     }
 
     private fun createIdToken(claims: JWTClaimsSet): String {
-        val header = JWSHeader.Builder(JWSAlgorithm.RS256)
-            .keyID(idTokenKeyId)
-            .build()
-        val jwsObject = JWSObject(header, Payload(claims.toJSONObject()))
-
-        jwsObject.sign(RSASSASigner(jwk.toRSAKey()))
-        return jwsObject.serialize()
+        return createJws(jwk.toRSAKey(), idTokenKeyId, Payload(claims.toJSONObject()))
     }
 
     private fun idTokenClaims(claims: JWTClaimsSet): IdTokenClaims {

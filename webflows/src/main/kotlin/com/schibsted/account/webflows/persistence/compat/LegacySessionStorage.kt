@@ -26,7 +26,7 @@ internal data class LegacySession(
  *
  * @see <a href="https://github.com/schibsted/account-sdk-android/blob/master/core/src/main/java/com/schibsted/account/persistence/SessionStorageDelegate.kt" target="_top">Old Schibsted account Android SDK</a>
  */
-private class LegacyTokenStorage(context: Context) {
+internal class LegacyTokenStorage(context: Context) {
     private var sessions: List<LegacySession> by SessionStorageDelegate(
         context,
         PREFERENCE_FILENAME
@@ -45,15 +45,15 @@ private class LegacyTokenStorage(context: Context) {
     }
 }
 
-internal class LegacySessionStorage(context: Context) {
-    private val legacyTokenStorage = LegacyTokenStorage(context)
+internal class LegacySessionStorage(private val legacyTokenStorage: LegacyTokenStorage) {
+    internal constructor(context: Context) : this(LegacyTokenStorage(context))
 
     fun get(clientId: String): StoredUserSession? {
         val sessions = legacyTokenStorage.get()
             .mapNotNull { toStoredUserSession(it) }
             .filter { it.clientId == clientId }
 
-        return sessions.sortedByDescending { it.updatedAt }.firstOrNull() // TODO test this yields the latest
+        return sessions.maxByOrNull { it.updatedAt }
     }
 
     fun remove() {
@@ -63,6 +63,7 @@ internal class LegacySessionStorage(context: Context) {
     private fun toStoredUserSession(legacySession: LegacySession): StoredUserSession? {
         val accessToken = legacySession.tokens.accessToken
         val clientId = unverifiedClaims(accessToken)?.get("client_id") ?: return null
+        val refreshToken = legacySession.tokens.refreshToken ?: return null
 
         val idToken = legacySession.tokens.idToken ?: return null
         val unverifiedIdTokenClaims = unverifiedClaims(idToken) ?: return null
@@ -80,7 +81,7 @@ internal class LegacySessionStorage(context: Context) {
         )
         val userTokens = UserTokens(
             legacySession.tokens.accessToken,
-            legacySession.tokens.refreshToken,
+            refreshToken,
             legacySession.tokens.idToken,
             idTokenClaims
         )

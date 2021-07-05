@@ -1,5 +1,13 @@
 package com.schibsted.account.testutil
 
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.JWSObject
+import com.nimbusds.jose.Payload
+import com.nimbusds.jose.crypto.RSASSASigner
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.RSAKey
+import com.schibsted.account.webflows.token.IdTokenValidatorTest
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
@@ -45,4 +53,14 @@ fun withServer(vararg responses: MockResponse, func: (MockWebServer) -> Unit) {
     } finally {
         server.shutdown()
     }
+}
+
+fun createJws(key: RSAKey, keyId: String, payload: Payload): String {
+    val header = JWSHeader.Builder(JWSAlgorithm.RS256)
+        .keyID(keyId)
+        .build()
+    val jwsObject = JWSObject(header, payload)
+
+    jwsObject.sign(RSASSASigner(key))
+    return jwsObject.serialize()
 }
