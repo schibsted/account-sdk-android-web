@@ -93,17 +93,16 @@ class MigratingSessionStorageTest {
         every { Log.e(any(), any()) } returns 0
 
         val authCode = "test_auth_code"
-        fun withApiResponseWrapper(responseData: String): String {
-            return """
-        {
-            "name": "SPP Container",
-            "version": "0.2",
-            "api": 2,
-            "code": 200,
-            "data": $responseData
-        }
+        val codeExchangeResponseJson =
+            """
+            {
+                "name": "SPP Container",
+                "version": "0.2",
+                "api": 2,
+                "code": 200,
+                "data": {"code": "$authCode"}
+            }
         """.trimIndent()
-        }
 
         val legacyStorage = mockk<LegacySessionStorage>(relaxUnitFun = true)
         val legacyUserSession = StoredUserSession(legacyClientId, Fixtures.userTokens, Date())
@@ -115,26 +114,29 @@ class MigratingSessionStorageTest {
             callback(null)
         }
 
-        val codeExchangeResponse = MockResponse().setResponseCode(200)
-            .setBody(withApiResponseWrapper("""{"code": "$authCode"}"""))
+        val tokenHandler = mockk<TokenHandler>() {
+            every {
+                makeTokenRequest(
+                    authCode,
+                    AuthState("", null, null, null),
+                    any()
+                )
+            } answers {
+                val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                callback(Right(UserTokensResult(Fixtures.userTokens, null, 10)))
+            }
+        }
 
+        val codeExchangeResponse = MockResponse().setBody(codeExchangeResponseJson)
         withServer(codeExchangeResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
-                val tokenHandler = mockk<TokenHandler>() {
-                    every {
-                        makeTokenRequest(
-                            authCode,
-                            AuthState("", null, null, null),
-                            any()
-                        )
-                    } answers {
-                        val callback = thirdArg<(TokenRequestResult) -> Unit>()
-                        callback(Right(UserTokensResult(Fixtures.userTokens, null, 10)))
-                    }
-                }
                 val client =
-                    Fixtures.getClient(clientConfiguration = Fixtures.clientConfig.copy(clientId = newClientId), tokenHandler = tokenHandler, schibstedAccountApi = schaccApi)
+                    Fixtures.getClient(
+                        clientConfiguration = Fixtures.clientConfig.copy(clientId = newClientId),
+                        tokenHandler = tokenHandler,
+                        schibstedAccountApi = schaccApi
+                    )
 
                 val migratingStorage = MigratingSessionStorage(
                     client,
@@ -143,17 +145,20 @@ class MigratingSessionStorageTest {
                     legacyClientId
                 )
 
-                val expectedMigratedSession = StoredUserSession(newClientId, Fixtures.userTokens, Date())
+                val expectedMigratedSession =
+                    StoredUserSession(newClientId, Fixtures.userTokens, Date())
                 migratingStorage.get(newClientId) {
                     assertEquals(expectedMigratedSession.clientId, it!!.clientId)
                     assertEquals(expectedMigratedSession.userTokens, it.userTokens)
 
                     verify { newStorage.get(newClientId, any()) }
                     verify { legacyStorage.get(legacyClientId) }
-                    verify { newStorage.save(match {
-                        expectedMigratedSession.clientId == it.clientId &&
-                        expectedMigratedSession.userTokens == it.userTokens
-                    }) }
+                    verify {
+                        newStorage.save(match {
+                            expectedMigratedSession.clientId == it.clientId &&
+                                    expectedMigratedSession.userTokens == it.userTokens
+                        })
+                    }
                     verify { legacyStorage.remove() }
 
                     done()

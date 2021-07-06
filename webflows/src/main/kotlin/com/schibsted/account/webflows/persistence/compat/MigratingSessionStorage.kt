@@ -67,7 +67,6 @@ internal class MigratingSessionStorage(
         legacyUser.oneTimeCode(client.configuration.clientId) { codeResult ->
             codeResult
                 .map { code ->
-                    // TODO this won't return refresh token?
                     client.makeTokenRequest(code, AuthState("", null, null, null)) {
                         it
                             .foreach { migratedSession ->

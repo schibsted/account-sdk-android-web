@@ -150,7 +150,6 @@ class ClientTest {
                 User(client, UserSession(Fixtures.userTokens)),
                 result
             )
-            assertFalse(true) // TODO does this get called
         }
     }
 
