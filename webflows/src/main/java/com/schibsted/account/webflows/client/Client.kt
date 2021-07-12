@@ -229,7 +229,7 @@ class Client {
 
     internal fun makeTokenRequest(
         authCode: String,
-        authState: AuthState,
+        authState: AuthState?,
         callback: (Either<TokenError, StoredUserSession>) -> Unit
     ) {
         tokenHandler.makeTokenRequest(authCode, authState) { result ->

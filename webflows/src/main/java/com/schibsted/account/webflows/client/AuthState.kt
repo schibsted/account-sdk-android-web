@@ -8,8 +8,8 @@ package com.schibsted.account.webflows.client
  */
 internal data class AuthState(
     val state: String,
-    val nonce: String?,
-    val codeVerifier: String?,
+    val nonce: String,
+    val codeVerifier: String,
     val mfa: MfaType?
 )
 

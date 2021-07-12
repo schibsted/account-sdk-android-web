@@ -45,12 +45,12 @@ internal class TokenHandler(
 
     fun makeTokenRequest(
         authCode: String,
-        authState: AuthState,
+        authState: AuthState?,
         callback: (TokenRequestResult) -> Unit
     ) {
         val tokenRequest = UserTokenRequest(
             authCode,
-            authState.codeVerifier,
+            authState?.codeVerifier,
             clientConfiguration.clientId,
             clientConfiguration.redirectUri
         )
@@ -85,7 +85,7 @@ internal class TokenHandler(
 
     private fun handleTokenResponse(
         tokenResponse: UserTokenResponse,
-        authState: AuthState,
+        authState: AuthState?,
         callback: (TokenRequestResult) -> Unit
     ) {
         Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
@@ -100,8 +100,8 @@ internal class TokenHandler(
         val idTokenValidationContext = IdTokenValidationContext(
             clientConfiguration.issuer,
             clientConfiguration.clientId,
-            authState.nonce,
-            authState.mfa?.value
+            authState?.nonce,
+            authState?.mfa?.value
         )
 
         IdTokenValidator.validate(idToken, jwks, idTokenValidationContext) { result ->

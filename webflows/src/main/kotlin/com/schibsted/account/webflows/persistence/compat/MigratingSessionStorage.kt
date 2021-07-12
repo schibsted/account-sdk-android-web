@@ -67,7 +67,7 @@ internal class MigratingSessionStorage(
         legacyUser.oneTimeCode(client.configuration.clientId) { codeResult ->
             codeResult
                 .map { code ->
-                    client.makeTokenRequest(code, AuthState("", null, null, null)) {
+                    client.makeTokenRequest(code, null) {
                         it
                             .foreach { migratedSession ->
                                 newStorage.save(migratedSession)
