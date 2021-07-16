@@ -83,7 +83,7 @@ sealed class RefreshTokenError {
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
 
-data class SessionStorageConfig(val legacyClientId: String)
+data class SessionStorageConfig(val legacyClientId: String, val legacyClientSecret: String)
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -110,7 +110,8 @@ class Client {
             sessionStorage = MigratingSessionStorage(
                 context.applicationContext,
                 this,
-                sessionStorageConfig.legacyClientId
+                sessionStorageConfig.legacyClientId,
+                sessionStorageConfig.legacyClientSecret
             )
         } else {
             sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
@@ -290,17 +291,6 @@ class Client {
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
             }
         }
-    }
-
-    internal fun copy(newClientConfiguration: ClientConfiguration): Client {
-        return Client(
-            newClientConfiguration,
-            stateStorage,
-            sessionStorage,
-            httpClient,
-            tokenHandler,
-            schibstedAccountApi
-        )
     }
 
     internal companion object {

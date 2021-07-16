@@ -2,26 +2,31 @@ package com.schibsted.account.webflows.persistence.compat
 
 import android.content.Context
 import android.util.Log
-import com.schibsted.account.webflows.client.AuthState
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.user.StoredUserSession
-import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Logging.SDK_TAG
 
 internal class MigratingSessionStorage(
     private val client: Client,
     private val newStorage: SessionStorage,
     private val legacyStorage: LegacySessionStorage,
-    private val legacyClientId: String
+    private val legacyClientId: String,
+    private val legacyClientSecret: String
 ) : SessionStorage {
 
-    internal constructor(context: Context, client: Client, legacyClientId: String) : this(
+    internal constructor(
+        context: Context,
+        client: Client,
+        legacyClientId: String,
+        legacyClientSecret: String
+    ) : this(
         client,
         EncryptedSharedPrefsStorage(context),
         LegacySessionStorage(context),
-        legacyClientId
+        legacyClientId,
+        legacyClientSecret
     )
 
     override fun save(session: StoredUserSession) {
@@ -56,18 +61,19 @@ internal class MigratingSessionStorage(
         callback: (StoredUserSession?) -> Unit
     ) {
         // use tokens from legacy session to get OAuth auth code for the new client
-        val legacyClientConfig =
-            client.configuration.copy(clientId = legacyClientId, redirectUri = "")
-        val legacyClient = client.copy(legacyClientConfig)
-        val legacyUser = User(legacyClient, legacySession.userTokens)
         // TODO test
         // 1. expired access token, but valid refresh token
         // 2. both invalid access token and refresh token
+        val legacyClient =
+            LegacyClient(legacyClientId, legacyClientSecret, client.schibstedAccountApi)
 
-        legacyUser.oneTimeCode(client.configuration.clientId) { codeResult ->
+        legacyClient.getAuthCodeFromTokens(
+            legacySession.userTokens,
+            client.configuration.clientId
+        ) { codeResult ->
             codeResult
-                .map { code ->
-                    client.makeTokenRequest(code, null) {
+                .map { codeResponse ->
+                    client.makeTokenRequest(codeResponse.code, null) {
                         it
                             .foreach { migratedSession ->
                                 newStorage.save(migratedSession)
