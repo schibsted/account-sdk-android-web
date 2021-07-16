@@ -3,8 +3,7 @@ package com.schibsted.account.webflows.util
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import kotlin.concurrent.thread
 
@@ -49,7 +48,7 @@ class BestEffortRunOnceTaskTest {
     }
 
     @Test
-    fun runRepeatsOperationIfLockTimesOut() {
+    fun runDoesNotRepeatOperationIfLockTimesOut() {
         val results = listOf(
             "First result",
             "Second result",
@@ -63,10 +62,10 @@ class BestEffortRunOnceTaskTest {
             opMock.doWork()
         })
 
-        verify(exactly = 3) { opMock.doWork() }
+        verify(exactly = 1) { opMock.doWork() }
         assertEquals(results[0], actualResults[0]) // first thread should always get first result
         // order of second and third thread isn't guaranteed
-        assertTrue(actualResults[1] in results.subList(1, results.count()))
-        assertTrue(actualResults[2] in results.subList(1, results.count()))
+        assertNull(actualResults[1])
+        assertNull(actualResults[2])
     }
 }

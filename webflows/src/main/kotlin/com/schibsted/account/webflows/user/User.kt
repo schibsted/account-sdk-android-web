@@ -65,7 +65,7 @@ class User {
             .addInterceptor(AuthenticatedRequestInterceptor(this))
             .authenticator(AccessTokenAuthenticator(this))
             .build()
-        this.tokenRefreshTask = BestEffortRunOnceTask {
+        this.tokenRefreshTask = BestEffortRunOnceTask(5000) {
             client.refreshTokensForUser(this)
         }
     }

@@ -40,8 +40,8 @@ internal class BestEffortRunOnceTask<T>(
                 value
             }
             else -> {
-                // the previous check will return false on timeout, possibly repeating the operation
-                block()
+                // the previous check will return false on timeout, and value should be null
+                value
             }
         }
     }
