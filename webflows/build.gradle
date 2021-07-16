@@ -3,9 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
-
-def gitVersion = ['sh', '-c', 'git describe --tag 2> /dev/null || git rev-parse --short HEAD'].execute().text.trim()
-
+apply plugin: 'signing'
 
 android {
     compileSdkVersion 29
@@ -27,11 +25,11 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField('String', 'VERSION_NAME', "\"$gitVersion\"")
+            buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
 
         debug {
-            buildConfigField('String', 'VERSION_NAME', "\"$gitVersion\"")
+            buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
     }
 
@@ -89,15 +87,6 @@ tasks.withType(Test) {
 
 afterEvaluate {
     publishing {
-        repositories.maven {
-            url = "$artifactory_contextUrl/libs-release-local"
-
-            credentials {
-                username = "$artifactory_user"
-                password = "$artifactory_pwd"
-            }
-        }
-
         publications {
             release(MavenPublication) {
                 from components.release
@@ -105,7 +94,33 @@ afterEvaluate {
 
                 artifactId = 'account-sdk-android-web'
                 groupId = 'com.schibsted.account'
-                version = gitVersion
+                version = project.version
+
+                pom {
+                    name = 'Schibsted account Android SDK'
+                    description = "Schibsted account Android SDK ${project.version}"
+                    url = 'https://github.com/schibsted/account-sdk-android-web'
+
+                    scm {
+                        connection = 'scm:git:https://github.com/schibsted/account-sdk-android-web.git'
+                        url = 'https://github.com/schibsted/account-sdk-android-web'
+                    }
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'schibsted-account'
+                            name = 'Schibsted account'
+                            email = 'schibstedaccount@schibsted.com'
+                        }
+                    }
+                }
             }
         }
     }
@@ -114,4 +129,18 @@ afterEvaluate {
 task sourceJar(type: Jar) {
     from sourceSets.main.java.srcDirs
     classifier "sources"
+}
+
+static String base64Decode(String envVar) {
+    def value = System.getenv(envVar)
+    if (value == null) {
+        return null
+    }
+
+    return new String(value.decodeBase64())
+}
+
+signing {
+    useInMemoryPgpKeys(base64Decode('SIGNING_KEY'), System.getenv('SIGNING_PASSWORD'))
+    sign publishing.publications
 }
