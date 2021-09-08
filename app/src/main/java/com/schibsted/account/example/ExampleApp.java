@@ -20,7 +20,7 @@ public class ExampleApp extends Application {
 
         Intent completionIntent = new Intent(this, MainActivity.class);
         Intent cancelIntent = new Intent(this, MainActivity.class);
-        cancelIntent.putExtra(MainActivity.LOGIN_FAILED_EXTRA, true);
+        cancelIntent.putExtra(MainActivity.Companion.getLOGIN_FAILED_EXTRA(), true);
         cancelIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         AuthorizationManagementActivity.setup(
                 client,

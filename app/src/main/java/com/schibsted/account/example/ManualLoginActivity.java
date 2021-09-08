@@ -51,9 +51,9 @@ public class ManualLoginActivity extends AppCompatActivity {
                 result
                         .foreach(wrap(this::startLoggedInActivity))
                         .left().foreach(wrap(error -> {
-                                Log.i(LOG_TAG, "Something went wrong: " + error);
-                                Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show();
-                        }));
+                    Log.i(LOG_TAG, "Something went wrong: " + error);
+                    Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show();
+                }));
             }));
         }
     }

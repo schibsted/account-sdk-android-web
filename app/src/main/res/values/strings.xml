@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Account SDK Android Web</string>
+    <string name="not_logged_in_text">Not logged-in</string>
 </resources>
