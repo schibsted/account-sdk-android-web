@@ -1,64 +1,83 @@
-package com.schibsted.account.example;
+package com.schibsted.account.example
 
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.Toast;
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import com.schibsted.account.R
+import com.schibsted.account.databinding.ActivityManualLoginBinding
+import com.schibsted.account.example.ClientConfig.environment
+import com.schibsted.account.example.HttpClient.instance
+import com.schibsted.account.example.LoggedInActivity.Companion.intentWithUser
+import com.schibsted.account.webflows.client.ClientConfiguration
+import com.schibsted.account.webflows.util.Either
+import com.schibsted.account.webflows.client.LoginError
+import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.user.User
+import timber.log.Timber
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+class ManualLoginActivity : AppCompatActivity() {
 
-import com.schibsted.account.R;
-import com.schibsted.account.webflows.client.Client;
-import com.schibsted.account.webflows.client.ClientConfiguration;
-import com.schibsted.account.webflows.user.User;
+    private var _binding: ActivityManualLoginBinding? = null
+    private val binding get() = _binding!!
 
-import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
+    private lateinit var client: Client
 
-public class ManualLoginActivity extends AppCompatActivity {
-    private static String LOG_TAG = "ManualLoginActivity";
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        _binding = DataBindingUtil.setContentView(this, R.layout.activity_manual_login)
 
-    private Client client;
+        initClient()
+        initLoginButton()
+        initResumeButton()
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_manual_login);
+        if (intent.data != null) {
+            handleAuthenticationResponse()
+        }
 
-        ClientConfiguration clientConfig = new ClientConfiguration(
-                ClientConfig.getEnvironment(),
-                ClientConfig.clientId,
-                ClientConfig.manualLoginRedirectUri
-        );
-        client = new Client(this, clientConfig, HttpClient.getInstance());
 
-        Button loginButton = findViewById(R.id.loginButton);
-        loginButton.setOnClickListener(v -> client.launchAuth(this));
+    }
 
-        Button resumeButton = findViewById(R.id.resumeButton);
-        resumeButton.setOnClickListener(v -> {
-            User user = ExampleApp.client.resumeLastLoggedInUser();
-            if (user != null) {
-                startLoggedInActivity(user);
-            } else {
-                Log.i(LOG_TAG, "User could not be resumed");
-            }
-        });
-
-        if (getIntent().getData() != null) {
-            client.handleAuthenticationResponse(getIntent(), wrap(result -> {
-                Log.i(LOG_TAG, "Login complete");
-                result
-                        .foreach(wrap(this::startLoggedInActivity))
-                        .left().foreach(wrap(error -> {
-                    Log.i(LOG_TAG, "Something went wrong: " + error);
-                    Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show();
-                }));
-            }));
+    private fun handleAuthenticationResponse() {
+        client.handleAuthenticationResponse(intent) { result: Either<LoginError?, User> ->
+            Timber.i("Login complete")
+            result
+                .foreach { user: User -> startLoggedInActivity(user) }
+                .left()
+                .foreach { error: LoginError? ->
+                    Timber.i("Something went wrong: $error")
+                    Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
-    private void startLoggedInActivity(User user) {
-        startActivity(LoggedInActivity.intentWithUser(this, user));
+    private fun startLoggedInActivity(user: User) {
+        startActivity(intentWithUser(this, user))
+    }
+
+    private fun initClient() {
+        val clientConfig = ClientConfiguration(
+            environment,
+            ClientConfig.clientId,
+            ClientConfig.manualLoginRedirectUri
+        )
+        client = Client(this, clientConfig, instance)
+    }
+
+    private fun initLoginButton() {
+        binding.loginButton.setOnClickListener {
+            client.launchAuth(this)
+        }
+    }
+
+    private fun initResumeButton() {
+        binding.resumeButton.setOnClickListener {
+            val user = ExampleApp.client.resumeLastLoggedInUser()
+            if (user != null) {
+                startLoggedInActivity(user)
+            } else {
+                Toast.makeText(this, "User could not be resumed", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

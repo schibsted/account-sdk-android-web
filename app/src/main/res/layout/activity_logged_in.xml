@@ -13,7 +13,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="70dp"
-            android:text="You're logged in!"
+            android:text="@string/logged_in_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -32,25 +32,25 @@
                 android:id="@+id/profileDataButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fetch profile data" />
+                android:text="@string/fetch_profile_data_button" />
 
             <Button
                 android:id="@+id/sessionExchangeButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Start session exchange" />
+                android:text="@string/start_session_exchange_button" />
 
             <Button
                 android:id="@+id/accountPagesButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Account pages" />
+                android:text="@string/account_pages_button" />
 
             <Button
                 android:id="@+id/logoutButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Logout" />
+                android:text="@string/logout_button" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
