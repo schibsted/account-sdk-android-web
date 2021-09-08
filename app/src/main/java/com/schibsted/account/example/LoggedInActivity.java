@@ -20,7 +20,7 @@ import static com.schibsted.account.example.KotlinLambdaCompat.wrap;
 
 public class LoggedInActivity extends AppCompatActivity {
     public static String USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION";
-    private static String LOG_TAG = "LoggedInActivity";
+    private static final String LOG_TAG = "LoggedInActivity";
 
     @Nullable
     private User user = null;
