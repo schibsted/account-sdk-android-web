@@ -45,29 +45,27 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         tokenRequest: UserTokenRequest,
         callback: (ApiResult<UserTokenResponse>) -> Unit
     ) {
-        val params = mutableMapOf<String, String>(
+        val params = mutableMapOf(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "authorization_code",
             "code" to tokenRequest.authCode,
             "redirect_uri" to tokenRequest.redirectUri
         )
-
-        if (tokenRequest.codeVerifier != null) {
-            params["code_verifier"] = tokenRequest.codeVerifier
+        tokenRequest.codeVerifier?.let { codeVerifier ->
+            params["code_verifier"] = codeVerifier
         }
 
         schaccService.tokenRequest(params).enqueue(ApiResultCallback(callback))
     }
 
     fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
-        val params = mutableMapOf<String, String>(
+        val params = mutableMapOf(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "refresh_token",
             "refresh_token" to tokenRequest.refreshToken,
         )
-
-        if (tokenRequest.scope != null) {
-            params["scope"] = tokenRequest.scope
+        tokenRequest.scope?.let { scope ->
+            params["scope"] = scope
         }
 
         return try {
@@ -82,7 +80,7 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         refreshToken: String,
         callback: (ApiResult<UserTokenResponse>) -> Unit
     ) {
-        val params = mutableMapOf<String, String>(
+        val params = mutableMapOf(
             "grant_type" to "refresh_token",
             "refresh_token" to refreshToken,
         )
@@ -115,7 +113,8 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
     }
 
     fun codeExchange(
-        user: User, clientId: String,
+        user: User,
+        clientId: String,
         callback: (ApiResult<CodeExchangeResponse>) -> Unit
     ) {
         proctectedSchaccApi(user) { service ->

@@ -264,8 +264,7 @@ class Client {
     internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
         val refreshToken = user.tokens?.refreshToken ?: return Left(RefreshTokenError.NoRefreshToken)
 
-        val result = tokenHandler.makeTokenRequest(refreshToken, scope = null)
-        return when (result) {
+        return when (val result = tokenHandler.makeTokenRequest(refreshToken, scope = null)) {
             is Right -> {
                 val tokens = user.tokens
                 if (tokens != null) {

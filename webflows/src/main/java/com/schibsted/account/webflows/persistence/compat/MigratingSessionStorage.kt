@@ -2,6 +2,7 @@ package com.schibsted.account.webflows.persistence.compat
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
@@ -43,7 +44,9 @@ internal class MigratingSessionStorage(
                 // if no existing session found, look in legacy storage
                 val legacySession = legacyStorage.get(legacyClientId)
                 if (legacySession != null) {
-                    migrateSession(legacySession, callback)
+                    val legacyClient =
+                        LegacyClient(legacyClientId, legacyClientSecret, client.schibstedAccountApi)
+                    migrateSession(legacySession, legacyClient, callback)
                 } else {
                     callback(null)
                 }
@@ -56,17 +59,13 @@ internal class MigratingSessionStorage(
         newStorage.remove(clientId)
     }
 
-    private fun migrateSession(
+    @VisibleForTesting
+    internal fun migrateSession(
         legacySession: StoredUserSession,
+        legacyClient: LegacyClient,
         callback: (StoredUserSession?) -> Unit
     ) {
         // use tokens from legacy session to get OAuth auth code for the new client
-        // TODO test
-        // 1. expired access token, but valid refresh token
-        // 2. both invalid access token and refresh token
-        val legacyClient =
-            LegacyClient(legacyClientId, legacyClientSecret, client.schibstedAccountApi)
-
         legacyClient.getAuthCodeFromTokens(
             legacySession.userTokens,
             client.configuration.clientId
@@ -82,13 +81,13 @@ internal class MigratingSessionStorage(
                             }
                             .left().foreach {
                                 Log.e(SDK_TAG, "Failed to migrate tokens: $it")
-                                callback(null) // TODO test?
+                                callback(null)
                             }
                     }
                 }
                 .left().map {
                     Log.e(SDK_TAG, "Failed to migrate tokens: $it")
-                    callback(null) // TODO test?
+                    callback(null)
                 }
         }
     }

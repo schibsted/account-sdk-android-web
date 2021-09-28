@@ -72,11 +72,12 @@ class ManualLoginActivity : AppCompatActivity() {
 
     private fun initResumeButton() {
         binding.resumeButton.setOnClickListener {
-            val user = ExampleApp.client.resumeLastLoggedInUser()
-            if (user != null) {
-                startLoggedInActivity(user)
-            } else {
-                Toast.makeText(this, "User could not be resumed", Toast.LENGTH_SHORT).show()
+            ExampleApp.client.resumeLastLoggedInUser { user ->
+                if (user != null) {
+                    startLoggedInActivity(user)
+                } else {
+                    Toast.makeText(this, "User could not be resumed", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

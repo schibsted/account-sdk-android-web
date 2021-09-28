@@ -6,10 +6,10 @@ import com.schibsted.account.webflows.api.CodeExchangeResponse
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Logging.SDK_TAG
 import okhttp3.Credentials
 
-// TODO add tests for this
 internal class LegacyClient(
     private val clientId: String,
     private val clientSecret: String,
@@ -25,7 +25,9 @@ internal class LegacyClient(
             newClientId
         ) { result ->
             result
-                .map { callback }
+                .map { codeExchangeResponse ->
+                    callback(Either.Right(value = codeExchangeResponse))
+                }
                 .left().map { error ->
                     when (error) {
                         is HttpError.ErrorResponse -> {
@@ -57,11 +59,11 @@ internal class LegacyClient(
         schibstedAccountApi.legacyRefreshTokenRequest(
             Credentials.basic(clientId, clientSecret),
             refreshToken
-        ) {
-            it
-                .map {
+        ) { userTokenApiResponse ->
+            userTokenApiResponse
+                .map { userTokenResponse ->
                     Log.d(SDK_TAG, "Refreshed legacy tokens successfully")
-                    callback(it.access_token)
+                    callback(userTokenResponse.access_token)
                 }
                 .left().map { err ->
                     Log.e(SDK_TAG, "Failed to refresh legacy tokens: $err")
