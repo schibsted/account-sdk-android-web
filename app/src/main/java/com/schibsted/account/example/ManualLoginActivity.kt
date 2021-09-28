@@ -9,11 +9,11 @@ import com.schibsted.account.databinding.ActivityManualLoginBinding
 import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
 import com.schibsted.account.example.LoggedInActivity.Companion.intentWithUser
-import com.schibsted.account.webflows.client.ClientConfiguration
-import com.schibsted.account.webflows.util.Either
-import com.schibsted.account.webflows.client.LoginError
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.ClientConfiguration
+import com.schibsted.account.webflows.client.LoginError
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 
 class ManualLoginActivity : AppCompatActivity() {

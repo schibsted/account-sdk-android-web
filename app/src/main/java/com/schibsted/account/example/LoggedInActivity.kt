@@ -5,15 +5,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.schibsted.account.webflows.util.Either
-import com.schibsted.account.webflows.api.UserProfileResponse
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
 import com.schibsted.account.R
 import com.schibsted.account.databinding.ActivityLoggedInBinding
-import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.api.HttpError
+import com.schibsted.account.webflows.api.UserProfileResponse
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.user.UserSession
+import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 import java.net.URL
 

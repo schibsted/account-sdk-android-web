@@ -7,8 +7,8 @@ import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
 import com.schibsted.account.example.MainActivity.Companion.LOGIN_FAILED_EXTRA
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
-import com.schibsted.account.webflows.client.ClientConfiguration
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.ClientConfiguration
 
 class ExampleApp : Application() {
 

@@ -9,9 +9,9 @@ import androidx.lifecycle.Observer
 import com.schibsted.account.R
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
-import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
