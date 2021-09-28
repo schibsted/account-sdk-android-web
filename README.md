@@ -180,7 +180,7 @@ To do that, follow these steps:
       [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html).
 
       If using Retrofit the authenticated request should be done via
-      [RetrofitClientFacade.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html).
+      [`RetrofitClientFacade.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html).
 
       The SDK will automatically inject the user access token as a Bearer token in the HTTP
       Authorization request header.
