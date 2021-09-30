@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Account SDK Android Web</string>
+    <string name="not_logged_in_text">Not logged-in</string>
+    <string name="login_button">Login</string>
+    <string name="resume_button">Resume user</string>
+    <string name="logged_in_text">You\'re logged in!</string>
+    <string name="fetch_profile_data_button">Fetch profile data</string>
+    <string name="start_session_exchange_button">Start session exchange</string>
+    <string name="account_pages_button">Account pages</string>
+    <string name="logout_button">Logout</string>
 </resources>

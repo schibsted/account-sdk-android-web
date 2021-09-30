@@ -12,7 +12,8 @@
 
         <activity
             android:name="com.schibsted.account.example.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -23,7 +24,8 @@
             android:label="Logged-in"/>
 
         <activity
-            android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity">
+            android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -35,7 +37,8 @@
 
         <activity
             android:name="com.schibsted.account.example.ManualLoginActivity"
-            android:label="Manual login">
+            android:label="Manual login"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
