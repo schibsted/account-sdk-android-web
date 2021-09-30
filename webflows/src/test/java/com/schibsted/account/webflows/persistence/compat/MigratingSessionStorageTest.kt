@@ -36,6 +36,9 @@ class MigratingSessionStorageTest {
     @Before
     fun setup(){
         mockkStatic(Log::class)
+        every { Log.v(any(), any()) } returns 0
+        every { Log.d(any(), any()) } returns 0
+        every { Log.i(any(), any()) } returns 0
         every { Log.e(any(), any()) } returns 0
     }
 
@@ -104,12 +107,6 @@ class MigratingSessionStorageTest {
 
     @Test
     fun testGetMigratesExistingLegacySession() {
-        mockkStatic(Log::class)
-        every { Log.v(any(), any()) } returns 0
-        every { Log.d(any(), any()) } returns 0
-        every { Log.i(any(), any()) } returns 0
-        every { Log.e(any(), any()) } returns 0
-
         val authCode = "test_auth_code"
         val codeExchangeResponseJson =
             """
@@ -132,11 +129,11 @@ class MigratingSessionStorageTest {
             callback(null)
         }
 
-        val tokenHandler = mockk<TokenHandler>() {
+        val tokenHandler = mockk<TokenHandler> {
             every {
                 makeTokenRequest(
                     authCode,
-                    AuthState("", "", "", null),
+                    null,
                     any()
                 )
             } answers {
@@ -157,7 +154,7 @@ class MigratingSessionStorageTest {
                     )
 
                 val migratingStorage = MigratingSessionStorage(
-                    client = mockk(),
+                    client = client,
                     newStorage = newStorage,
                     legacyStorage = legacyStorage,
                     legacyClientId = legacyClientId,
