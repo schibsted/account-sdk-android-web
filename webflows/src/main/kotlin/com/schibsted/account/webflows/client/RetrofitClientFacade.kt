@@ -1,21 +1,23 @@
 package com.schibsted.account.webflows.client
 
+import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.util.Either
 import retrofit2.Retrofit
 
 /**  Represents a client registered with Schibsted account - with Retrofit support. */
 class RetrofitClientFacade<S>(
-    private val client: Client,
+    val internalClient: Client,
     private val serviceClass: Class<S>,
     private val retrofitBuilder: Retrofit.Builder,
-): ClientInterface by client {
+): ClientInterface by internalClient {
 
     private var retrofitApi: S? = null
     private var user: User? = null
 
     /** Resume any previously logged-in user session */
     override fun resumeLastLoggedInUser(): User? {
-        val loggedInUser = client.resumeLastLoggedInUser()
+        val loggedInUser = internalClient.resumeLastLoggedInUser()
 
         if (loggedInUser != null) {
             user = loggedInUser
@@ -51,5 +53,9 @@ class RetrofitClientFacade<S>(
             }
         }
         return null
+    }
+
+    internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
+        return internalClient.refreshTokensForUser(user)
     }
 }
