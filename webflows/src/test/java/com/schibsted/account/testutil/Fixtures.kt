@@ -3,7 +3,7 @@ package com.schibsted.account.testutil
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.ClientConfiguration
-import com.schibsted.account.webflows.client.RetrofitClientFacade
+import com.schibsted.account.webflows.client.RetrofitClient
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.IdTokenClaims
@@ -57,8 +57,8 @@ internal object Fixtures {
         tokenHandler: TokenHandler = mockk(relaxed = true),
         schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true),
         serviceClass: Class<TestRetrofitApi> = TestRetrofitApi::class.java,
-    ): RetrofitClientFacade<TestRetrofitApi> {
-        return RetrofitClientFacade(
+    ): RetrofitClient<TestRetrofitApi> {
+        return RetrofitClient(
             internalClient = getClient(
                 stateStorage,
                 sessionStorage,

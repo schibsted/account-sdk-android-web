@@ -48,9 +48,9 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    val client = Client(applicationContext, clientConfig, okHttpClient)
    ```
 
-   If you need Retrofit support, wrap the above client instance in a RetrofitClientFacade instance:
+   If you need Retrofit support, wrap the above client instance in a RetrofitClient instance:
    ```kotlin
-   val retrofitClient = RetrofitClientFacade<YourRetrofitInterface>(
+   val retrofitClient = RetrofitClient<YourRetrofitInterface>(
            client = client,
            serviceClass = YourRetrofitInterface::class.java,
            retrofitBuilder = Retrofit.Builder().baseUrl("https://your.api.com"),
@@ -180,7 +180,7 @@ To do that, follow these steps:
       [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html).
 
       If using Retrofit the authenticated request should be done via
-      [`RetrofitClientFacade.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html).
+      [`RetrofitClient.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html).
 
       The SDK will automatically inject the user access token as a Bearer token in the HTTP
       Authorization request header.

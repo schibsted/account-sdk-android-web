@@ -6,7 +6,7 @@ import com.schibsted.account.webflows.util.Either
 import retrofit2.Retrofit
 
 /**  Represents a client registered with Schibsted account - with Retrofit support. */
-class RetrofitClientFacade<S>(
+class RetrofitClient<S>(
     val internalClient: Client,
     private val serviceClass: Class<S>,
     private val retrofitBuilder: Retrofit.Builder,
