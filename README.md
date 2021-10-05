@@ -47,6 +47,16 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "https://app.example.com/applogin")
    val client = Client(applicationContext, clientConfig, okHttpClient)
    ```
+
+   If you need Retrofit support, wrap the above client instance in a RetrofitClient instance:
+   ```kotlin
+   val retrofitClient = RetrofitClient<YourRetrofitInterface>(
+           client = client,
+           serviceClass = YourRetrofitInterface::class.java,
+           retrofitBuilder = Retrofit.Builder().baseUrl("https://your.api.com"),
+   )
+   ```
+
 1. Initialise `AuthorizationManagementActivity` on app startup:
    ```kotlin
    class App : Application() {
@@ -168,6 +178,10 @@ To do that, follow these steps:
 * Automatic and transparent management of user tokens.
     * Authenticated requests to backend services can be done via
       [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html).
+
+      If using Retrofit the authenticated request should be done via
+      [`RetrofitClient.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html).
+
       The SDK will automatically inject the user access token as a Bearer token in the HTTP
       Authorization request header.
       If the access token is rejected with a `401 Unauthorized` response (e.g. due to having
