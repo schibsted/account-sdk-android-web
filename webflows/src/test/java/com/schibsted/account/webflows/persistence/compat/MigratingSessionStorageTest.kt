@@ -1,6 +1,5 @@
 package com.schibsted.account.webflows.persistence.compat
 
-import android.util.Log
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.await
 import com.schibsted.account.testutil.withServer
@@ -8,7 +7,6 @@ import com.schibsted.account.webflows.api.ApiResult
 import com.schibsted.account.webflows.api.CodeExchangeResponse
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
-import com.schibsted.account.webflows.client.AuthState
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.token.TokenError
@@ -23,7 +21,6 @@ import io.mockk.*
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Before
 import org.junit.Test
 import java.util.*
 
@@ -32,15 +29,6 @@ class MigratingSessionStorageTest {
     private val newClientId = "newClientId"
     private val legacyClientId = "legacyClientId"
     private val legacyClientSecret = "legacyClientSecret"
-
-    @Before
-    fun setup(){
-        mockkStatic(Log::class)
-        every { Log.v(any(), any()) } returns 0
-        every { Log.d(any(), any()) } returns 0
-        every { Log.i(any(), any()) } returns 0
-        every { Log.e(any(), any()) } returns 0
-    }
 
     @Test
     fun testStoreOnlyWritesToNewStorage() {
@@ -231,7 +219,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk{
+        val legacySession: StoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val migratedSession = StoredUserSession("clientId", mockk(), Date())
@@ -281,7 +269,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk{
+        val legacySession: StoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val migrationError = TokenError.TokenRequestError(mockk())
@@ -331,7 +319,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk{
+        val legacySession: StoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val client = mockk<Client> {

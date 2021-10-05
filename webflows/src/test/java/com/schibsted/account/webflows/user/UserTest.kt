@@ -2,7 +2,6 @@ package com.schibsted.account.webflows.user
 
 import android.os.Build
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.schibsted.account.testutil.*
@@ -20,12 +19,10 @@ import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.verify
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.*
-import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
@@ -35,17 +32,6 @@ import java.util.concurrent.CompletableFuture
 
 @RunWith(AndroidJUnit4::class)
 class UserTest {
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            mockkStatic(Log::class)
-            every { Log.v(any(), any()) } returns 0
-            every { Log.d(any(), any()) } returns 0
-            every { Log.i(any(), any()) } returns 0
-            every { Log.e(any(), any()) } returns 0
-        }
-    }
 
     @Test
     fun makeAuthenticatedRequestReturnsResponseToCallback() {

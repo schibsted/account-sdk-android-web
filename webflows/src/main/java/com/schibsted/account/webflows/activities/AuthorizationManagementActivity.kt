@@ -33,10 +33,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.util.Either.Left
+import timber.log.Timber
 
 /**
  * Stores state and handles events related to the authorization flow. It functions
@@ -177,7 +176,7 @@ class AuthorizationManagementActivity : Activity() {
     }
 
     private fun handleAuthorizationCanceled() {
-        Log.d(Logging.SDK_TAG, "Authorization flow canceled by user")
+        Timber.d("Authorization flow canceled by user")
         AuthResultLiveData.get().update(Left(NotAuthed.CancelledByUser))
         cancelIntent.send()
     }

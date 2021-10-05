@@ -1,7 +1,6 @@
 package com.schibsted.account.webflows.user
 
 import android.os.Parcelable
-import android.util.Log
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.api.ApiResult
 import com.schibsted.account.webflows.api.HttpError
@@ -14,19 +13,11 @@ import com.schibsted.account.webflows.util.BestEffortRunOnceTask
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import com.schibsted.account.webflows.util.Logging.SDK_TAG
 import kotlinx.parcelize.Parcelize
 import okhttp3.*
+import timber.log.Timber
 import java.io.IOException
 import java.net.URL
-
-
-@Parcelize
-data class UserSession internal constructor(
-    internal val tokens: UserTokens
-) : Parcelable
-
-private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>
 
 /** Representation of logged-in user. */
 class User {
@@ -170,7 +161,7 @@ class User {
         }
 
         if (shouldLogout(result)) {
-            Log.i(SDK_TAG, "Invalid refresh token, logging user out")
+            Timber.i("Invalid refresh token, logging user out")
             logout()
             return Left(RefreshTokenError.UserWasLoggedOut)
         }
@@ -204,3 +195,10 @@ class User {
             .toURL()
     }
 }
+
+@Parcelize
+data class UserSession internal constructor(
+    internal val tokens: UserTokens
+) : Parcelable
+
+private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>

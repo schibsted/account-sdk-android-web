@@ -1,14 +1,13 @@
 package com.schibsted.account.webflows.persistence.compat
 
-import android.util.Log
 import com.schibsted.account.webflows.api.ApiResult
 import com.schibsted.account.webflows.api.CodeExchangeResponse
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.Either
-import com.schibsted.account.webflows.util.Logging.SDK_TAG
 import okhttp3.Credentials
+import timber.log.Timber
 
 internal class LegacyClient(
     private val clientId: String,
@@ -41,15 +40,19 @@ internal class LegacyClient(
                                             callback
                                         )
                                     } else {
-                                        // token refresh failed, so we return the original 401
+                                        Timber.d("Token refresh failed, return the original 401")
                                         callback(result)
                                     }
                                 }
                             } else {
+                                Timber.d("LegacyCodeExchange failed with error: $error")
                                 callback(result)
                             }
                         }
-                        else -> callback(result)
+                        else -> {
+                            Timber.d("LegacyCodeExchange failed with error: $error")
+                            callback(result)
+                        }
                     }
                 }
         }
@@ -62,11 +65,11 @@ internal class LegacyClient(
         ) { userTokenApiResponse ->
             userTokenApiResponse
                 .map { userTokenResponse ->
-                    Log.d(SDK_TAG, "Refreshed legacy tokens successfully")
+                    Timber.d("Refreshed legacy tokens successfully")
                     callback(userTokenResponse.access_token)
                 }
                 .left().map { err ->
-                    Log.e(SDK_TAG, "Failed to refresh legacy tokens: $err")
+                    Timber.e("Failed to refresh legacy tokens: $err")
                     callback(null)
                 }
         }

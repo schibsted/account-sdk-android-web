@@ -1,6 +1,5 @@
 package com.schibsted.account.webflows.persistence.compat
 
-import android.util.Log
 import com.schibsted.account.webflows.api.*
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.Either
@@ -22,11 +21,6 @@ class LegacyClientTest {
         legacyClient = LegacyClient(clientId, clientSecret, schibstedAccountApi)
 
         every { callback(any()) } just Runs
-
-        mockkStatic(Log::class)
-        every { Log.d(any(), any()) } returns 0
-        every { Log.e(any(), any()) } returns 0
-
     }
 
     @Test
@@ -261,7 +255,15 @@ class LegacyClientTest {
         )
         val errorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
         val userTokenResponse =
-            Either.Right(UserTokenResponse("freshAccessToken", "freshRefreshToken", "freshIdToken", "scope", 60))
+            Either.Right(
+                UserTokenResponse(
+                    "freshAccessToken",
+                    "freshRefreshToken",
+                    "freshIdToken",
+                    "scope",
+                    60
+                )
+            )
         val response = Either.Right(CodeExchangeResponse("code"))
 
         every {

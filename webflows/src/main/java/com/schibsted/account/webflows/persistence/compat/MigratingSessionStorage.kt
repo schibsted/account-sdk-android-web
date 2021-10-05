@@ -1,13 +1,12 @@
 package com.schibsted.account.webflows.persistence.compat
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.user.StoredUserSession
-import com.schibsted.account.webflows.util.Logging.SDK_TAG
+import timber.log.Timber
 
 internal class MigratingSessionStorage(
     private val client: Client,
@@ -72,21 +71,21 @@ internal class MigratingSessionStorage(
         ) { codeResult ->
             codeResult
                 .map { codeResponse ->
-                    client.makeTokenRequest(codeResponse.code, null) {
-                        it
+                    client.makeTokenRequest(codeResponse.code, null) { storedUserSession ->
+                        storedUserSession
                             .foreach { migratedSession ->
                                 newStorage.save(migratedSession)
                                 legacyStorage.remove()
                                 callback(migratedSession)
                             }
-                            .left().foreach {
-                                Log.e(SDK_TAG, "Failed to migrate tokens: $it")
+                            .left().foreach { tokenError ->
+                                Timber.e("Failed to migrate tokens: $tokenError")
                                 callback(null)
                             }
                     }
                 }
-                .left().map {
-                    Log.e(SDK_TAG, "Failed to migrate tokens: $it")
+                .left().map { httpError ->
+                    Timber.e("Failed to migrate tokens: $httpError")
                     callback(null)
                 }
         }

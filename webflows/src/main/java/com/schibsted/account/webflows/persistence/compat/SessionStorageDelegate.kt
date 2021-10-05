@@ -3,9 +3,9 @@ package com.schibsted.account.webflows.persistence.compat
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import timber.log.Timber
 import java.lang.reflect.Type
 import java.security.InvalidKeyException
 import javax.crypto.SecretKey
@@ -52,7 +52,7 @@ internal class SessionStorageDelegate(
     private fun retrieveSessions() = runCatching {
         readStorage()
     }.onFailure {
-        Log.e(LOG_TAG, "Failed to read legacy session storage.", it)
+        Timber.e(it, "Failed to read legacy session storage.")
     }.getOrDefault(emptyList())
 
     private fun storeSessions(list: List<LegacySession>) {
@@ -63,7 +63,7 @@ internal class SessionStorageDelegate(
             }
             writeStorage(list)
         }.onFailure {
-            Log.e(LOG_TAG, "Failed to write storage.", it)
+            Timber.e(it, "Failed to write storage.")
             repairUnwritableStorage(list, it)
         }
     }
@@ -167,7 +167,7 @@ internal class SessionStorageDelegate(
                 writeStorage(list)
             } catch (e: Exception) {
                 removeDataAndKey()
-                Log.e(LOG_TAG, "Failed to write storage with new RSA keys", e)
+                Timber.e(e, "Failed to write storage with new RSA keys")
             }
         }
     }
