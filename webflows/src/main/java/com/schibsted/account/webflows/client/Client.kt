@@ -86,7 +86,7 @@ typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
 data class SessionStorageConfig(val legacyClientId: String, val legacyClientSecret: String)
 
 /**  Represents a client registered with Schibsted account. */
-class Client {
+class Client : ClientInterface {
     internal val httpClient: OkHttpClient
     internal val schibstedAccountApi: SchibstedAccountApi
     internal val configuration: ClientConfiguration
@@ -149,7 +149,7 @@ class Client {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
+    override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest): Intent {
         val customTabsIntent = CustomTabsIntent.Builder().build().apply {
             intent.data = generateLoginUrl(authRequest)
         }
@@ -162,7 +162,7 @@ class Client {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
+    override fun launchAuth(context: Context, authRequest: AuthRequest) {
         CustomTabsIntent.Builder()
             .build()
             .launchUrl(context, generateLoginUrl(authRequest))
@@ -180,7 +180,7 @@ class Client {
      * This only needs to be used if manually starting the login flow using [launchAuth].
      * If using [getAuthenticationIntent] this step will be handled for you.
      */
-    fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
+    override fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
         val authResponse = intent.data?.query ?: return callback(
             Left(LoginError.UnexpectedError("No authentication response"))
         )
@@ -247,7 +247,7 @@ class Client {
     }
 
     /** Resume any previously logged-in user session */
-    fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
+    override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
         sessionStorage.get(configuration.clientId) {
             if (it == null) {
                 callback(null)
