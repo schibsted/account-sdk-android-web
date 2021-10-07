@@ -20,9 +20,16 @@ class ExampleApp : Application() {
     }
 
     private fun initClient() {
-        val clientConfig =
-            ClientConfiguration(environment, ClientConfig.clientId, ClientConfig.loginRedirectUri)
-        client = Client(applicationContext, clientConfig, instance)
+        val clientConfig = ClientConfiguration(
+            env = environment,
+            clientId = ClientConfig.clientId,
+            redirectUri = ClientConfig.loginRedirectUri
+        )
+        client = Client(
+            context = applicationContext,
+            configuration = clientConfig,
+            httpClient = instance
+        )
     }
 
     private fun initAuthorizationManagement() {
@@ -31,9 +38,9 @@ class ExampleApp : Application() {
         cancelIntent.putExtra(LOGIN_FAILED_EXTRA, true)
         cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         AuthorizationManagementActivity.setup(
-            client,
-            PendingIntent.getActivity(this, 0, completionIntent, 0),
-            PendingIntent.getActivity(this, 1, cancelIntent, 0)
+            client = client,
+            completionIntent = PendingIntent.getActivity(this, 0, completionIntent, 0),
+            cancelIntent = PendingIntent.getActivity(this, 1, cancelIntent, 0)
         )
     }
 
