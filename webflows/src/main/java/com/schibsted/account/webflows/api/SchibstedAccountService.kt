@@ -12,6 +12,19 @@ internal interface SchibstedAccountService {
 
     @GET("/oauth/jwks")
     fun jwks(): Call<JWKSet>
+
+    @FormUrlEncoded
+    @POST("/api/2/oauth/exchange")
+    fun legacyCodeExchange(
+        @Header("Authorization") bearerToken: String,
+        @Field("clientId") clientId: String,
+        @Field("type") type: String = "code",
+    ): Call<SchibstedAccountTokenProtectedService.SchibstedAccountApiResponse<CodeExchangeResponse>>
+
+    @Headers("X-OIDC: v1")
+    @FormUrlEncoded
+    @POST("/oauth/token")
+    fun legacyTokenRequest(@Header("Authorization") clientCredentials: String, @FieldMap params: Map<String, String>): Call<UserTokenResponse>
 }
 
 internal interface SchibstedAccountTokenProtectedService {
@@ -27,4 +40,11 @@ internal interface SchibstedAccountTokenProtectedService {
         @Field("redirectUri") redirectUri: String,
         @Field("type") type: String = "session",
     ): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
+
+    @FormUrlEncoded
+    @POST("/api/2/oauth/exchange")
+    fun codeExchange(
+        @Field("clientId") clientId: String,
+        @Field("type") type: String = "code",
+    ): Call<SchibstedAccountApiResponse<CodeExchangeResponse>>
 }

@@ -27,12 +27,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
-import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -77,11 +75,11 @@ class RetrofitClientTest {
             }
         }
 
-        val client = getRetrofitClient(
+        val client = getRetrofitClient(Fixtures.getClient(
             sessionStorage = sessionStorageMock,
             stateStorage = stateStorageMock,
-            tokenHandler = tokenHandler,
-        )
+            tokenHandler = tokenHandler
+        ))
 
         client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
             it.assertRight { user ->
@@ -101,7 +99,7 @@ class RetrofitClientTest {
 
     @Test
     fun handleAuthenticationResponseShouldHandleMissingIntentData() {
-        getRetrofitClient().handleAuthenticationResponse(authResultIntent(null)) {
+        getRetrofitClient(Fixtures.getClient()).handleAuthenticationResponse(authResultIntent(null)) {
             it.assertLeft { error ->
                 assertEquals(LoginError.UnexpectedError("No authentication response"), error)
             }
@@ -125,8 +123,10 @@ class RetrofitClientTest {
             every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
         }
         val client = getRetrofitClient(
-            tokenHandler = tokenHandler,
-            stateStorage = stateStorageMock
+            Fixtures.getClient(
+                tokenHandler = tokenHandler,
+                stateStorage = stateStorageMock
+            )
         )
 
         client.handleAuthenticationResponse(authResultIntent("code=authCode&state=${authState.state}")) {
@@ -142,13 +142,18 @@ class RetrofitClientTest {
     fun existingSessionIsResumeable() {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
-        val client = getRetrofitClient(sessionStorage = sessionStorageMock)
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<(StoredUserSession?) -> Unit>()
+            callback(userSession)
+        }
+        val client = getRetrofitClient(Fixtures.getClient(sessionStorage = sessionStorageMock))
 
-        assertEquals(
-            User(client.internalClient, UserSession(Fixtures.userTokens)),
-            client.resumeLastLoggedInUser()
-        )
+        client.resumeLastLoggedInUser { result ->
+            assertEquals(
+                User(client.internalClient, UserSession(Fixtures.userTokens)),
+                result
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -161,7 +166,7 @@ class RetrofitClientTest {
                 Right(UserTokenResponse("", "", "", "", 0))
             }
         }
-        val client = getRetrofitClient(tokenHandler = tokenHandler)
+        val client = getRetrofitClient(Fixtures.getClient(tokenHandler = tokenHandler))
         val user = User(client.internalClient, Fixtures.userTokens)
 
         /*
@@ -182,15 +187,5 @@ class RetrofitClientTest {
             lock.open() // unblock refresh token response
         }
         CompletableFuture.allOf(refreshTask, logoutTask).join()
-    }
-
-    @Test(expected = UnknownHostException::class)
-    fun makeAuthenticatedRequestThrowsUnknownHostException(): Unit = runBlocking {
-        val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
-        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
-        val client = getRetrofitClient(sessionStorage = sessionStorageMock)
-        client.resumeLastLoggedInUser()
-        client.makeAuthenticatedRequest { it.getUserName() }
     }
 }

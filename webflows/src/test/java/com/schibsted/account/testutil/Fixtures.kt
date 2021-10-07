@@ -34,6 +34,7 @@ internal object Fixtures {
     val userTokens = UserTokens("accessToken", "refreshToken", "idToken", idTokenClaims)
 
     fun getClient(
+        clientConfiguration: ClientConfiguration = clientConfig,
         stateStorage: StateStorage = mockk(relaxed = true),
         sessionStorage: SessionStorage = mockk(relaxed = true),
         httpClient: OkHttpClient = Fixtures.httpClient,
@@ -41,7 +42,7 @@ internal object Fixtures {
         schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true)
     ): Client {
         return Client(
-            clientConfig,
+            clientConfiguration,
             stateStorage,
             sessionStorage,
             httpClient,
@@ -51,21 +52,11 @@ internal object Fixtures {
     }
 
     fun getRetrofitClient(
-        stateStorage: StateStorage = mockk(relaxed = true),
-        sessionStorage: SessionStorage = mockk(relaxed = true),
-        httpClient: OkHttpClient = Fixtures.httpClient,
-        tokenHandler: TokenHandler = mockk(relaxed = true),
-        schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true),
+        client: Client,
         serviceClass: Class<TestRetrofitApi> = TestRetrofitApi::class.java,
     ): RetrofitClient<TestRetrofitApi> {
         return RetrofitClient(
-            internalClient = getClient(
-                stateStorage,
-                sessionStorage,
-                httpClient,
-                tokenHandler,
-                schibstedAccountApi
-            ),
+            internalClient = client,
             serviceClass = serviceClass,
             retrofitBuilder = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create()).baseUrl("https://some.not.existing.domain")
         )

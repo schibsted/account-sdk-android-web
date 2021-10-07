@@ -3,7 +3,6 @@ package com.schibsted.account.webflows.client
 import android.content.Intent
 import android.os.Build
 import android.os.ConditionVariable
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.Fixtures.clientConfig
@@ -23,30 +22,16 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import com.schibsted.account.webflows.util.Util
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.verify
-import org.junit.Assert.*
-import org.junit.BeforeClass
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.net.URL
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
 class ClientTest {
-    companion object {
-        @BeforeClass
-        @JvmStatic
-        fun setup() {
-            mockkStatic(Log::class)
-            every { Log.v(any(), any()) } returns 0
-            every { Log.d(any(), any()) } returns 0
-            every { Log.i(any(), any()) } returns 0
-            every { Log.e(any(), any()) } returns 0
-        }
-    }
 
     private fun authResultIntent(authResponseParameters: String?): Intent {
         return mockk {
@@ -141,13 +126,18 @@ class ClientTest {
     fun existingSessionIsResumeable() {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
-        every { sessionStorageMock.get(clientConfig.clientId) } returns userSession
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<(StoredUserSession?) -> Unit>()
+            callback(userSession)
+        }
         val client = getClient(sessionStorage = sessionStorageMock)
 
-        assertEquals(
-            User(client, UserSession(Fixtures.userTokens)),
-            client.resumeLastLoggedInUser()
-        )
+        client.resumeLastLoggedInUser { result ->
+            assertEquals(
+                User(client, UserSession(Fixtures.userTokens)),
+                result
+            )
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)

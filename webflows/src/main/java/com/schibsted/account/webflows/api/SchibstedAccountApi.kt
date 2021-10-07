@@ -45,13 +45,15 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         tokenRequest: UserTokenRequest,
         callback: (ApiResult<UserTokenResponse>) -> Unit
     ) {
-        val params = mapOf(
+        val params = mutableMapOf(
             "client_id" to tokenRequest.clientId,
             "grant_type" to "authorization_code",
             "code" to tokenRequest.authCode,
-            "code_verifier" to tokenRequest.codeVerifier,
             "redirect_uri" to tokenRequest.redirectUri
         )
+        tokenRequest.codeVerifier?.let { codeVerifier ->
+            params["code_verifier"] = codeVerifier
+        }
 
         schaccService.tokenRequest(params).enqueue(ApiResultCallback(callback))
     }
@@ -62,9 +64,8 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             "grant_type" to "refresh_token",
             "refresh_token" to tokenRequest.refreshToken,
         )
-
-        if (tokenRequest.scope != null) {
-            params["scope"] = tokenRequest.scope
+        tokenRequest.scope?.let { scope ->
+            params["scope"] = scope
         }
 
         return try {
@@ -72,6 +73,20 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         } catch (e: IOException) {
             Left(HttpError.UnexpectedError(e))
         }
+    }
+
+    fun legacyRefreshTokenRequest(
+        clientCredentialsBasicAuth: String,
+        refreshToken: String,
+        callback: (ApiResult<UserTokenResponse>) -> Unit
+    ) {
+        val params = mutableMapOf(
+            "grant_type" to "refresh_token",
+            "refresh_token" to refreshToken,
+        )
+
+        schaccService.legacyTokenRequest(clientCredentialsBasicAuth, params)
+            .enqueue(ApiResultCallback(callback))
     }
 
     fun getJwks(callback: (ApiResult<JWKSet>) -> Unit) {
@@ -95,6 +110,26 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             service.sessionExchange(clientId, redirectUri)
                 .enqueue(ApiResultCallback { callback(it.unpack()) })
         }
+    }
+
+    fun codeExchange(
+        user: User,
+        clientId: String,
+        callback: (ApiResult<CodeExchangeResponse>) -> Unit
+    ) {
+        proctectedSchaccApi(user) { service ->
+            service.codeExchange(clientId)
+                .enqueue(ApiResultCallback { callback(it.unpack()) })
+        }
+    }
+
+    fun legacyCodeExchange(
+        accessToken: String,
+        clientId: String,
+        callback: (ApiResult<CodeExchangeResponse>) -> Unit
+    ) {
+        schaccService.legacyCodeExchange("Bearer $accessToken", clientId)
+            .enqueue(ApiResultCallback { callback(it.unpack()) })
     }
 
     private fun proctectedSchaccApi(

@@ -1,7 +1,5 @@
 package com.schibsted.account.webflows.token
 
-import android.util.Log
-import com.schibsted.account.webflows.util.Logging
 import com.schibsted.account.webflows.api.*
 import com.schibsted.account.webflows.client.AuthState
 import com.schibsted.account.webflows.client.ClientConfiguration
@@ -11,6 +9,7 @@ import com.schibsted.account.webflows.token.TokenError.*
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
+import timber.log.Timber
 
 internal sealed class TokenError {
     data class TokenRequestError(val cause: HttpError) : TokenError()
@@ -45,12 +44,12 @@ internal class TokenHandler(
 
     fun makeTokenRequest(
         authCode: String,
-        authState: AuthState,
+        authState: AuthState?,
         callback: (TokenRequestResult) -> Unit
     ) {
         val tokenRequest = UserTokenRequest(
             authCode,
-            authState.codeVerifier,
+            authState?.codeVerifier,
             clientConfiguration.clientId,
             clientConfiguration.redirectUri
         )
@@ -58,7 +57,7 @@ internal class TokenHandler(
             result
                 .foreach { handleTokenResponse(it, authState, callback) }
                 .left().foreach { err ->
-                    Log.d(Logging.SDK_TAG, "Token request error response: $err")
+                    Timber.d("Token request error response: $err")
                     callback(Left(TokenRequestError(err)))
                 }
         }
@@ -73,11 +72,10 @@ internal class TokenHandler(
             scope,
             clientConfiguration.clientId
         )
-        val result = schibstedAccountApi.makeTokenRequest(tokenRequest)
-        return when (result) {
+        return when (val result = schibstedAccountApi.makeTokenRequest(tokenRequest)) {
             is Right -> result
             is Left -> {
-                Log.d(Logging.SDK_TAG, "Token request error response: ${result.value}")
+                Timber.d("Token request error response: ${result.value}")
                 Left(TokenRequestError(result.value))
             }
         }
@@ -85,14 +83,14 @@ internal class TokenHandler(
 
     private fun handleTokenResponse(
         tokenResponse: UserTokenResponse,
-        authState: AuthState,
+        authState: AuthState?,
         callback: (TokenRequestResult) -> Unit
     ) {
-        Log.d(Logging.SDK_TAG, "Token response: $tokenResponse")
+        Timber.d("Token response: $tokenResponse")
 
         val idToken = tokenResponse.id_token
         if (idToken == null) {
-            Log.e(Logging.SDK_TAG, "Missing ID Token")
+            Timber.e("Missing ID Token")
             callback(Left(NoIdTokenReceived))
             return
         }
@@ -100,8 +98,8 @@ internal class TokenHandler(
         val idTokenValidationContext = IdTokenValidationContext(
             clientConfiguration.issuer,
             clientConfiguration.clientId,
-            authState.nonce,
-            authState.mfa?.value
+            authState?.nonce,
+            authState?.mfa?.value
         )
 
         IdTokenValidator.validate(idToken, jwks, idTokenValidationContext) { result ->

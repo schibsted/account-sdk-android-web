@@ -31,5 +31,5 @@ interface ClientInterface {
     fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler)
 
     /** Resume any previously logged-in user session */
-    fun resumeLastLoggedInUser(): User?
+    fun resumeLastLoggedInUser(callback: (User?) -> Unit)
 }

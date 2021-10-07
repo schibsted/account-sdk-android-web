@@ -16,22 +16,22 @@ class RetrofitClient<S>(
     private var user: User? = null
 
     /** Resume any previously logged-in user session */
-    override fun resumeLastLoggedInUser(): User? {
-        val loggedInUser = internalClient.resumeLastLoggedInUser()
+    override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
+        internalClient.resumeLastLoggedInUser { resumedUser ->
+            if (resumedUser != null) {
+                user = resumedUser
+                retrofitApi = retrofitBuilder
+                    .client(resumedUser.httpClient)
+                    .build()
+                    .create(serviceClass)
 
-        if (loggedInUser != null) {
-            user = loggedInUser
-            retrofitApi = retrofitBuilder
-                .client(loggedInUser.httpClient)
-                .build()
-                .create(serviceClass)
-
-            return loggedInUser
+                callback(resumedUser)
+            } else {
+                user = null
+                retrofitApi = null
+                callback(null)
+            }
         }
-
-        user = null
-        retrofitApi = null
-        return null
     }
 
     /**

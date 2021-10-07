@@ -70,8 +70,8 @@ class LoggedInActivity : AppCompatActivity() {
         binding.sessionExchangeButton.setOnClickListener {
             if (isUserLoggedIn) {
                 user?.webSessionUrl(
-                    ClientConfig.webClientId,
-                    ClientConfig.webClientRedirectUri,
+                    clientId = ClientConfig.webClientId,
+                    redirectUri = ClientConfig.webClientRedirectUri,
                 )
                 { result: Either<HttpError?, URL> ->
                     result

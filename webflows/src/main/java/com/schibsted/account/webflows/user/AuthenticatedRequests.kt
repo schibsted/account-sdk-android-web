@@ -1,10 +1,9 @@
 package com.schibsted.account.webflows.user
 
-import android.util.Log
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import com.schibsted.account.webflows.util.Logging
 import okhttp3.*
+import timber.log.Timber
 
 /**
  * OkkHttp interceptor that adds the user access token as a Bearer token in the Authorization
@@ -32,8 +31,7 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
             return null
         }
 
-        val tokenRefreshResult = user.refreshTokens()
-        return when (tokenRefreshResult) {
+        return when (val tokenRefreshResult = user.refreshTokens()) {
             is Right -> {
                 // retry request with fresh access token
                 val request = response.request.newBuilder()
@@ -42,7 +40,7 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
                 request
             }
             is Left -> {
-                Log.e(Logging.SDK_TAG, "Failed to refresh user tokens: $tokenRefreshResult")
+                Timber.e("Failed to refresh user tokens: $tokenRefreshResult")
                 null
             }
         }
@@ -53,7 +51,7 @@ private fun Request.Builder.withBearerToken(token: String?): Request.Builder = a
     if (token != null) {
         header("Authorization", "Bearer $token")
     } else {
-        Log.e(Logging.SDK_TAG, "No access token to include in request")
+        Timber.e("No access token to include in request")
     }
 }
 
