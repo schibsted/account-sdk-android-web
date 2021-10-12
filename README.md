@@ -57,13 +57,13 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    As example,
    the [Example app](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example)
    has the clientId `602525f2b41fa31789a95aa8` and redirect
-   url `com.sdk-example.pre.602525f2b41fa31789a95aa8://login`, the data section in the manifest will
+   url `com.sdk-example.pre.602525f2b41fa31789a95aa8:/login`, the data section in the manifest will
    therefore be:
       ```xml
-           <data android:scheme="com.sdk-example.pre.602525f2b41fa31789a95aa8"
-                 android:host="login"/>
+             <data android:scheme="com.sdk-example.pre.602525f2b41fa31789a95aa8"
+                    android:path="/login"/>
    ```
-1. Create a `Client` instance (
+2. Create a `Client` instance (
    see [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
    ```kotlin
@@ -93,7 +93,7 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
 )
    ```
 
-1. Initialise `AuthorizationManagementActivity` on app startup (
+3. Initialise `AuthorizationManagementActivity` on app startup (
    see [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
    ```kotlin
@@ -111,7 +111,7 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
        }
    }
      ```
-1. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (
+4. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (
    see [MainActivity](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt)
    as reference):
    ```kotlin
@@ -148,7 +148,7 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
        }
    }
    ```
-1. If no user is is logged-in, start the login flow. For example on button click:
+5. If no user is is logged-in, start the login flow. For example on button click:
    ```kotlin
    loginButton.setOnClickListener { _ ->
        val authIntent = client.getAuthenticationIntent(this)
