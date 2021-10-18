@@ -17,8 +17,7 @@ To implement login with Schibsted account in your app, please first have a look 
 will help you create a client and configure the necessary data.
 
 **Note:** This SDK requires your client to be registered as a `public_mobile_client`. Please email
-our [support](mailto:schibstedaccount@schibsted.com) to get help with setting that up. You should
-receive both `clientId`, as well as `redirect url` used in steps below.
+our [support](mailto:schibstedaccount@schibsted.com) to get help with setting that up.
 
 **Note:** If you have implemented
 the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android) in your app, and want
@@ -67,7 +66,7 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    see [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
    ```kotlin
-   val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "https://app.example.com/applogin")
+   val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "<redirect uri>")
    val okHttpClient = OkHttpClient.Builder().build() // this client instance should be shared within your app
    val sessionStorageConfig =
     SessionStorageConfig("<oldClientId>", "<oldClientSecret>")
@@ -80,7 +79,7 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    ```
    **Note:** SessionStorageConfig is only needed if your app used
    the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android)
-   for login and want already logged in users to remain logged in (preferred). If this is not the
+   for login to keep already logged in users logged in. If this is not the
    scenario, sessionStorageConfig can be ignored.
 
 If you need Retrofit support, wrap the above client instance in a RetrofitClient instance:
