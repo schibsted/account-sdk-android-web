@@ -4,7 +4,9 @@ buildscript {
     ext.timber_version = '5.0.1'
     repositories {
         google()
-        jcenter()
+        jcenter {
+            url "https://jcenter.bintray.com/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.2'
@@ -26,7 +28,9 @@ def gitVersion = ['sh', '-c', 'git describe --tag 2> /dev/null || git rev-parse 
 allprojects {
     repositories {
         google()
-        jcenter()
+        jcenter {
+            url "https://jcenter.bintray.com/"
+        }
     }
 
     group "com.schibsted.account"
