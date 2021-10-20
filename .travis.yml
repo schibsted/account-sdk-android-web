@@ -10,12 +10,12 @@ android:
 env:
   global:
     # GH_TOKEN
-    - secure: "J12rRolhETfQK6KG6PflrFTtkM273Sp5xG8n2bn0OlqFG05+hWOTh/eGBH5LAC5XFfB4Tt8BCYCKCl9SqRAVJyx2As48T3DZROGFPCl7wNgWN2/i+bgDznPdmW3/5kn2vnsy+OU5Cj1bylSEKH/Ryii7geuWlpMus+O2R5L2eU3oycsrCUh4QD5T0iaV8zv5G+NKr/H0uQeJY+YGs8NUOjmouOM92WA7XE3ipYsaztm+k3LVexe3DhVWRCsQoR2JxT0Vh3KgH33Edc5A0vccSKYsST+LYZHU1WMtykhPlElxvMoQWszqkaT/eHLRBQxQP+a4zUHFkTcnMv3yx53C0Jy2Z+z+0nNSMTd7sdblRUWZMZAF2vxfOxVtPY+gom9AzlhaFkcKeLD3CJXeM0ge2PUniaFHFpREomPb1RwUygg+IEm8JqjZZ7se8rA8uB07/ltVRA9rJwK5dg6uclGSeFr+Z9NqZHnlLidXGNN/cnl9MZijcmMcNZut3tdIzmiR2S9GbFzvB4Z+3708S0Y/+VQIpYYXF4jXl1h70Iwiw2pE0wZz2JUdtAdwg4hEn1bZ8nTzA1Isw9pHOqXV+hEKF5Y1stEcgIaYlp4mStmG1PGs1dIfBwSSdX8C/HaO0D5rA4bOmUJzFo56vnVvHIY2XUaYjis7GpfZdnKz83I1RcE="
+    - secure: "n7blhZYs6/0J+1q/MP0U9aOTuWUxLDwg+O08km4H1dVIMMCx0POTyNW7kLQ1m0oAcBateMFStRpuBAObR5h6SgWDC50SbKYjWaeZrqrA0EKpd5yAsXSbg6y5F8jobogd2kfyHJtgdPU5laysfw0jVOl8Vt3WwXP0JnfNT2fzSSv6B/scDnkFj0XjuOLRMW508L8JYY6d9J3kXXvOIt14M0hGUGbC+h7zFArRgwfXnPjNZ1cWrXXqjOe9fjHkwRGJ3QnwQxsiM6M3JTLtGk3SSyJMyNI7CTGH9M5jpZzcd3TkRkS26Evx8dnUENH5giB9cFpSgnRR5dW/UykxMlamlgEIdMgKepjWRbWR8uks1FP9pl1Q6Bw8dBMUr8baWq41Z65cD8ucyNhcUfsGIaJoPxKVBF0gke8NWNlbOW7Auo1mBxpxRJ2X/U3N0zniij7zz4MFdo1fTHb1jY7G9UFchWDnT9Moi97mv5+vzL+R1R0EIsUE9DrrjPeaC/lNTFp4kVUdUbZT91kce1CP2XQfQ8WGfwI0V8E1mzj8/0VoXyKj7XZIf7x3mZALSPNyYWc8pzIScsrPBB0ZTLKeWY3iKGTzzWz4lZ9e9P8FBsStxCV8tiQkJLd9hgNtvReVFBpSGMXZnzlI3quW38YaX0m8IgendFs9gmeYKiTmZJMUgSs="
     - ORG_GRADLE_PROJECT_sonatypeUsername=samuelg
     # Encrypted ORG_GRADLE_PROJECT_sonatypePassword
-    - secure: "ZBYMk0bM/ml7rkEjHxKTUOIusoUtV3QSLantVrAiGubtfm+LjnOo4wzjwmgfPPk+WytxqxS4FHRzrymzJC8NfxZtbl2rkWRQFoVEbE7U18LAyG51Ov/rIO+YDjszthucBPZ04m4Boza2kRIyTlNCikAgR0FlrhPC6TVKGzWS3VL7hNWaNOn8qDxx6mN0WsqQGjZipqGxyzHPnX3LLOODzcRSX3W9ZoXei6mcbOteAXci3q5PNwEnF1jOStTWFYsj5loJGQIHrXfegajWfwwxiMLvkcM6aF+Pc9qnOJ2qc68hhRBxou7NUuniQRt+felLym9496V6rZ3nNIyd+TLcQZcuSts7V74DXdj18mfhu1iXC1GuOOkeawjJ2q2mLQWrt61hHYrGFW69jQ9TMzqBYhNg5Lj1hqYNAFu6FWRh6ix2h33cyvSiEhW7lQnzm1xIjOgqMlwUozL391H5W0gO4eaJ9J3iQWvG/dFSxDGJh/QSBTUukAZuh1VtIkY9YbyampzmLD/PUzrnfJu0BZLZOmn6MhGZ+mDmm78vU8whAr/AceqovjiPqw8XF55fzxQllLaY3wJ2ux5YtG4yYyuFA86hEKdwHzHX+dkvIxt21ty0YBH/vQDpFNry2j8xpWwdTY8N4hl7rYtSAN4Jg2f0PR9G1TozZJ2c7BBKDHLdE1w="
+    # - secure: 
     # Encrypted SIGNING_PASSWORD (encrypted SIGNING_KEY, Base64 encoded, is set in Travis environment variables)
-    - secure: "hHJnXjsw0AjW46zLSEQzr+7m0YGLeryoszDjTnIMBiqDKiCaoJtpu3ZHdhU5G06cLtfbFXrY75GsgTEOt9GvBGTNr+e4FBk7O8wiEDTqpxH1X1A/mZZxud3pW7F2/icyBk4dKHmisBL2mWqtvJajKJByu7038UrTL73helb+x7n7JXp34qlI5ga4LzuH1j/ay1PgPandkyTcEs/il2hGxK2GqRBdgPEJUKO4i4HyLJI2EeYjZAClkDpkONM/XwbLJhylG54Wu4+rvuCTInjQEq0y11bOnxnC6SJxFAuXkJO9aulUJNOwN6m0KcQXVHIZEVi+VQ6P7TUBHDEI8z0amdcPc/u1TmMCzAbWf+BdkQs23XCVuON/DmDW0y2ltNYlJMekLh7i+F1rofsXUq/R1fnlFOg/IUKVxw8yDWtGo4+fNkE/pD6Ln8W2HnaOVVlhCugCWrey7MWv3VaOvRuwNdQmHf8fk3QIbE8Ny8IqKKabsUn7z2Xipa/HN/iU8lmPVMn0sjbNnJpYOnN3cirMRNV7eUEK3qFpjdMdPTHXljuexjQpp7qlIgez5Gyw0zjXFmgzp3Ewi+uJCal9aNyBirfVdq5SZmQH6961pwjGYrBUnhHKzfmcGp5K8IwpPz+VLZuQ8qE19cnIlWQYJ2TAgLNVGh9U+pg6YBRWmETs/jE="
+    # - secure: 
 
 script: ./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
 
@@ -40,16 +40,15 @@ deploy:
   - provider: pages
     skip_cleanup: true
     github_token: $GH_TOKEN
-    github_url: github.schibsted.io
     verbose: true
     local_dir: docs
     on:
-      repo: spt-identity/account-sdk-android-web
+      repo: schibsted/account-sdk-android-web
       branch: master
 
   - provider: script
     skip_cleanup: true
     script: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
     on:
-      repo: spt-identity/account-sdk-android-web
+      repo: schibsted/account-sdk-android-web
       tags: true
