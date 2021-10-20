@@ -4,7 +4,6 @@ jdk: openjdk11
 
 android:
   components:
-    - android-29
     - build-tools-29.0.3
 
 env:
@@ -16,6 +15,14 @@ env:
     - secure: "LNlry39I/iQt/3vR31WHhg33w1amttlzcpKE4zIb5V2bDcQ9aTHiqNKdmUyx2DmGxVtEFc5zuZUbbnwi+sGJjLronbqS0Rt8Ol9IkCZm9Hs6zmql9y8wh3OgwyXMuZaEpojJtGI0FR0MH9cAC1f/gXf684Zf+r3axQiZX8OvIRgCf1mLR8dfnM1ul46wYu0A0moW0qrOiZnFDkxxhgXjczgRzEp0ErNfv6waRifX230h/fm9sKA3o6tpaw76njZ+WEQGEvYM73VuREcwU9DI2qj3/8JS4LtQcACwvT5T8YVA8QnctL+3MdVVcdnCixT0ZDz6iU2rKvq7H7LQ80WlbLC0l4oa5Q6GGk/GUVMutxiBhHm/gm7czbgUA9HCuKWctZFgjW9JRQbcP/YHislFZ1UzeahtotsX2LJIsprqlL7UTSL9w0Khxj7pAbMqbsns+xzIQl/GfkKJOSxhrr7tGilXmm9SLY+HQV1Vet04fy/L3yZToxmkfA61vsWF+wuCZc1axOdldFiumuzNSbqPIiCP4sv74a0GTBpZG++RtM8vjTY22gUOdfIYAJTuhZLe1q3wwjQ4GMEjuvCbTxAzzY8t01Ld1SanAidVzPeKdb4Qjj8Ic46tfUfGz3eccJljSJovfEWlULMhILHq6p0N/rbmQnSYSKNuiNhU7w65Olw="
     # Encrypted SIGNING_PASSWORD (encrypted SIGNING_KEY, Base64 encoded, is set in Travis environment variables)
     - secure: "iOwgrQ9tvRhPkrbsPl35+RsNLD5iuXQNSyWt1/rS/ZuP5KkCv2RGqS9k+RHRfn1JpgAwXW/4wQK6dd1AXG8Er4C0bvxeG4DKEwUtp/sy9aI4Ipi2ZkGkYugf5uv0lqQ7QpsSGExmNvNwnFyoVQCFz5GuJWsyQPiXw4S9am1gHOtYjefwC0Gbp4uS84kKWdOzvqNoZepZpzheGrgBpYpebcDIKx5mOwxpansjt6aXgrLSnTZh3U4rSWoyJw6mThp1nFvituDv0py7LLlA8ck9981Rp73ffoEOg4NnwkrYwLLZTqXX0gmDp259K4XkvXi72siwhjar/tBBymnKt1OmUo+EEZAFg9AzHcqeeT2I8XTdZkjbok/MNTC5yXJ1bLhRjswL5Vz1KzT8f7p6NFv8C5CILvn5c94JSPStTuOYn1J/ejaq10WQx3PU66uUlM/BDFFkhJ6MgRT4VTNj1CalV9VVz2iGGkOkCm1QEVEqkZsmRpiYkmY62jQRiFCFzZEPLYzswn2TQoswZe8nDfQjwMQh66A1QMaH/5/IjQWQd0FKf7OOhXXoS2HWQVltMFWuIj8tPi8Dxg8X2mGrdlL1nRib4GplBq0ClYm0xlA/dSWowe7FSxkbVGWedNEs6PbP1JPlAOjlSU6o3VqrDbHJBb+cseBNV9Jonj+GgjI7gcw="
+
+before_install:
+  # @todo https://github.schibsted.io/spt-identity/t/issues/1672
+  - touch $HOME/.android/repositories.cfg
+  - wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
+  - unzip commandlinetools.zip -d $ANDROID_HOME/
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-29" --sdk_root=$ANDROID_HOME
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;29.0.3" --sdk_root=$ANDROID_HOME
 
 script: ./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
 
