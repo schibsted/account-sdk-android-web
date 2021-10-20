@@ -146,6 +146,6 @@ static String base64Decode(String envVar) {
 }
 
 signing {
-    useInMemoryPgpKeys(base64Decode('SIGNING_KEY'), System.getenv('SIGNING_PASSWORD'))
+    useInMemoryPgpKeys(System.getenv('SIGNING_KEY_ID'), base64Decode('SIGNING_KEY'), base64Decode('SIGNING_PASSWORD'))
     sign publishing.publications
 }
