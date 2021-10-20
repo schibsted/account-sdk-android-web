@@ -1,6 +1,6 @@
-group: vm
-jdk: openjdk11
 language: android
+dist: trusty
+jdk: openjdk11
 
 android:
   components:
