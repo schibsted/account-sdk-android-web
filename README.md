@@ -20,8 +20,7 @@ To implement login with Schibsted account in your app, please first have a look 
 [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/). This
 will help you create a client and configure the necessary data.
 
-**Note:** This SDK requires your client to be registered as a `public_mobile_client`. Please email
-our [support](mailto:schibstedaccount@schibsted.com) to get help with setting that up.
+**Note:** This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/) for more help). 
 
 **Note:** If you have implemented
 the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android) in your app, and want
