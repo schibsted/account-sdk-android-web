@@ -1,4 +1,8 @@
 # Schibsted account Android SDK
+[![Build Status](https://app.travis-ci.com/schibsted/account-sdk-android-web.svg?branch=master)](https://app.travis-ci.com/schibsted/account-sdk-android-web)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/schibsted/account-sdk-android-web)
+![Platform](https://img.shields.io/badge/Platform-Android%2021%2B-orange.svg?style=flat)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/schibsted/account-sdk-android-web/blob/master/LICENSE)
 
 New implementation of the Schibsted account Android SDK using the web flows via
 [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/).
