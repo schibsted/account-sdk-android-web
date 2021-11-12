@@ -270,8 +270,14 @@ class SchibstedAccountApiTest {
             await { done ->
                 val user = User(Fixtures.getClient(), Fixtures.userTokens)
                 val clientId = "client1"
+                val state = "state1"
                 val redirectUri = "https://client1.example.com/redirect"
-                schaccApi.sessionExchange(user, clientId, redirectUri) { result ->
+                schaccApi.sessionExchange(
+                    user = user,
+                    state = state,
+                    clientId = clientId,
+                    redirectUri = redirectUri
+                ) { result ->
                     result.assertRight {
                         val expectedSessionExchangeResponse = SessionExchangeResponse("12345")
                         assertEquals(expectedSessionExchangeResponse, it)
@@ -288,7 +294,8 @@ class SchibstedAccountApiTest {
                         mapOf(
                             "clientId" to clientId,
                             "redirectUri" to redirectUri,
-                            "type" to "session"
+                            "type" to "session",
+                            "state" to state
                         ), requestParams
                     )
                     done()

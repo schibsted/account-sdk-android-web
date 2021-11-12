@@ -24,7 +24,10 @@ internal interface SchibstedAccountService {
     @Headers("X-OIDC: v1")
     @FormUrlEncoded
     @POST("/oauth/token")
-    fun legacyTokenRequest(@Header("Authorization") clientCredentials: String, @FieldMap params: Map<String, String>): Call<UserTokenResponse>
+    fun legacyTokenRequest(
+        @Header("Authorization") clientCredentials: String,
+        @FieldMap params: Map<String, String>
+    ): Call<UserTokenResponse>
 }
 
 internal interface SchibstedAccountTokenProtectedService {
@@ -35,11 +38,7 @@ internal interface SchibstedAccountTokenProtectedService {
 
     @FormUrlEncoded
     @POST("/api/2/oauth/exchange")
-    fun sessionExchange(
-        @Field("clientId") clientId: String,
-        @Field("redirectUri") redirectUri: String,
-        @Field("type") type: String = "session",
-    ): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
+    fun sessionExchange(@FieldMap params: Map<String, String>): Call<SchibstedAccountApiResponse<SessionExchangeResponse>>
 
     @FormUrlEncoded
     @POST("/api/2/oauth/exchange")

@@ -104,10 +104,20 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         user: User,
         clientId: String,
         redirectUri: String,
+        state: String?,
         callback: (ApiResult<SessionExchangeResponse>) -> Unit
     ) {
+        val params = mutableMapOf(
+            "type" to "session",
+            "clientId" to clientId,
+            "redirectUri" to redirectUri
+        )
+        state?.let {
+            params["state"] = it
+        }
+
         proctectedSchaccApi(user) { service ->
-            service.sessionExchange(clientId, redirectUri)
+            service.sessionExchange(params)
                 .enqueue(ApiResultCallback { callback(it.unpack()) })
         }
     }
