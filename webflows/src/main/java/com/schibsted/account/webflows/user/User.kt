@@ -91,11 +91,22 @@ class User {
      *
      * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
      * @param redirectUri where to redirect the user after the session has been created
+     * @param state An opaque value used by the client to maintain state between the request and callback. It's also recommended to prevent CSRF {@link https://tools.ietf.org/html/rfc6749#section-10.12}
      * @param callback callback that receives the URL or an error in case of failure
      */
-    fun webSessionUrl(clientId: String, redirectUri: String, callback: (ApiResult<URL>) -> Unit) =
+    fun webSessionUrl(
+        clientId: String,
+        redirectUri: String,
+        state: String? = null,
+        callback: (ApiResult<URL>) -> Unit
+    ) =
         onlyIfLoggedIn {
-            client.schibstedAccountApi.sessionExchange(this, clientId, redirectUri) {
+            client.schibstedAccountApi.sessionExchange(
+                user = this,
+                clientId = clientId,
+                redirectUri = redirectUri,
+                state = state
+            ) {
                 val result = it.map { schibstedAccountUrl("/session/${it.code}") }
                 callback(result)
             }
