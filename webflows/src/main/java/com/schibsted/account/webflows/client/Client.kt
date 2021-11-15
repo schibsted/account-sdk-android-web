@@ -189,11 +189,11 @@ class Client : ClientInterface {
 
     /** Resume any previously logged-in user session */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
-        sessionStorage.get(configuration.clientId) {
-            if (it == null) {
+        sessionStorage.get(configuration.clientId) { storedUserSession ->
+            if (storedUserSession == null) {
                 callback(null)
             } else {
-                callback(User(this, it.userTokens))
+                callback(User(this, storedUserSession.userTokens))
             }
         }
     }
