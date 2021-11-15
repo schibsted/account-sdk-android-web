@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 import com.schibsted.account.webflows.user.StoredUserSession
 
 /**
@@ -20,7 +22,7 @@ internal interface SessionStorage {
 }
 
 internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
-    private val gson = Gson()
+    private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
 
     private val prefs: SharedPreferences by lazy {
         val masterKey = MasterKey.Builder(context.applicationContext)
@@ -43,9 +45,17 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
         editor.apply()
     }
 
-    override fun get(clientId: String, callback: (StoredUserSession?) -> Unit){
+    override fun get(clientId: String, callback: (StoredUserSession?) -> Unit) {
         val json = prefs.getString(clientId, null) ?: return callback(null)
-        callback(gson.fromJson(json, StoredUserSession::class.java))
+        callback(gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(json))
+    }
+
+    private fun Gson.getStoredUserSession(json: String): StoredUserSession? {
+        return try {
+            fromJson(json, StoredUserSession::class.java)
+        } catch (e: JsonSyntaxException) {
+            null
+        }
     }
 
     override fun remove(clientId: String) {
