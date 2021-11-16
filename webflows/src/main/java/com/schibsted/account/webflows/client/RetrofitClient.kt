@@ -10,9 +10,11 @@ class RetrofitClient<S>(
     val internalClient: Client,
     private val serviceClass: Class<S>,
     private val retrofitBuilder: Retrofit.Builder,
-): ClientInterface by internalClient {
+) : ClientInterface by internalClient {
 
-    private var retrofitApi: S? = null
+    var retrofitApi: S? = null
+        private set
+
     private var user: User? = null
 
     /** Resume any previously logged-in user session */
