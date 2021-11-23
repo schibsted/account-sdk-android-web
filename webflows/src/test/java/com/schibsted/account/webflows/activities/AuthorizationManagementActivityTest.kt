@@ -101,8 +101,8 @@ class AuthorizationManagementActivityTest {
                 assertEquals(authResponse, intent.data)
             }, any())
         }
-        verify(exactly = 1) { AuthorizationManagementActivity.completionIntent.send() }
-        verify(exactly = 0) { AuthorizationManagementActivity.cancelIntent.send() }
+        verify(exactly = 1) { AuthorizationManagementActivity.completionIntent?.send() }
+        verify(exactly = 0) { AuthorizationManagementActivity.cancelIntent?.send() }
     }
 
     @Test
@@ -112,7 +112,7 @@ class AuthorizationManagementActivityTest {
 
         launch<AuthorizationManagementActivity>(intent)
         AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.CancelledByUser, it) }
-        verify(exactly = 1) { AuthorizationManagementActivity.cancelIntent.send() }
-        verify(exactly = 0) { AuthorizationManagementActivity.completionIntent.send() }
+        verify(exactly = 1) { AuthorizationManagementActivity.cancelIntent?.send() }
+        verify(exactly = 0) { AuthorizationManagementActivity.completionIntent?.send() }
     }
 }

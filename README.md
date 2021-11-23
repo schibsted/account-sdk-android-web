@@ -1,4 +1,5 @@
 # Schibsted account Android SDK
+
 [![Build Status](https://app.travis-ci.com/schibsted/account-sdk-android-web.svg?branch=master)](https://app.travis-ci.com/schibsted/account-sdk-android-web)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/schibsted/account-sdk-android-web)
 ![Platform](https://img.shields.io/badge/Platform-Android%2021%2B-orange.svg?style=flat)
@@ -20,7 +21,10 @@ To implement login with Schibsted account in your app, please first have a look 
 [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/). This
 will help you create a client and configure the necessary data.
 
-**Note:** This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/) for more help). 
+**Note:** This SDK requires your client to be registered as a `public_mobile_client` in Self
+Service (
+see [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/) for
+more help).
 
 **Note:** If you have implemented
 the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android) in your app, and want
@@ -82,8 +86,8 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
    ```
    **Note:** SessionStorageConfig is only needed if your app used
    the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android)
-   for login to keep already logged in users logged in. If this is not the
-   scenario, sessionStorageConfig can be ignored.
+   for login to keep already logged in users logged in. If this is not the scenario,
+   sessionStorageConfig can be ignored.
 
 If you need Retrofit support, wrap the above client instance in a RetrofitClient instance:
 
@@ -112,7 +116,11 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
            )
        }
    }
-     ```
+     ``` 
+   **Note:** completionIntent and cancelIntent is not mandatory, but optional if you want to
+   redirect user to specific activity on login result. You can also observe
+   AuthResultLiveData and navigate on its result (see step 4. below).
+
 4. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (
    see [MainActivity](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt)
    as reference):

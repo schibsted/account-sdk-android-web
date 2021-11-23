@@ -172,13 +172,13 @@ class AuthorizationManagementActivity : Activity() {
 
     private fun handleAuthorizationComplete() {
         AuthResultLiveData.get().update(intent)
-        completionIntent.send()
+        completionIntent?.send()
     }
 
     private fun handleAuthorizationCanceled() {
         Timber.d("Authorization flow canceled by user")
         AuthResultLiveData.get().update(Left(NotAuthed.CancelledByUser))
-        cancelIntent.send()
+        cancelIntent?.send()
     }
 
     private fun extractState(state: Bundle?) {
@@ -191,11 +191,15 @@ class AuthorizationManagementActivity : Activity() {
         private const val KEY_AUTH_INTENT = "authIntent"
         private const val KEY_AUTHORIZATION_STARTED = "authStarted"
 
-        internal lateinit var completionIntent: PendingIntent
-        internal lateinit var cancelIntent: PendingIntent
+        internal var completionIntent: PendingIntent? = null
+        internal var cancelIntent: PendingIntent? = null
 
         @JvmStatic
-        fun setup(client: Client, completionIntent: PendingIntent, cancelIntent: PendingIntent) {
+        fun setup(
+            client: Client,
+            completionIntent: PendingIntent? = null,
+            cancelIntent: PendingIntent? = null
+        ) {
             AuthResultLiveData.create(client)
             Companion.completionIntent = completionIntent
             Companion.cancelIntent = cancelIntent
@@ -210,7 +214,7 @@ class AuthorizationManagementActivity : Activity() {
          *  been called before this
          */
         internal fun createStartIntent(context: Context, authIntent: Intent): Intent {
-            if (!::completionIntent.isInitialized || !::cancelIntent.isInitialized) {
+            if (AuthResultLiveData.getIfInitialised() == null) {
                 throw IllegalStateException("AuthorizationManagementActivity.setup must be called before this")
             }
             return createBaseIntent(context).apply {
