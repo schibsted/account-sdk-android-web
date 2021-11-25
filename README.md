@@ -54,9 +54,8 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
            <action android:name="android.intent.action.VIEW" />
            <category android:name="android.intent.category.DEFAULT" />
            <category android:name="android.intent.category.BROWSABLE" />
-           <data android:scheme="https"
-                 android:host="app.example.com"
-                 android:path="/applogin"/>
+           <data android:scheme="app.example.com"
+                 android:path="/login"/>
        </intent-filter>
    </activity>
    ```
