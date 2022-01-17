@@ -17,7 +17,10 @@ class RetrofitClient<S>(
 
     private var user: User? = null
 
-    /** Resume any previously logged-in user session */
+    /** Initiates RetrofitClient and resume any previously logged-in user session
+     *
+     * This should ideally only be used on app startup
+     * */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
         internalClient.resumeLastLoggedInUser { resumedUser ->
             if (resumedUser != null) {
