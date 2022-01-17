@@ -3,12 +3,14 @@ package com.schibsted.account.example
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import com.schibsted.account.BuildConfig
 import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
 import com.schibsted.account.example.MainActivity.Companion.LOGIN_FAILED_EXTRA
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.ClientConfiguration
+import timber.log.Timber
 
 class ExampleApp : Application() {
 
@@ -17,6 +19,13 @@ class ExampleApp : Application() {
 
         initClient()
         initAuthorizationManagement()
+        initTimber()
+    }
+
+    private fun initTimber() {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
     }
 
     private fun initClient() {
