@@ -87,6 +87,11 @@ class User {
     }
 
     /**
+     * Get idToken for User
+     * */
+    fun getIdToken(): String? = tokens?.idToken
+
+    /**
      * Generate URL with embedded one-time code for creating a web session for the current user.
      *
      * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
