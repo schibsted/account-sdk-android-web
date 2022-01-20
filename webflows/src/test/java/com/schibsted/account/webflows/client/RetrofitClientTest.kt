@@ -27,8 +27,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import java.util.*
@@ -75,11 +74,13 @@ class RetrofitClientTest {
             }
         }
 
-        val client = getRetrofitClient(Fixtures.getClient(
-            sessionStorage = sessionStorageMock,
-            stateStorage = stateStorageMock,
-            tokenHandler = tokenHandler
-        ))
+        val client = getRetrofitClient(
+            Fixtures.getClient(
+                sessionStorage = sessionStorageMock,
+                stateStorage = stateStorageMock,
+                tokenHandler = tokenHandler
+            )
+        )
 
         client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
             it.assertRight { user ->
@@ -154,6 +155,36 @@ class RetrofitClientTest {
                 result
             )
         }
+    }
+
+    @Test
+    fun `IsInitialized should return false if retrofitClient has not been initialized`() {
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
+        val client = getRetrofitClient(Fixtures.getClient(sessionStorage = sessionStorageMock))
+
+        val result = client.isInitialized()
+        assertFalse(result)
+    }
+
+    @Test
+    fun `IsInitialized should return true if retrofitClient has been initialized`() {
+        val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<(StoredUserSession?) -> Unit>()
+            callback(userSession)
+        }
+        val client = getRetrofitClient(Fixtures.getClient(sessionStorage = sessionStorageMock))
+
+        client.resumeLastLoggedInUser { result ->
+            assertEquals(
+                User(client.internalClient, UserSession(Fixtures.userTokens)),
+                result
+            )
+        }
+
+        val result = client.isInitialized()
+        assertTrue(result)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)

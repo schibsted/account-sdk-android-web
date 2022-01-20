@@ -39,6 +39,13 @@ class RetrofitClient<S>(
         }
     }
 
+    /** Check if RetrofitClient has been initialized */
+    fun isInitialized(): Boolean {
+        user ?: return false
+        retrofitApi ?: return false
+        return true
+    }
+
     /**
      * Perform the given [request] with user access token as Bearer token in Authorization header.
      *
