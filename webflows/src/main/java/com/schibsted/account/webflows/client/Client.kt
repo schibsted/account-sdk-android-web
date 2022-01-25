@@ -187,13 +187,22 @@ class Client : ClientInterface {
         }
     }
 
+    var cashedUser: User? = null
+
     /** Resume any previously logged-in user session */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
         sessionStorage.get(configuration.clientId) { storedUserSession ->
             if (storedUserSession == null) {
+                cashedUser = null
                 callback(null)
             } else {
-                callback(User(this, storedUserSession.userTokens))
+                val user = User(this, storedUserSession.userTokens)
+                if (user.equals(cashedUser)) {
+                    callback(cashedUser)
+                } else {
+                    cashedUser = user
+                    callback(cashedUser)
+                }
             }
         }
     }
