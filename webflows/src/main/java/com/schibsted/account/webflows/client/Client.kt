@@ -187,7 +187,7 @@ class Client : ClientInterface {
         }
     }
 
-    var cashedUser: User? = null
+    private var cashedUser: User? = null
 
     /** Resume any previously logged-in user session */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
