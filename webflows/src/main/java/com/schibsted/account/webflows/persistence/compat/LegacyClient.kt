@@ -4,7 +4,7 @@ import com.schibsted.account.webflows.api.ApiResult
 import com.schibsted.account.webflows.api.CodeExchangeResponse
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
-import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.token.MigrationUserTokens
 import com.schibsted.account.webflows.util.Either
 import okhttp3.Credentials
 import timber.log.Timber
@@ -15,7 +15,7 @@ internal class LegacyClient(
     private val schibstedAccountApi: SchibstedAccountApi
 ) {
     fun getAuthCodeFromTokens(
-        legacyTokens: UserTokens,
+        legacyTokens: MigrationUserTokens,
         newClientId: String,
         callback: (ApiResult<CodeExchangeResponse>) -> Unit
     ) {

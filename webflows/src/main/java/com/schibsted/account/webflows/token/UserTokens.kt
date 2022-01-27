@@ -19,3 +19,10 @@ internal data class UserTokens(
                 "idTokenClaims: ${idTokenClaims})"
     }
 }
+
+internal data class MigrationUserTokens(
+    val accessToken: String,
+    val refreshToken: String,
+    val idToken: String?,
+    val idTokenClaims: IdTokenClaims?
+)
