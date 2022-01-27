@@ -5,6 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
+import com.schibsted.account.webflows.user.MigrationStoredUserSession
 import com.schibsted.account.webflows.user.StoredUserSession
 import timber.log.Timber
 
@@ -60,7 +61,7 @@ internal class MigratingSessionStorage(
 
     @VisibleForTesting
     internal fun migrateSession(
-        legacySession: StoredUserSession,
+        legacySession: MigrationStoredUserSession,
         legacyClient: LegacyClient,
         callback: (StoredUserSession?) -> Unit
     ) {

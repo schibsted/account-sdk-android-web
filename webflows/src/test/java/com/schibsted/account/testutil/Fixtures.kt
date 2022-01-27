@@ -7,6 +7,7 @@ import com.schibsted.account.webflows.client.RetrofitClient
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.IdTokenClaims
+import com.schibsted.account.webflows.token.MigrationUserTokens
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.TestRetrofitApi
@@ -33,6 +34,8 @@ internal object Fixtures {
     )
     val userTokens = UserTokens("accessToken", "refreshToken", "idToken", idTokenClaims)
 
+    val migrationUserTokens = MigrationUserTokens("accessToken", "refreshToken", null, null)
+
     fun getClient(
         clientConfiguration: ClientConfiguration = clientConfig,
         stateStorage: StateStorage = mockk(relaxed = true),
@@ -58,7 +61,8 @@ internal object Fixtures {
         return RetrofitClient(
             internalClient = client,
             serviceClass = serviceClass,
-            retrofitBuilder = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create()).baseUrl("https://some.not.existing.domain")
+            retrofitBuilder = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+                .baseUrl("https://some.not.existing.domain")
         )
     }
 
