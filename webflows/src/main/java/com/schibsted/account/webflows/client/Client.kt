@@ -1,5 +1,6 @@
 package com.schibsted.account.webflows.client
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -104,9 +105,15 @@ class Client : ClientInterface {
      */
     @JvmOverloads
     override fun launchAuth(context: Context, authRequest: AuthRequest) {
-        CustomTabsIntent.Builder()
-            .build()
-            .launchUrl(context, generateLoginUrl(authRequest))
+        val loginUrl = generateLoginUrl(authRequest)
+        try {
+            CustomTabsIntent.Builder()
+                .build()
+                .launchUrl(context, loginUrl)
+        } catch (e: ActivityNotFoundException) {
+            val intent = Intent(Intent.ACTION_VIEW, loginUrl)
+            context.startActivity(intent)
+        }
     }
 
     private fun generateLoginUrl(authRequest: AuthRequest): Uri {
