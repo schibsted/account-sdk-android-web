@@ -53,7 +53,8 @@ class Client : ClientInterface {
                 context.applicationContext,
                 this,
                 sessionStorageConfig.legacyClientId,
-                sessionStorageConfig.legacyClientSecret
+                sessionStorageConfig.legacyClientSecret,
+                sessionStorageConfig.legacySharedPrefsFilename
             )
         } else {
             EncryptedSharedPrefsStorage(context.applicationContext)
@@ -311,4 +312,8 @@ sealed class RefreshTokenError {
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
 
-data class SessionStorageConfig(val legacyClientId: String, val legacyClientSecret: String)
+data class SessionStorageConfig(
+    val legacyClientId: String,
+    val legacyClientSecret: String,
+    val legacySharedPrefsFilename: String? = null
+)
