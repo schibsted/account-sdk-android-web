@@ -18,7 +18,7 @@ internal data class LegacyUserTokens(
 internal data class LegacySession(
     val lastActive: Long,
     val userId: String,
-    @SerializedName("token") val tokens: LegacyUserTokens
+    val token: LegacyUserTokens
 )
 
 /**
@@ -61,13 +61,13 @@ internal class LegacySessionStorage(private val legacyTokenStorage: LegacyTokenS
     }
 
     private fun toStoredUserSession(legacySession: LegacySession): MigrationStoredUserSession? {
-        val accessToken = legacySession.tokens.accessToken
+        val accessToken = legacySession.token.accessToken
         val clientId = unverifiedClaims(accessToken)?.get("client_id") ?: return null
-        val refreshToken = legacySession.tokens.refreshToken ?: return null
+        val refreshToken = legacySession.token.refreshToken ?: return null
 
-        val idToken = legacySession.tokens.idToken
+        val idToken = legacySession.token.idToken
         val userTokens = MigrationUserTokens(
-            accessToken = legacySession.tokens.accessToken,
+            accessToken = legacySession.token.accessToken,
             refreshToken = refreshToken,
             idToken = idToken,
             idTokenClaims = createIdTokenClaims(idToken)
