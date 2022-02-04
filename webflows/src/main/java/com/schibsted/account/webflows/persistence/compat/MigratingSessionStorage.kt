@@ -21,11 +21,12 @@ internal class MigratingSessionStorage(
         context: Context,
         client: Client,
         legacyClientId: String,
-        legacyClientSecret: String
+        legacyClientSecret: String,
+        legacySharedPrefsFilename: String?
     ) : this(
         client,
         EncryptedSharedPrefsStorage(context),
-        LegacySessionStorage(context),
+        LegacySessionStorage(context, legacySharedPrefsFilename),
         legacyClientId,
         legacyClientSecret
     )

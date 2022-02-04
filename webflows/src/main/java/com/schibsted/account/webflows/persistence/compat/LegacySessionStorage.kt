@@ -26,10 +26,10 @@ internal data class LegacySession(
  *
  * @see <a href="https://github.com/schibsted/account-sdk-android/blob/master/core/src/main/java/com/schibsted/account/persistence/SessionStorageDelegate.kt" target="_top">Old Schibsted account Android SDK</a>
  */
-internal class LegacyTokenStorage(context: Context) {
+internal class LegacyTokenStorage(context: Context, legacySharedPrefsFilename: String?) {
     private var sessions: List<LegacySession> by SessionStorageDelegate(
         context,
-        PREFERENCE_FILENAME
+        legacySharedPrefsFilename ?: PREFERENCE_FILENAME
     )
 
     fun get(): Collection<LegacySession> {
@@ -46,7 +46,7 @@ internal class LegacyTokenStorage(context: Context) {
 }
 
 internal class LegacySessionStorage(private val legacyTokenStorage: LegacyTokenStorage) {
-    internal constructor(context: Context) : this(LegacyTokenStorage(context))
+    internal constructor(context: Context, legacySharedPrefsFilename: String?) : this(LegacyTokenStorage(context, legacySharedPrefsFilename))
 
     fun get(clientId: String): MigrationStoredUserSession? {
         val sessions = legacyTokenStorage.get()
