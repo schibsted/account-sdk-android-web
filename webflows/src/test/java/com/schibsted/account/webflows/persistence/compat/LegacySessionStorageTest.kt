@@ -9,9 +9,7 @@ import com.schibsted.account.testutil.createJws
 import com.schibsted.account.webflows.token.IdTokenClaims
 import com.schibsted.account.webflows.token.IdTokenValidatorTest
 import com.schibsted.account.webflows.token.MigrationUserTokens
-import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.user.MigrationStoredUserSession
-import com.schibsted.account.webflows.user.StoredUserSession
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -38,9 +36,9 @@ class LegacySessionStorageTest {
         return MigrationStoredUserSession(
             clientId,
             MigrationUserTokens(
-                legacySession.tokens.accessToken,
-                legacySession.tokens.refreshToken ?: "",
-                legacySession.tokens.idToken,
+                legacySession.token.accessToken,
+                legacySession.token.refreshToken ?: "",
+                legacySession.token.idToken,
                 idTokenClaims.copy(aud = emptyList())
             ),
             Date(legacySession.lastActive)
@@ -95,7 +93,7 @@ class LegacySessionStorageTest {
     fun testExistingLegacyDataWithoutRefreshTokenIsIgnored() {
         val existingSession = createLegacySession(clientId, Fixtures.idTokenClaims)
         val existingSessionWithoutRefreshToken =
-            existingSession.copy(tokens = existingSession.tokens.copy(refreshToken = null))
+            existingSession.copy(token = existingSession.token.copy(refreshToken = null))
         val legacyTokenStorage = mockk<LegacyTokenStorage> {
             every { get() } returns listOf(existingSessionWithoutRefreshToken)
         }
@@ -108,7 +106,7 @@ class LegacySessionStorageTest {
     fun testExistingLegacyDataWithoutIdTokenIsNotIgnored() {
         val existingSession = createLegacySession(clientId, Fixtures.idTokenClaims)
         val existingSessionWithoutIdToken =
-            existingSession.copy(tokens = existingSession.tokens.copy(idToken = null))
+            existingSession.copy(token = existingSession.token.copy(idToken = null))
         val legacyTokenStorage = mockk<LegacyTokenStorage> {
             every { get() } returns listOf(existingSessionWithoutIdToken)
         }
