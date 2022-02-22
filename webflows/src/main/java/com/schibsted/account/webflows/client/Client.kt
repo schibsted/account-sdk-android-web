@@ -237,7 +237,7 @@ class Client : ClientInterface {
                     val userSession =
                         StoredUserSession(configuration.clientId, userTokens, Date())
                     sessionStorage.save(userSession)
-                    Timber.i("Refreshed user tokens: $result")
+                    Timber.d("Refreshed user tokens: $result")
                     Right(userTokens)
                 } else {
                     Timber.i("User has logged-out during token refresh, discarding new tokens.")
