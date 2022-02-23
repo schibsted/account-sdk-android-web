@@ -16,5 +16,8 @@ internal data class AuthState(
 enum class MfaType(val value: String) {
     PASSWORD("password"),
     OTP("otp"),
-    SMS("sms")
+    SMS("sms"),
+    EID_NO("eid-no"), //Only used for PRE environment
+    EID_SE("eid-se"), //Only used for PRE environment
+    EID("eid"), // For Production
 }
