@@ -109,8 +109,8 @@ internal class IdTokenClaimsVerifier(
         val haystack = values ?: return false // no values to search among
 
         // Regardless of country, AMR will only contain EID value
-        if (needle == MfaType.EID_NO || needle == MfaType.EID_SE) {
-            needle = MfaType.EID
+        if (needle == MfaType.EID_NO.value || needle == MfaType.EID_SE.value) {
+            needle = MfaType.EID.value
         }
         return haystack.contains(needle)
     }
