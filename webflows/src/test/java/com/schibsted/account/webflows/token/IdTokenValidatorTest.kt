@@ -88,6 +88,19 @@ class IdTokenValidatorTest {
     }
 
     @Test
+    fun testAcceptsEidAMRWithoutCountryPrefix() {
+        val expectedAmrValue = "eid-se"
+        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
+        val claims = defaultIdTokenClaims()
+            .claim("amr", listOf("eid", "otherValue"))
+            .build()
+        val idToken = createIdToken(claims)
+        IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
+            result.assertRight { assertEquals(idTokenClaims(claims), it) }
+        }
+    }
+
+    @Test
     fun testRejectMissingExpectedAMRInIdTokenWithoutAMR() {
         val context = IdTokenValidationContext(issuer, clientId, nonce, "testValue")
 
