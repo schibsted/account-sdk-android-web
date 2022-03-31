@@ -3,6 +3,7 @@ package com.schibsted.account.example
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import com.schibsted.account.BuildConfig
 import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
@@ -48,8 +49,8 @@ class ExampleApp : Application() {
         cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         AuthorizationManagementActivity.setup(
             client = client,
-            completionIntent = PendingIntent.getActivity(this, 0, completionIntent, 0),
-            cancelIntent = PendingIntent.getActivity(this, 1, cancelIntent, 0)
+            completionIntent = PendingIntent.getActivity(this, 0, completionIntent, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0),
+            cancelIntent = PendingIntent.getActivity(this, 1, cancelIntent, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
         )
     }
 
