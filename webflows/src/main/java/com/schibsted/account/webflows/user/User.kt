@@ -171,9 +171,11 @@ class User {
         fun shouldLogout(result: TokenRefreshResult?): Boolean {
             return result is Left &&
                     result.value is RefreshTokenError.RefreshRequestFailed &&
-                    result.value.error is HttpError.ErrorResponse &&
-                    result.value.error.body != null &&
-                    OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
+                    result.value.error is HttpError.ErrorResponse && (
+                        result.value.error.code == 500 ||
+                        result.value.error.body == null ||
+                        OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
+                    )
         }
 
         if (shouldLogout(result)) {
