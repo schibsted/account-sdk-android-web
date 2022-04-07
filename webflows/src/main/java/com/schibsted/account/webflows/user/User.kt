@@ -173,7 +173,7 @@ class User {
                     result.value is RefreshTokenError.RefreshRequestFailed &&
                     result.value.error is HttpError.ErrorResponse && (
                         result.value.error.code == 500 ||
-                        result.value.error.body == null ||
+                        result.value.error.body != null &&
                         OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
                     )
         }
