@@ -3,8 +3,6 @@ package com.schibsted.account.example
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
-import com.schibsted.account.R
 import com.schibsted.account.databinding.ActivityManualLoginBinding
 import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
@@ -17,15 +15,16 @@ import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 
 class ManualLoginActivity : AppCompatActivity() {
-
-    private var _binding: ActivityManualLoginBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityManualLoginBinding
 
     private lateinit var client: Client
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = DataBindingUtil.setContentView(this, R.layout.activity_manual_login)
+
+        binding = ActivityManualLoginBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
         initClient()
         initLoginButton()
@@ -34,8 +33,6 @@ class ManualLoginActivity : AppCompatActivity() {
         if (intent.data != null) {
             handleAuthenticationResponse()
         }
-
-
     }
 
     private fun handleAuthenticationResponse() {

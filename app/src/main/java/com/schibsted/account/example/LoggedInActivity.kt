@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.databinding.DataBindingUtil
 import com.schibsted.account.R
 import com.schibsted.account.databinding.ActivityLoggedInBinding
 import com.schibsted.account.webflows.api.HttpError
@@ -18,18 +17,19 @@ import timber.log.Timber
 import java.net.URL
 
 class LoggedInActivity : AppCompatActivity() {
-
-    private var _binding: ActivityLoggedInBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityLoggedInBinding
 
     private var user: User? = null
 
     private val isUserLoggedIn: Boolean
         get() = user?.isLoggedIn() == true
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        _binding = DataBindingUtil.setContentView(this, R.layout.activity_logged_in)
+
+        binding = ActivityLoggedInBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
         evaluateAndUpdateUserSession()
 
