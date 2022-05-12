@@ -58,7 +58,9 @@ class ManualLoginActivity : AppCompatActivity() {
             ClientConfig.clientId,
             ClientConfig.manualLoginRedirectUri
         )
-        client = Client(this, clientConfig, instance)
+        client = Client(this, clientConfig, instance, logoutCallback = {
+            Timber.i("Received a logout event from client")
+        })
     }
 
     private fun initLoginButton() {
