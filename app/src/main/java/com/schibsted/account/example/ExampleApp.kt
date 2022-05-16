@@ -19,6 +19,7 @@ class ExampleApp : Application() {
         super.onCreate()
 
         initClient()
+        initManualClient()
         initAuthorizationManagement()
         initTimber()
     }
@@ -42,6 +43,21 @@ class ExampleApp : Application() {
         )
     }
 
+    private fun initManualClient() {
+        val clientConfig = ClientConfiguration(
+            env = environment,
+            clientId = ClientConfig.clientId,
+            redirectUri = ClientConfig.manualLoginRedirectUri
+        )
+        manualClient = Client(
+            context = applicationContext,
+            configuration = clientConfig,
+            httpClient = instance,
+            logoutCallback = {
+                Timber.i("Received a logout event from client")
+            })
+    }
+
     private fun initAuthorizationManagement() {
         val completionIntent = Intent(this, MainActivity::class.java)
         val cancelIntent = Intent(this, MainActivity::class.java)
@@ -49,12 +65,24 @@ class ExampleApp : Application() {
         cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         AuthorizationManagementActivity.setup(
             client = client,
-            completionIntent = PendingIntent.getActivity(this, 0, completionIntent, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0),
-            cancelIntent = PendingIntent.getActivity(this, 1, cancelIntent, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+            completionIntent = PendingIntent.getActivity(
+                this,
+                0,
+                completionIntent,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+            ),
+            cancelIntent = PendingIntent.getActivity(
+                this,
+                1,
+                cancelIntent,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+            )
         )
     }
 
     companion object {
         lateinit var client: Client
+
+        lateinit var manualClient: Client
     }
 }

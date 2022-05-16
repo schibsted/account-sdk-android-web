@@ -25,6 +25,7 @@
 
         <activity
             android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity"
+            android:label="Automatic login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

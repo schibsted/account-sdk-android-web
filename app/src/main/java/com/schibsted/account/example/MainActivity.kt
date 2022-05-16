@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLoggedInActivity(user: User) {
-        startActivity(LoggedInActivity.intentWithUser(this, user))
+        startActivity(LoggedInActivity.intentWithUser(this, user, LoggedInActivity.Companion.Flow.AUTOMATIC))
     }
 
     companion object {

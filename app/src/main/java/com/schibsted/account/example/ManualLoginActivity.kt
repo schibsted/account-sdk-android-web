@@ -4,11 +4,8 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.schibsted.account.databinding.ActivityManualLoginBinding
-import com.schibsted.account.example.ClientConfig.environment
-import com.schibsted.account.example.HttpClient.instance
 import com.schibsted.account.example.LoggedInActivity.Companion.intentWithUser
 import com.schibsted.account.webflows.client.Client
-import com.schibsted.account.webflows.client.ClientConfiguration
 import com.schibsted.account.webflows.client.LoginError
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -49,18 +46,11 @@ class ManualLoginActivity : AppCompatActivity() {
     }
 
     private fun startLoggedInActivity(user: User) {
-        startActivity(intentWithUser(this, user))
+        startActivity(intentWithUser(this, user, LoggedInActivity.Companion.Flow.MANUAL))
     }
 
     private fun initClient() {
-        val clientConfig = ClientConfiguration(
-            environment,
-            ClientConfig.clientId,
-            ClientConfig.manualLoginRedirectUri
-        )
-        client = Client(this, clientConfig, instance, logoutCallback = {
-            Timber.i("Received a logout event from client")
-        })
+        client = ExampleApp.manualClient
     }
 
     private fun initLoginButton() {
@@ -71,7 +61,7 @@ class ManualLoginActivity : AppCompatActivity() {
 
     private fun initResumeButton() {
         binding.resumeButton.setOnClickListener {
-            ExampleApp.client.resumeLastLoggedInUser { user ->
+            client.resumeLastLoggedInUser { user ->
                 if (user != null) {
                     startLoggedInActivity(user)
                 } else {
