@@ -8,13 +8,12 @@ import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.createJws
 import com.schibsted.account.webflows.token.IdTokenClaims
 import com.schibsted.account.webflows.token.IdTokenValidatorTest
-import com.schibsted.account.webflows.token.UserTokens
-import com.schibsted.account.webflows.user.StoredUserSession
+import com.schibsted.account.webflows.token.MigrationUserTokens
+import com.schibsted.account.webflows.user.MigrationStoredUserSession
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
+import org.junit.Assert.*
 import org.junit.Test
 import java.util.*
 
@@ -33,13 +32,13 @@ class LegacySessionStorageTest {
     private fun legacyTokensToStoredUserSession(
         legacySession: LegacySession,
         idTokenClaims: IdTokenClaims
-    ): StoredUserSession {
-        return StoredUserSession(
+    ): MigrationStoredUserSession {
+        return MigrationStoredUserSession(
             clientId,
-            UserTokens(
-                legacySession.tokens.accessToken,
-                legacySession.tokens.refreshToken,
-                legacySession.tokens.idToken!!,
+            MigrationUserTokens(
+                legacySession.token.accessToken,
+                legacySession.token.refreshToken ?: "",
+                legacySession.token.idToken,
                 idTokenClaims.copy(aud = emptyList())
             ),
             Date(legacySession.lastActive)
@@ -86,10 +85,7 @@ class LegacySessionStorageTest {
         }
 
         val legacySessionStorage = LegacySessionStorage(legacyTokenStorage)
-        val expectedSession = legacyTokensToStoredUserSession(
-            existingSession,
-            Fixtures.idTokenClaims
-        )
+        val expectedSession = legacyTokensToStoredUserSession(existingSession, Fixtures.idTokenClaims)
         assertEquals(expectedSession, legacySessionStorage.get(clientId))
     }
 
@@ -97,7 +93,7 @@ class LegacySessionStorageTest {
     fun testExistingLegacyDataWithoutRefreshTokenIsIgnored() {
         val existingSession = createLegacySession(clientId, Fixtures.idTokenClaims)
         val existingSessionWithoutRefreshToken =
-            existingSession.copy(tokens = existingSession.tokens.copy(refreshToken = null))
+            existingSession.copy(token = existingSession.token.copy(refreshToken = null))
         val legacyTokenStorage = mockk<LegacyTokenStorage> {
             every { get() } returns listOf(existingSessionWithoutRefreshToken)
         }
@@ -107,16 +103,16 @@ class LegacySessionStorageTest {
     }
 
     @Test
-    fun testExistingLegacyDataWithoutIdTokenIsIgnored() {
+    fun testExistingLegacyDataWithoutIdTokenIsNotIgnored() {
         val existingSession = createLegacySession(clientId, Fixtures.idTokenClaims)
         val existingSessionWithoutIdToken =
-            existingSession.copy(tokens = existingSession.tokens.copy(idToken = null))
+            existingSession.copy(token = existingSession.token.copy(idToken = null))
         val legacyTokenStorage = mockk<LegacyTokenStorage> {
             every { get() } returns listOf(existingSessionWithoutIdToken)
         }
 
         val legacySessionStorage = LegacySessionStorage(legacyTokenStorage)
-        assertNull(legacySessionStorage.get(clientId))
+        assertNotNull(legacySessionStorage.get(clientId))
     }
 
     @Test
@@ -128,10 +124,7 @@ class LegacySessionStorageTest {
         }
 
         val legacySessionStorage = LegacySessionStorage(legacyTokenStorage)
-        val expectedSession = legacyTokensToStoredUserSession(
-            newestSession,
-            Fixtures.idTokenClaims
-        )
+        val expectedSession = legacyTokensToStoredUserSession(newestSession, Fixtures.idTokenClaims)
         assertEquals(expectedSession, legacySessionStorage.get(clientId))
     }
 

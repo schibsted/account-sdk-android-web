@@ -17,23 +17,40 @@ class RetrofitClient<S>(
 
     private var user: User? = null
 
-    /** Resume any previously logged-in user session */
+    /** Initiates RetrofitClient and resume any previously logged-in user session
+     *
+     * This should ideally only be used on app startup
+     * User will only be updated with new user if resumedUser contains a new user
+     * */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
         internalClient.resumeLastLoggedInUser { resumedUser ->
-            if (resumedUser != null) {
-                user = resumedUser
-                retrofitApi = retrofitBuilder
-                    .client(resumedUser.httpClient)
-                    .build()
-                    .create(serviceClass)
+            when {
+                user?.equals(resumedUser) == true -> {
+                    callback(user)
+                }
+                resumedUser != null -> {
+                    user = resumedUser
+                    retrofitApi = retrofitBuilder
+                        .client(resumedUser.httpClient)
+                        .build()
+                        .create(serviceClass)
 
-                callback(resumedUser)
-            } else {
-                user = null
-                retrofitApi = null
-                callback(null)
+                    callback(resumedUser)
+                }
+                else -> {
+                    user = null
+                    retrofitApi = null
+                    callback(null)
+                }
             }
         }
+    }
+
+    /** Check if RetrofitClient has been initialized */
+    fun isInitialized(): Boolean {
+        user ?: return false
+        retrofitApi ?: return false
+        return true
     }
 
     /**

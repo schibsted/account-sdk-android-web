@@ -25,6 +25,7 @@
 
         <activity
             android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity"
+            android:label="Automatic login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -44,7 +45,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="com.sdk-example.pre.602525f2b41fa31789a95aa8"
-                    android:host="manual-login"/>
+                    android:path="/manual-login"/>
             </intent-filter>
         </activity>
     </application>

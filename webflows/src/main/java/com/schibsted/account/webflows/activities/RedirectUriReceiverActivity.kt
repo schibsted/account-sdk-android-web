@@ -47,7 +47,7 @@ import android.os.Bundle
  * ```
  */
 class RedirectUriReceiverActivity : Activity() {
-    public override fun onCreate(savedInstanceBundle: Bundle?) {
+    override fun onCreate(savedInstanceBundle: Bundle?) {
         super.onCreate(savedInstanceBundle)
 
         // while this does not appear to be achieving much, handling the redirect in this way

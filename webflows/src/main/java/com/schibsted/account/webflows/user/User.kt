@@ -87,6 +87,11 @@ class User {
     }
 
     /**
+     * Get idToken for User
+     * */
+    fun getIdToken(): String? = tokens?.idToken
+
+    /**
      * Generate URL with embedded one-time code for creating a web session for the current user.
      *
      * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
@@ -166,9 +171,11 @@ class User {
         fun shouldLogout(result: TokenRefreshResult?): Boolean {
             return result is Left &&
                     result.value is RefreshTokenError.RefreshRequestFailed &&
-                    result.value.error is HttpError.ErrorResponse &&
-                    result.value.error.body != null &&
-                    OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
+                    result.value.error is HttpError.ErrorResponse && (
+                        result.value.error.code == 500 ||
+                        result.value.error.body != null &&
+                        OAuthError.fromJson(result.value.error.body).error == "invalid_grant"
+                    )
         }
 
         if (shouldLogout(result)) {

@@ -13,6 +13,7 @@ import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.TokenRequestResult
 import com.schibsted.account.webflows.token.UserTokensResult
+import com.schibsted.account.webflows.user.MigrationStoredUserSession
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
@@ -108,7 +109,8 @@ class MigratingSessionStorageTest {
         """.trimIndent()
 
         val legacyStorage = mockk<LegacySessionStorage>(relaxUnitFun = true)
-        val legacyUserSession = StoredUserSession(legacyClientId, Fixtures.userTokens, Date())
+        val legacyUserSession =
+            MigrationStoredUserSession(legacyClientId, Fixtures.migrationUserTokens, Date())
         every { legacyStorage.get(legacyClientId) } returns legacyUserSession
 
         val newStorage = mockk<SessionStorage>(relaxUnitFun = true)
@@ -219,7 +221,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk {
+        val legacySession: MigrationStoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val migratedSession = StoredUserSession("clientId", mockk(), Date())
@@ -269,7 +271,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk {
+        val legacySession: MigrationStoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val migrationError = TokenError.TokenRequestError(mockk())
@@ -319,7 +321,7 @@ class MigratingSessionStorageTest {
             every { save(any()) } just Runs
         }
 
-        val legacySession: StoredUserSession = mockk {
+        val legacySession: MigrationStoredUserSession = mockk {
             every { userTokens } returns mockk()
         }
         val client = mockk<Client> {

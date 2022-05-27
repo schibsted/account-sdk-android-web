@@ -1,5 +1,6 @@
 package com.schibsted.account.webflows.client
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -36,13 +37,15 @@ class Client : ClientInterface {
     private val stateStorage: StateStorage
     private val sessionStorage: SessionStorage
     private val urlBuilder: UrlBuilder
+    private var logoutCallback: (() -> Unit)? = null
 
     @JvmOverloads
     constructor (
         context: Context,
         configuration: ClientConfiguration,
         httpClient: OkHttpClient,
-        sessionStorageConfig: SessionStorageConfig? = null
+        sessionStorageConfig: SessionStorageConfig? = null,
+        logoutCallback: (() -> Unit)? = null
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
@@ -52,7 +55,8 @@ class Client : ClientInterface {
                 context.applicationContext,
                 this,
                 sessionStorageConfig.legacyClientId,
-                sessionStorageConfig.legacyClientSecret
+                sessionStorageConfig.legacyClientSecret,
+                sessionStorageConfig.legacySharedPrefsFilename
             )
         } else {
             EncryptedSharedPrefsStorage(context.applicationContext)
@@ -63,6 +67,7 @@ class Client : ClientInterface {
         tokenHandler = TokenHandler(configuration, schibstedAccountApi)
         this.httpClient = httpClient
         this.urlBuilder = UrlBuilder(configuration, stateStorage, AUTH_STATE_KEY)
+        this.logoutCallback = logoutCallback
     }
 
     internal constructor (
@@ -104,9 +109,15 @@ class Client : ClientInterface {
      */
     @JvmOverloads
     override fun launchAuth(context: Context, authRequest: AuthRequest) {
-        CustomTabsIntent.Builder()
-            .build()
-            .launchUrl(context, generateLoginUrl(authRequest))
+        val loginUrl = generateLoginUrl(authRequest)
+        try {
+            CustomTabsIntent.Builder()
+                .build()
+                .launchUrl(context, loginUrl)
+        } catch (e: ActivityNotFoundException) {
+            val intent = Intent(Intent.ACTION_VIEW, loginUrl)
+            context.startActivity(intent)
+        }
     }
 
     private fun generateLoginUrl(authRequest: AuthRequest): Uri {
@@ -187,19 +198,30 @@ class Client : ClientInterface {
         }
     }
 
+    private var cashedUser: User? = null
+
     /** Resume any previously logged-in user session */
     override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
         sessionStorage.get(configuration.clientId) { storedUserSession ->
             if (storedUserSession == null) {
+                cashedUser = null
                 callback(null)
             } else {
-                callback(User(this, storedUserSession.userTokens))
+                val user = User(this, storedUserSession.userTokens)
+                if (user.equals(cashedUser)) {
+                    callback(cashedUser)
+                } else {
+                    cashedUser = user
+                    callback(cashedUser)
+                }
             }
         }
     }
 
     internal fun destroySession() {
         sessionStorage.remove(configuration.clientId)
+
+        logoutCallback?.invoke()
     }
 
     internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
@@ -220,7 +242,7 @@ class Client : ClientInterface {
                     val userSession =
                         StoredUserSession(configuration.clientId, userTokens, Date())
                     sessionStorage.save(userSession)
-                    Timber.i("Refreshed user tokens: $result")
+                    Timber.d("Refreshed user tokens: $result")
                     Right(userTokens)
                 } else {
                     Timber.i("User has logged-out during token refresh, discarding new tokens.")
@@ -295,4 +317,8 @@ sealed class RefreshTokenError {
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
 
-data class SessionStorageConfig(val legacyClientId: String, val legacyClientSecret: String)
+data class SessionStorageConfig(
+    val legacyClientId: String,
+    val legacyClientSecret: String,
+    val legacySharedPrefsFilename: String? = null
+)

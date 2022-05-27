@@ -1,7 +1,7 @@
 package com.schibsted.account.webflows.persistence.compat
 
+import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.webflows.api.*
-import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.Either
 import io.mockk.*
 import org.junit.Before
@@ -25,12 +25,7 @@ class LegacyClientTest {
 
     @Test
     fun `getAuthCodeFromTokens should callback with code if initial legacyCodeExchange is successful`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val response = Either.Right(CodeExchangeResponse("code"))
 
         every {
@@ -55,12 +50,7 @@ class LegacyClientTest {
 
     @Test
     fun `getAuthCodeFromTokens should forward error through callback if errorcode is not 401`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val errorResponse = Either.Left(HttpError.ErrorResponse(300, "body"))
 
         every {
@@ -83,44 +73,10 @@ class LegacyClientTest {
         verify(exactly = 1) { callback(errorResponse) }
     }
 
-    @Test
-    fun `getAuthCodeFromTokens should forward error through callback if error code is 401, but missing refreshToken`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = null,
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
-        val errorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
-
-        every {
-            schibstedAccountApi.legacyCodeExchange(
-                "accessToken",
-                "newClientId",
-                any()
-            )
-        } answers {
-            val legacyCodeExchangeCallback = thirdArg<(ApiResult<CodeExchangeResponse>) -> Unit>()
-            legacyCodeExchangeCallback(errorResponse)
-        }
-
-        legacyClient.getAuthCodeFromTokens(
-            legacyTokens = legacyToken,
-            newClientId = "newClientId",
-            callback = callback
-        )
-
-        verify(exactly = 1) { callback(errorResponse) }
-    }
 
     @Test
     fun `getAuthCodeFromTokens should forward error through callback if error is other than ErrorResponse`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val errorResponse =
             Either.Left(HttpError.UnexpectedError(Throwable("something went wrong")))
 
@@ -146,12 +102,7 @@ class LegacyClientTest {
 
     @Test
     fun `getAuthCodeFromTokens should forward error through callback if error is 401 and refreshToken is available with refreshToken, but refreshing refreshToken returns null`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val errorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
         val userTokenErrorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
 
@@ -187,12 +138,7 @@ class LegacyClientTest {
 
     @Test
     fun `getAuthCodeFromTokens should callback with code if error is 401 and refreshToken is available with refreshToken, and refreshing refreshToken is sucessful`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val errorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
         val userTokenResponse =
             Either.Right(
@@ -247,12 +193,7 @@ class LegacyClientTest {
 
     @Test
     fun `getAuthCodeFromTokens should callback with code if error is 401 and refreshToken is available with refreshToken, and refreshing refreshToken is sucessful and legacyCodeExchange is successful`() {
-        val legacyToken = UserTokens(
-            accessToken = "accessToken",
-            refreshToken = "refreshToken",
-            idToken = "idToken",
-            idTokenClaims = mockk()
-        )
+        val legacyToken = Fixtures.migrationUserTokens
         val errorResponse = Either.Left(HttpError.ErrorResponse(401, "body"))
         val userTokenResponse =
             Either.Right(

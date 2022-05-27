@@ -15,6 +15,7 @@ import com.schibsted.account.webflows.client.RefreshTokenError
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
+import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
@@ -32,6 +33,44 @@ import java.util.concurrent.CompletableFuture
 
 @RunWith(AndroidJUnit4::class)
 class UserTest {
+
+    @Test
+    fun `Equals fun should return true if token content is the same`() {
+        val userTokens1 =
+            UserTokens("accessToken", "refreshToken", "idToken", Fixtures.idTokenClaims)
+        val userTokens2 =
+            UserTokens("accessToken", "refreshToken", "idToken", Fixtures.idTokenClaims)
+        val user1 = User(Fixtures.getClient(), userTokens1)
+        val user2 = User(Fixtures.getClient(), userTokens2)
+        assertTrue(user1.equals(user2))
+    }
+
+    @Test
+    fun `Equals fun should return null if both users are null`() {
+        val user1: User? = null
+        val user2: User? = null
+        assertNull(user1?.equals(user2))
+    }
+
+    @Test
+    fun `Equals fun should return false is token content is different`() {
+        val userTokens1 =
+            UserTokens("accessToken1", "refreshToken", "idToken", Fixtures.idTokenClaims)
+        val userTokens2 =
+            UserTokens("accessToken2", "refreshToken", "idToken", Fixtures.idTokenClaims)
+        val user1 = User(Fixtures.getClient(), userTokens1)
+        val user2 = User(Fixtures.getClient(), userTokens2)
+        assertFalse(user1.equals(user2))
+    }
+
+    @Test
+    fun `Equals fun should return false if comparing User is null`() {
+        val userTokens1 =
+            UserTokens("accessToken1", "refreshToken", "idToken", Fixtures.idTokenClaims)
+        val user1 = User(Fixtures.getClient(), userTokens1)
+        val user2: User? = null
+        assertFalse(user1.equals(user2))
+    }
 
     @Test
     fun makeAuthenticatedRequestReturnsResponseToCallback() {
