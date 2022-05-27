@@ -98,8 +98,14 @@ class LoggedInActivity : AppCompatActivity() {
     }
 
     private fun evaluateAndUpdateUserSession() {
+        val client = when (intent.getSerializableExtra(FLOW_EXTRA)) {
+            Flow.AUTOMATIC -> ExampleApp.client
+            Flow.MANUAL -> ExampleApp.manualClient
+            else -> throw RuntimeException("Must provide a flow enum")
+        }
+
         val userSession: UserSession? = intent.getParcelableExtra(USER_SESSION_EXTRA)
-        val user = if (userSession != null) User(ExampleApp.client, userSession) else null
+        val user = if (userSession != null) User(client, userSession) else null
         updateUser(user)
     }
 
@@ -111,11 +117,17 @@ class LoggedInActivity : AppCompatActivity() {
     }
 
     companion object {
-        var USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION"
+        private const val USER_SESSION_EXTRA = "com.schibsted.account.USER_SESSION"
+        private const val FLOW_EXTRA = "com.schibsted.account.FLOW"
 
-        fun intentWithUser(context: Context?, user: User): Intent {
+        enum class Flow {
+            AUTOMATIC, MANUAL
+        }
+
+        fun intentWithUser(context: Context?, user: User, flow: Flow): Intent {
             val intent = Intent(context, LoggedInActivity::class.java)
             intent.putExtra(USER_SESSION_EXTRA, user.session)
+            intent.putExtra(FLOW_EXTRA, flow)
             return intent
         }
     }

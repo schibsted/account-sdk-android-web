@@ -37,13 +37,15 @@ class Client : ClientInterface {
     private val stateStorage: StateStorage
     private val sessionStorage: SessionStorage
     private val urlBuilder: UrlBuilder
+    private var logoutCallback: (() -> Unit)? = null
 
     @JvmOverloads
     constructor (
         context: Context,
         configuration: ClientConfiguration,
         httpClient: OkHttpClient,
-        sessionStorageConfig: SessionStorageConfig? = null
+        sessionStorageConfig: SessionStorageConfig? = null,
+        logoutCallback: (() -> Unit)? = null
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
@@ -65,6 +67,7 @@ class Client : ClientInterface {
         tokenHandler = TokenHandler(configuration, schibstedAccountApi)
         this.httpClient = httpClient
         this.urlBuilder = UrlBuilder(configuration, stateStorage, AUTH_STATE_KEY)
+        this.logoutCallback = logoutCallback
     }
 
     internal constructor (
@@ -217,6 +220,8 @@ class Client : ClientInterface {
 
     internal fun destroySession() {
         sessionStorage.remove(configuration.clientId)
+
+        logoutCallback?.invoke()
     }
 
     internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
