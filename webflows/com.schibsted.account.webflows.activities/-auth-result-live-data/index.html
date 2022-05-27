@@ -1,0 +1,318 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>AuthResultLiveData</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><link href="../../../styles/prism.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script><script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script><script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>  </head>
+  <body>
+    <div class="navigation-wrapper" id="navigation-wrapper">
+      <div id="leftToggler"><span class="icon-toggler"></span></div>
+      <div class="library-name"><a href="../../../index.html">webflows</a></div>
+      <div>2.4.3-14-gc6530ff</div>
+      <div class="pull-right d-flex"><button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+      </div>
+    </div>
+    <div id="container">
+      <div id="leftColumn">
+        <div id="sideMenu"></div>
+      </div>
+      <div id="main">
+        <div class="main-content" id="content" pageIds="webflows::com.schibsted.account.webflows.activities/AuthResultLiveData///PointingToDeclaration//586576867">
+          <div class="breadcrumbs"><a href="../../../index.html">webflows</a>/<a href="../index.html">com.schibsted.account.webflows.activities</a>/<a href="index.html">AuthResultLiveData</a></div>
+          <div class="cover ">
+            <h1 class="cover"><span>Auth</span><wbr></wbr><span>Result</span><wbr></wbr><span>Live</span><wbr></wbr><span><span>Data</span></span></h1>
+            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">AuthResultLiveData</a> : <a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LiveData.html">LiveData</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../index.html#1209040028%2FClasslikes%2F586576867">AuthResult</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Holds current logged-in state of user.</p><p class="paragraph">When initiated it will try to resume last logged-in user from persisted session data. It may go through the following states:</p><ol><li><p class="paragraph">After init: Success(User) or Failure(NotAuthed.NoLoggedInUser)</p></li><li><p class="paragraph">Auth flow started: Failure(NotAuthed.AuthInProgress)</p></li><li><p class="paragraph">Auth flow completed: Success(User) or Failure(NotAuthed.LoginFailed)</p></li><li><p class="paragraph">Auth flow cancelled: Failure(NotAuthed.CancelledByUser)</p></li><li><p class="paragraph">User logs out: Failure(NotAuthed.NoLoggedInUser)</p></li></ol></div></div>
+          </div>
+          <div class="tabbedcontent">
+            <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+            <div class="tabs-section-body">
+              <h2 class="">Types</h2>
+              <div class="table" data-togglable="Types"><a data-name="-1499338616%2FClasslikes%2F586576867" anchor-label="Companion" id="-1499338616%2FClasslikes%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1499338616%2FClasslikes%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <h2 class="">Functions</h2>
+              <div class="table" data-togglable="Functions"><a data-name="-1482381820%2FFunctions%2F586576867" anchor-label="changeActiveCounter" id="-1482381820%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1482381820%2FFunctions%2F586576867"><span>change</span><wbr></wbr><span>Active</span><wbr></wbr><span><span>Counter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1482381820%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1482381820%2FFunctions%2F586576867"><span class="token function">changeActiveCounter</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1983261550%2FFunctions%2F586576867" anchor-label="dispatchingValue" id="-1983261550%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1983261550%2FFunctions%2F586576867"><span>dispatching</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1983261550%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1983261550%2FFunctions%2F586576867"><span class="token function">dispatchingValue</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation">Nullable</span></a> </span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LiveData.ObserverWrapper.html">LiveData.ObserverWrapper</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="685674515%2FFunctions%2F586576867" anchor-label="getValue" id="685674515%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#685674515%2FFunctions%2F586576867"><span>get</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="685674515%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation">Nullable</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#685674515%2FFunctions%2F586576867"><span class="token function">getValue</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html#1209040028%2FClasslikes%2F586576867">AuthResult</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-256882484%2FFunctions%2F586576867" anchor-label="getVersion" id="-256882484%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-256882484%2FFunctions%2F586576867"><span>get</span><wbr></wbr><span><span>Version</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-256882484%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-256882484%2FFunctions%2F586576867"><span class="token function">getVersion</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1328333103%2FFunctions%2F586576867" anchor-label="hasActiveObservers" id="-1328333103%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1328333103%2FFunctions%2F586576867"><span>has</span><wbr></wbr><span>Active</span><wbr></wbr><span><span>Observers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1328333103%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1328333103%2FFunctions%2F586576867"><span class="token function">hasActiveObservers</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1046544021%2FFunctions%2F586576867" anchor-label="hasObservers" id="-1046544021%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1046544021%2FFunctions%2F586576867"><span>has</span><wbr></wbr><span><span>Observers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1046544021%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1046544021%2FFunctions%2F586576867"><span class="token function">hasObservers</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1615624474%2FFunctions%2F586576867" anchor-label="observe" id="-1615624474%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1615624474%2FFunctions%2F586576867"><span><span>observe</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1615624474%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1615624474%2FFunctions%2F586576867"><span class="token function">observe</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a> </span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a><span class="token punctuation">, </span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a> </span>p1<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/Observer.html">Observer</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="1599192834%2FFunctions%2F586576867" anchor-label="observeForever" id="1599192834%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#1599192834%2FFunctions%2F586576867"><span>observe</span><wbr></wbr><span><span>Forever</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1599192834%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1599192834%2FFunctions%2F586576867"><span class="token function">observeForever</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a> </span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/Observer.html">Observer</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="931098953%2FFunctions%2F586576867" anchor-label="onActive" id="931098953%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#931098953%2FFunctions%2F586576867"><span>on</span><wbr></wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="931098953%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#931098953%2FFunctions%2F586576867"><span class="token function">onActive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="989844228%2FFunctions%2F586576867" anchor-label="onInactive" id="989844228%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#989844228%2FFunctions%2F586576867"><span>on</span><wbr></wbr><span><span>Inactive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="989844228%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#989844228%2FFunctions%2F586576867"><span class="token function">onInactive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="720011319%2FFunctions%2F586576867" anchor-label="postValue" id="720011319%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#720011319%2FFunctions%2F586576867"><span>post</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="720011319%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#720011319%2FFunctions%2F586576867"><span class="token function">postValue</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="917563793%2FFunctions%2F586576867" anchor-label="removeObserver" id="917563793%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#917563793%2FFunctions%2F586576867"><span>remove</span><wbr></wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="917563793%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#917563793%2FFunctions%2F586576867"><span class="token function">removeObserver</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a> </span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/Observer.html">Observer</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="1487287389%2FFunctions%2F586576867" anchor-label="removeObservers" id="1487287389%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#1487287389%2FFunctions%2F586576867"><span>remove</span><wbr></wbr><span><span>Observers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1487287389%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1487287389%2FFunctions%2F586576867"><span class="token function">removeObservers</span></a><span class="token punctuation">(</span><span><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation">NonNull</span></a> </span>p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/lifecycle/LifecycleOwner.html">LifecycleOwner</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1819164229%2FFunctions%2F586576867" anchor-label="setValue" id="-1819164229%2FFunctions%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1819164229%2FFunctions%2F586576867"><span>set</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1819164229%2FFunctions%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/MainThread.html"><span class="token annotation">MainThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-1819164229%2FFunctions%2F586576867"><span class="token function">setValue</span></a><span class="token punctuation">(</span>p0<span class="token operator">: </span><a href="../../com.schibsted.account.webflows.util/-either/index.html">Either</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-not-authed/index.html">NotAuthed</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../com.schibsted.account.webflows.user/-user/index.html">User</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <h2 class="">Properties</h2>
+              <div class="table" data-togglable="Properties"><a data-name="-163308686%2FProperties%2F586576867" anchor-label="mActiveCount" id="-163308686%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-163308686%2FProperties%2F586576867">mActiveCount</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-163308686%2FProperties%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><a data-name="-163308686%2FProperties%2F586576867" anchor-label="mActiveCount" id="-163308686%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="index.html#-163308686%2FProperties%2F586576867">mActiveCount</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="-1918813974%2FProperties%2F586576867" anchor-label="mDataLock" id="-1918813974%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#-1918813974%2FProperties%2F586576867">mDataLock</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1918813974%2FProperties%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><a data-name="-1918813974%2FProperties%2F586576867" anchor-label="mDataLock" id="-1918813974%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="index.html#-1918813974%2FProperties%2F586576867">mDataLock</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+<a data-name="230544954%2FProperties%2F586576867" anchor-label="mPendingData" id="230544954%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a>
+                <div class="table-row" data-filterable-current=":webflows:dokkaHtml/release" data-filterable-set=":webflows:dokkaHtml/release">
+                  <div class="main-subrow keyValue ">
+                    <div class=""><span class="inline-flex">
+                        <div><a href="index.html#230544954%2FProperties%2F586576867">mPendingData</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="230544954%2FProperties%2F586576867"></span>
+                          <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                        </span></span></div>
+                    <div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":webflows:dokkaHtml/release"><a data-name="230544954%2FProperties%2F586576867" anchor-label="mPendingData" id="230544954%2FProperties%2F586576867" data-filterable-set=":webflows:dokkaHtml/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="index.html#230544954%2FProperties%2F586576867">mPendingData</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
+      </div>
+    </div>
+  </body>
+</html>
+
