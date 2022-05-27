@@ -199,6 +199,11 @@ class User {
         return (other is User) && tokens == other.tokens
     }
 
+    /** For testing purposes only, to set userTokens*/
+    fun setUserTokensForTesting(tokens: UserTokens) {
+        this.tokens = tokens
+    }
+
     private fun <T> onlyIfLoggedIn(block: (UserTokens) -> T): T {
         val currentTokens = tokens
             ?: throw IllegalStateException("Can not use tokens of logged-out user!")

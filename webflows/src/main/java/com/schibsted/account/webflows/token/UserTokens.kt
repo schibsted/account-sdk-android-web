@@ -5,7 +5,7 @@ import com.schibsted.account.webflows.util.Util
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class UserTokens(
+data class UserTokens(
     val accessToken: String,
     val refreshToken: String?,
     val idToken: String,

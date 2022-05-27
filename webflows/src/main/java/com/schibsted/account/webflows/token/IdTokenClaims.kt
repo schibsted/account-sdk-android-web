@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class IdTokenClaims(
+data class IdTokenClaims(
     val iss: String,
     val sub: String,
     val userId: String,

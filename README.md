@@ -125,7 +125,7 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
    as reference):
    ```kotlin
    class MainActivity : AppCompatActivity() {
-        override fun onCreate(savedInstanceState: Bundle?) {
+       override fun onCreate(savedInstanceState: Bundle?) {
            super.onCreate(savedInstanceState)
    
            AuthResultLiveData.get().observe(this,
