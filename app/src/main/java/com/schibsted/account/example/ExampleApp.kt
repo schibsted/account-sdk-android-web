@@ -4,7 +4,6 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
-import android.webkit.CookieManager
 import com.schibsted.account.BuildConfig
 import com.schibsted.account.example.ClientConfig.environment
 import com.schibsted.account.example.HttpClient.instance
@@ -19,12 +18,6 @@ class ExampleApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
-        val cookieManager: CookieManager = CookieManager.getInstance()
-        cookieManager.removeAllCookies() {
-            Timber.d("remove all cookies: $it")
-        }
-        cookieManager.setAcceptCookie(false)
 
         initClient()
         initManualClient()

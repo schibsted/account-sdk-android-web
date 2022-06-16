@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         initializeButtons()
         observeAuthResultLiveData()
-        
+
     }
 
 
