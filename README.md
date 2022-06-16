@@ -243,3 +243,4 @@ these steps:
 
       **Note:** If the refresh token request fails, due to the refresh token itself having expired
       or been invalidated by the user, the SDK will log the user out.
+      
