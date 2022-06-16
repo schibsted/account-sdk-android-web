@@ -14,6 +14,14 @@ env:
     # Encrypted ORG_GRADLE_PROJECT_sonatypePassword
     - secure: "LNlry39I/iQt/3vR31WHhg33w1amttlzcpKE4zIb5V2bDcQ9aTHiqNKdmUyx2DmGxVtEFc5zuZUbbnwi+sGJjLronbqS0Rt8Ol9IkCZm9Hs6zmql9y8wh3OgwyXMuZaEpojJtGI0FR0MH9cAC1f/gXf684Zf+r3axQiZX8OvIRgCf1mLR8dfnM1ul46wYu0A0moW0qrOiZnFDkxxhgXjczgRzEp0ErNfv6waRifX230h/fm9sKA3o6tpaw76njZ+WEQGEvYM73VuREcwU9DI2qj3/8JS4LtQcACwvT5T8YVA8QnctL+3MdVVcdnCixT0ZDz6iU2rKvq7H7LQ80WlbLC0l4oa5Q6GGk/GUVMutxiBhHm/gm7czbgUA9HCuKWctZFgjW9JRQbcP/YHislFZ1UzeahtotsX2LJIsprqlL7UTSL9w0Khxj7pAbMqbsns+xzIQl/GfkKJOSxhrr7tGilXmm9SLY+HQV1Vet04fy/L3yZToxmkfA61vsWF+wuCZc1axOdldFiumuzNSbqPIiCP4sv74a0GTBpZG++RtM8vjTY22gUOdfIYAJTuhZLe1q3wwjQ4GMEjuvCbTxAzzY8t01Ld1SanAidVzPeKdb4Qjj8Ic46tfUfGz3eccJljSJovfEWlULMhILHq6p0N/rbmQnSYSKNuiNhU7w65Olw="
 
+before_install:
+  # @todo https://github.schibsted.io/spt-identity/t/issues/1672
+  - touch $HOME/.android/repositories.cfg
+  - wget "https://dl.google.com/android/repository/commandlinetools-linux-7302050_latest.zip" -O commandlinetools.zip
+  - unzip commandlinetools.zip -d $ANDROID_HOME/
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-29" --sdk_root=$ANDROID_HOME
+  - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;29.0.3" --sdk_root=$ANDROID_HOME
+
 script: ./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
 
 before_cache:
