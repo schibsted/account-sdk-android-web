@@ -7,6 +7,7 @@ import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
 import com.schibsted.account.webflows.user.StoredUserSession
 import timber.log.Timber
 import java.io.File
@@ -25,7 +26,10 @@ internal interface SessionStorage {
     fun remove(clientId: String)
 }
 
-internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorage {
+internal class EncryptedSharedPrefsStorage(
+    val context: Context,
+    private val eventListener: WebFlowsEventListener
+) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
 
     private var _sharedPreferences: SharedPreferences? = null
@@ -63,6 +67,7 @@ internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorag
         _sharedPreferences = try {
             buildSharedPreferences(context)
         } catch (e: GeneralSecurityException) {
+            eventListener.createEncryptedSharedPreferencesFailure(e)
             Timber.e(
                 "Error occurred while trying to build shared preferences, trying to recover",
                 e
@@ -76,7 +81,7 @@ internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorag
 
     private fun buildSharedPreferences(context: Context): SharedPreferences {
         Timber.d("Building the encrypted shared preferences")
-
+        eventListener.createEncryptedSharedPreferences()
         val masterKey = MasterKey.Builder(context.applicationContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -97,6 +102,7 @@ internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorag
      * will also try to delete the master key entry in the keystore.
      */
     private fun deleteSharedPreferences(context: Context) {
+        eventListener.deletePreferencesStart()
         Timber.d("Trying to delete encrypted shared preferences")
 
         try {
@@ -118,9 +124,10 @@ internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorag
             val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
             keyStore.deleteEntry(MasterKey.DEFAULT_MASTER_KEY_ALIAS)
-
+            eventListener.deletePreferencesEnd()
             Timber.d("Finished deleting encrypted shared preferences")
         } catch (e: Exception) {
+            eventListener.deletePreferencesError()
             Timber.e("Error occurred while trying to delete encrypted shared preferences", e)
         }
     }
@@ -158,18 +165,20 @@ internal class EncryptedSharedPrefsStorage(val context: Context) : SessionStorag
 
     @Synchronized
     override fun get(clientId: String, callback: (StoredUserSession?) -> Unit) {
+        eventListener.preferencesReadStart()
         val prefs = getSharedPreferences()
             ?: throw IllegalStateException("Shared preferences has not been initialized")
 
         try {
             val json = prefs.getString(clientId, null) ?: return callback(null)
-
+            eventListener.preferencesReadEnd()
             callback(gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(json))
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to get data from the encrypted shared preferences, trying to recover (returning null)",
                 e
             )
+            eventListener.preferencesReadError(e)
 
             deleteSharedPreferences(context)
 

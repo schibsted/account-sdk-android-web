@@ -39,7 +39,8 @@ class ExampleApp : Application() {
         client = Client(
             context = applicationContext,
             configuration = clientConfig,
-            httpClient = instance
+            httpClient = instance,
+            eventListener = LoggingEventListener()
         )
     }
 

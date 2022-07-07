@@ -8,6 +8,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
@@ -45,7 +46,8 @@ class Client : ClientInterface {
         configuration: ClientConfiguration,
         httpClient: OkHttpClient,
         sessionStorageConfig: SessionStorageConfig? = null,
-        logoutCallback: (() -> Unit)? = null
+        logoutCallback: (() -> Unit)? = null,
+        eventListener: WebFlowsEventListener = WebFlowsEventListener.NONE
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
@@ -56,10 +58,11 @@ class Client : ClientInterface {
                 this,
                 sessionStorageConfig.legacyClientId,
                 sessionStorageConfig.legacyClientSecret,
-                sessionStorageConfig.legacySharedPrefsFilename
+                sessionStorageConfig.legacySharedPrefsFilename,
+                eventListener
             )
         } else {
-            EncryptedSharedPrefsStorage(context.applicationContext)
+            EncryptedSharedPrefsStorage(context.applicationContext, eventListener)
         }
 
         schibstedAccountApi =

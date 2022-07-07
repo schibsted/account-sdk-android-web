@@ -3,6 +3,7 @@ package com.schibsted.account.webflows.persistence.compat
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.user.MigrationStoredUserSession
@@ -14,7 +15,7 @@ internal class MigratingSessionStorage(
     private val newStorage: SessionStorage,
     private val legacyStorage: LegacySessionStorage,
     private val legacyClientId: String,
-    private val legacyClientSecret: String
+    private val legacyClientSecret: String,
 ) : SessionStorage {
 
     internal constructor(
@@ -22,13 +23,14 @@ internal class MigratingSessionStorage(
         client: Client,
         legacyClientId: String,
         legacyClientSecret: String,
-        legacySharedPrefsFilename: String?
+        legacySharedPrefsFilename: String?,
+        eventListener: WebFlowsEventListener
     ) : this(
         client,
-        EncryptedSharedPrefsStorage(context),
+        EncryptedSharedPrefsStorage(context, eventListener),
         LegacySessionStorage(context, legacySharedPrefsFilename),
         legacyClientId,
-        legacyClientSecret
+        legacyClientSecret,
     )
 
     override fun save(session: StoredUserSession) {
