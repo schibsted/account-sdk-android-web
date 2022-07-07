@@ -7,7 +7,7 @@ import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
+import com.schibsted.account.webflows.client.listener.EncryptedSharedPreferencesEventListener
 import com.schibsted.account.webflows.user.StoredUserSession
 import timber.log.Timber
 import java.io.File
@@ -28,7 +28,7 @@ internal interface SessionStorage {
 
 internal class EncryptedSharedPrefsStorage(
     val context: Context,
-    private val eventListener: WebFlowsEventListener
+    private val eventListener: EncryptedSharedPreferencesEventListener
 ) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
 
@@ -127,7 +127,7 @@ internal class EncryptedSharedPrefsStorage(
             eventListener.deletePreferencesEnd()
             Timber.d("Finished deleting encrypted shared preferences")
         } catch (e: Exception) {
-            eventListener.deletePreferencesError()
+            eventListener.deletePreferencesError(e)
             Timber.e("Error occurred while trying to delete encrypted shared preferences", e)
         }
     }

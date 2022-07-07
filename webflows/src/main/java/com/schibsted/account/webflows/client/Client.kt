@@ -8,7 +8,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
-import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
+import com.schibsted.account.webflows.client.listener.EncryptedSharedPreferencesEventListener
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
@@ -47,7 +47,7 @@ class Client : ClientInterface {
         httpClient: OkHttpClient,
         sessionStorageConfig: SessionStorageConfig? = null,
         logoutCallback: (() -> Unit)? = null,
-        eventListener: WebFlowsEventListener = WebFlowsEventListener.NONE
+        eventListener: EncryptedSharedPreferencesEventListener = EncryptedSharedPreferencesEventListener.NONE
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)

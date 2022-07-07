@@ -3,7 +3,7 @@ package com.schibsted.account.webflows.persistence.compat
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
-import com.schibsted.account.webflows.client.listener.WebFlowsEventListener
+import com.schibsted.account.webflows.client.listener.EncryptedSharedPreferencesEventListener
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.user.MigrationStoredUserSession
@@ -24,7 +24,7 @@ internal class MigratingSessionStorage(
         legacyClientId: String,
         legacyClientSecret: String,
         legacySharedPrefsFilename: String?,
-        eventListener: WebFlowsEventListener
+        eventListener: EncryptedSharedPreferencesEventListener
     ) : this(
         client,
         EncryptedSharedPrefsStorage(context, eventListener),

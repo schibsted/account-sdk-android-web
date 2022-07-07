@@ -7,7 +7,7 @@ import java.security.GeneralSecurityException
  * One of the teams has a strange issue with user being logged out
  * and they suspect the androidx.crypto library might be the reason.
  */
-abstract class WebFlowsEventListener {
+abstract class EncryptedSharedPreferencesEventListener {
 
     open fun preferencesReadStart() {}
 
@@ -23,10 +23,10 @@ abstract class WebFlowsEventListener {
 
     open fun deletePreferencesEnd() {}
 
-    open fun deletePreferencesError() {}
+    open fun deletePreferencesError(e: Exception) {}
 
 
     companion object {
-        val NONE = object : WebFlowsEventListener() {}
+        val NONE = object : EncryptedSharedPreferencesEventListener() {}
     }
 }
