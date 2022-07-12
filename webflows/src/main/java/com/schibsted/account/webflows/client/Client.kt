@@ -1,6 +1,5 @@
 package com.schibsted.account.webflows.client
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -103,7 +102,7 @@ class Client : ClientInterface {
                 intent.data = loginUrl
             }.intent
         } else {
-            Intent(Intent.ACTION_VIEW, loginUrl)
+            Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
         }
         return AuthorizationManagementActivity.createStartIntent(context, intent)
     }
@@ -121,7 +120,7 @@ class Client : ClientInterface {
                 .build()
                 .launchUrl(context, loginUrl)
         } else {
-            val intent = Intent(Intent.ACTION_VIEW, loginUrl)
+            val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
             context.startActivity(intent)
         }
     }

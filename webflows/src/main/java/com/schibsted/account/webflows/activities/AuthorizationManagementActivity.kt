@@ -165,9 +165,9 @@ class AuthorizationManagementActivity : Activity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         outState.putBoolean(KEY_AUTHORIZATION_STARTED, authStarted)
         outState.putParcelable(KEY_AUTH_INTENT, authIntent)
+        super.onSaveInstanceState(outState)
     }
 
     private fun handleAuthorizationComplete() {
