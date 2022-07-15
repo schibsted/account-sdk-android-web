@@ -22,7 +22,7 @@ before_install:
   - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "platforms;android-29" --sdk_root=$ANDROID_HOME
   - yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager "build-tools;29.0.3" --sdk_root=$ANDROID_HOME
 
-script: ./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
+script: echo $ENCRYPT_TEST #./gradlew build testRelease connectedCheck --exclude-task testDebugUnitTest
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
