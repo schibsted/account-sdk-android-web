@@ -1,10 +1,10 @@
 package com.schibsted.account.webflows.client
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsService
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
@@ -96,10 +96,15 @@ class Client : ClientInterface {
      */
     @JvmOverloads
     override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest): Intent {
-        val customTabsIntent = CustomTabsIntent.Builder().build().apply {
-            intent.data = generateLoginUrl(authRequest)
+        val loginUrl = generateLoginUrl(authRequest)
+        val intent: Intent = if (this.isCustomTabsSupported(context)) {
+            CustomTabsIntent.Builder().build().apply {
+                intent.data = loginUrl
+            }.intent
+        } else {
+            Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
         }
-        return AuthorizationManagementActivity.createStartIntent(context, customTabsIntent.intent)
+        return AuthorizationManagementActivity.createStartIntent(context, intent)
     }
 
     /**
@@ -110,12 +115,12 @@ class Client : ClientInterface {
     @JvmOverloads
     override fun launchAuth(context: Context, authRequest: AuthRequest) {
         val loginUrl = generateLoginUrl(authRequest)
-        try {
+        if (this.isCustomTabsSupported(context)) {
             CustomTabsIntent.Builder()
                 .build()
                 .launchUrl(context, loginUrl)
-        } catch (e: ActivityNotFoundException) {
-            val intent = Intent(Intent.ACTION_VIEW, loginUrl)
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
             context.startActivity(intent)
         }
     }
@@ -124,6 +129,13 @@ class Client : ClientInterface {
         val loginUrl = urlBuilder.loginUrl(authRequest)
         Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
+    }
+
+    private fun isCustomTabsSupported(context: Context): Boolean {
+        val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
+        val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
+
+        return !resolveInfos.isEmpty()
     }
 
     /**

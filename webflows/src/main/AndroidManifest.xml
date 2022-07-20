@@ -11,4 +11,9 @@
         <activity android:name="com.schibsted.account.webflows.activities.RedirectUriReceiverActivity" />
     </application>
 
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
 </manifest>
