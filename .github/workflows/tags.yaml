@@ -2,9 +2,8 @@ name: Release SDK
 env:
   ORG_GRADLE_PROJECT_sonatypeUsername: samuelg
   ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.ORG_GRADLE_PROJECT_SONATYPEPASSWORD }}
-  SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
   SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+  SIGNING_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
 on:
   push:
