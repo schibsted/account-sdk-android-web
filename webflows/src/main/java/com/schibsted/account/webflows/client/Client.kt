@@ -11,6 +11,7 @@ import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.persistence.compat.MigratingSessionStorage
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
@@ -213,20 +214,26 @@ class Client : ClientInterface {
     private var cashedUser: User? = null
 
     /** Resume any previously logged-in user session */
-    override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
-        sessionStorage.get(configuration.clientId) { storedUserSession ->
-            if (storedUserSession == null) {
-                cashedUser = null
-                callback(null)
-            } else {
-                val user = User(this, storedUserSession.userTokens)
-                if (user.equals(cashedUser)) {
-                    callback(cashedUser)
-                } else {
-                    cashedUser = user
-                    callback(cashedUser)
+    override fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
+        sessionStorage.get(configuration.clientId) { result ->
+            result
+                .foreach { storedUserSession: StoredUserSession? ->
+                    if (storedUserSession == null) {
+                        cashedUser = null
+                        callback(Right(null))
+                    } else {
+                        val user = User(this, storedUserSession.userTokens)
+                        if (user.equals(cashedUser)) {
+                            callback(Right(cashedUser))
+                        } else {
+                            cashedUser = user
+                            callback(Right(cashedUser))
+                        }
+                    }
                 }
-            }
+                .left().foreach {
+                    callback(Left(it))
+                }
         }
     }
 

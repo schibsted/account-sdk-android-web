@@ -8,6 +8,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.schibsted.account.webflows.user.StoredUserSession
+import com.schibsted.account.webflows.util.Either
+import timber.log.Timber
+import java.security.GeneralSecurityException
+
+internal typealias StorageReadCallback = (Either<StorageError, StoredUserSession?>) -> Unit
 
 /**
  * User session storage.
@@ -17,7 +22,7 @@ import com.schibsted.account.webflows.user.StoredUserSession
  */
 internal interface SessionStorage {
     fun save(session: StoredUserSession)
-    fun get(clientId: String, callback: (StoredUserSession?) -> Unit)
+    fun get(clientId: String, callback: StorageReadCallback)
     fun remove(clientId: String)
 }
 
@@ -29,25 +34,54 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
-        EncryptedSharedPreferences.create(
-            context.applicationContext,
-            PREFERENCE_FILENAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        try {
+            EncryptedSharedPreferences.create(
+                context.applicationContext,
+                PREFERENCE_FILENAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: GeneralSecurityException) {
+            Timber.e(
+                "Error occurred while trying to build encrypted shared preferences",
+                e
+            )
+            throw e
+        }
     }
 
     override fun save(session: StoredUserSession) {
-        val editor = prefs.edit()
-        val json = gson.toJson(session)
-        editor.putString(session.clientId, json)
-        editor.apply()
+        try {
+            val editor = prefs.edit()
+            val json = gson.toJson(session)
+            editor.putString(session.clientId, json)
+            editor.apply()
+        } catch (e: SecurityException) {
+            Timber.e(
+                "Error occurred while trying to write to encrypted shared preferences",
+                e
+            )
+        }
     }
 
-    override fun get(clientId: String, callback: (StoredUserSession?) -> Unit) {
-        val json = prefs.getString(clientId, null) ?: return callback(null)
-        callback(gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(json))
+    override fun get(clientId: String, callback: StorageReadCallback) {
+        try {
+            val json = prefs.getString(clientId, null) ?: return callback(Either.Right(null))
+            callback(
+                Either.Right(
+                    gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(
+                        json
+                    )
+                )
+            )
+        } catch (e: SecurityException) {
+            Timber.e(
+                "Error occurred while trying to read from encrypted shared preferences",
+                e
+            )
+            callback(Either.Left(StorageError.UnexpectedError(e)))
+        }
     }
 
     private fun Gson.getStoredUserSession(json: String): StoredUserSession? {
@@ -59,9 +93,16 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     }
 
     override fun remove(clientId: String) {
-        val editor = prefs.edit()
-        editor.remove(clientId)
-        editor.apply()
+        try {
+            val editor = prefs.edit()
+            editor.remove(clientId)
+            editor.apply()
+        } catch (e: SecurityException) {
+            Timber.e(
+                "Error occurred while trying to delete from encrypted shared preferences",
+                e
+            )
+        }
     }
 
     companion object {
