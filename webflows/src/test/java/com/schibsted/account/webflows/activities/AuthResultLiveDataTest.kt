@@ -10,7 +10,9 @@ import com.schibsted.account.testutil.assertRight
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.LoginError
 import com.schibsted.account.webflows.client.LoginResultHandler
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
@@ -56,8 +58,8 @@ class AuthResultLiveDataTest {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
         every { client.resumeLastLoggedInUser(any()) } answers {
-            val callback = firstArg<(User?) -> Unit>()
-            callback(user)
+            val callback = firstArg<(Either<StorageError, User?>) -> Unit>()
+            callback(Right(user))
         }
 
         AuthResultLiveData.create(client)
@@ -68,8 +70,8 @@ class AuthResultLiveDataTest {
     fun initResumesNoLoggedInUser() {
         val client = mockk<Client>(relaxed = true)
         every { client.resumeLastLoggedInUser(any()) } answers {
-            val callback = firstArg<(User?) -> Unit>()
-            callback(null)
+            val callback = firstArg<(Either<StorageError, User?>) -> Unit>()
+            callback(Right(null))
         }
 
         AuthResultLiveData.create(client)
@@ -119,8 +121,8 @@ class AuthResultLiveDataTest {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
         every { client.resumeLastLoggedInUser(any()) } answers {
-            val callback = firstArg<(User?) -> Unit>()
-            callback(user)
+            val callback = firstArg<(Either<StorageError, User?>) -> Unit>()
+            callback(Right(user))
         }
         AuthResultLiveData.create(client)
 

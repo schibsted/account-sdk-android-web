@@ -13,6 +13,7 @@ import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
+import com.schibsted.account.webflows.persistence.StorageReadCallback
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.TokenRequestResult
@@ -127,16 +128,18 @@ class ClientTest {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
-            val callback = secondArg<(StoredUserSession?) -> Unit>()
-            callback(userSession)
+            val callback = secondArg<StorageReadCallback>()
+            callback(Right(userSession))
         }
         val client = getClient(sessionStorage = sessionStorageMock)
 
         client.resumeLastLoggedInUser { result ->
-            assertEquals(
-                User(client, UserSession(Fixtures.userTokens)),
-                result
-            )
+            result.assertRight {
+                assertEquals(
+                    User(client, UserSession(Fixtures.userTokens)),
+                    it
+                )
+            }
         }
     }
 
