@@ -85,50 +85,53 @@ tasks.withType(Test) {
     }
 }
 
-afterEvaluate {
+android {
     publishing {
-        publications {
-            release(MavenPublication) {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            afterEvaluate {
                 from components.release
-                artifact(sourceJar)
+            }
 
-                artifactId = 'account-sdk-android-web'
-                groupId = 'com.schibsted.account'
-                version = project.version
+            artifactId = 'account-sdk-android-web'
+            groupId = 'com.schibsted.account'
+            version = project.version
 
-                pom {
-                    name = 'Schibsted account Android SDK'
-                    description = "Schibsted account Android SDK ${project.version}"
+            pom {
+                name = 'Schibsted account Android SDK'
+                description = "Schibsted account Android SDK ${project.version}"
+                url = 'https://github.com/schibsted/account-sdk-android-web'
+
+                scm {
+                    connection = 'scm:git:https://github.com/schibsted/account-sdk-android-web.git'
                     url = 'https://github.com/schibsted/account-sdk-android-web'
+                }
 
-                    scm {
-                        connection = 'scm:git:https://github.com/schibsted/account-sdk-android-web.git'
-                        url = 'https://github.com/schibsted/account-sdk-android-web'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
                     }
+                }
 
-                    licenses {
-                        license {
-                            name = 'MIT License'
-                            url = 'https://opensource.org/licenses/MIT'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id = 'schibsted-account'
-                            name = 'Schibsted account'
-                            email = 'schibstedaccount@schibsted.com'
-                        }
+                developers {
+                    developer {
+                        id = 'schibsted-account'
+                        name = 'Schibsted account'
+                        email = 'schibstedaccount@schibsted.com'
                     }
                 }
             }
         }
     }
-}
-
-task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier "sources"
 }
 
 static String base64Decode(String envVar) {
