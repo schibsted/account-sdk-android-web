@@ -14,6 +14,7 @@ import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.persistence.StorageReadCallback
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
@@ -22,12 +23,10 @@ import com.schibsted.account.webflows.token.UserTokensResult
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
+import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.verify
+import io.mockk.*
 import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
@@ -158,6 +157,23 @@ class RetrofitClientTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun storageErrorIsPropagatedToCallback() {
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
+        val error = StorageError.UnexpectedError(Exception("Something went wrong"))
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<StorageReadCallback>()
+            callback(Left(error))
+        }
+        val client = getRetrofitClient(Fixtures.getClient(sessionStorage = sessionStorageMock))
+
+        val resultCallback = mockk<(Either<StorageError, User?>) -> Unit>()
+        every { resultCallback(any()) } just Runs
+
+        client.resumeLastLoggedInUser(resultCallback)
+        verify(exactly = 1) { resultCallback(Left(error)) }
     }
 
     @Test
