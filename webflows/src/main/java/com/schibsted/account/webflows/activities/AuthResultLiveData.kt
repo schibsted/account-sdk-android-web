@@ -49,7 +49,7 @@ class AuthResultLiveData private constructor(private val client: Client) :
                     }
                 }
                 .left().foreach {
-                    Left(NotAuthed.NoLoggedInUser)
+                    value = Left(NotAuthed.NoLoggedInUser)
                 }
         }
     }

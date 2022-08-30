@@ -79,6 +79,18 @@ class AuthResultLiveDataTest {
     }
 
     @Test
+    fun initHandlesStorageError() {
+        val client = mockk<Client>(relaxed = true)
+        every { client.resumeLastLoggedInUser(any()) } answers {
+            val callback = firstArg<(Either<StorageError, User?>) -> Unit>()
+            callback(Left(StorageError.UnexpectedError(Exception("Something went wrong"))))
+        }
+
+        AuthResultLiveData.create(client)
+        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
+    }
+
+    @Test
     fun updateHandlesSuccessResult() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
