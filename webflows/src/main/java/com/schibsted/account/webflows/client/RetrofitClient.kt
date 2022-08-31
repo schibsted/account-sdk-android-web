@@ -48,7 +48,7 @@ class RetrofitClient<S>(
                 }
                 .left().foreach {
                     reset()
-                    callback(Either.Right(null))
+                    callback(Either.Left(it))
                 }
         }
     }
