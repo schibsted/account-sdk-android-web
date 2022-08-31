@@ -47,6 +47,14 @@ class User {
             tokens.idTokenClaims.sub
         }
 
+    /**
+     * ID Token
+     */
+    val idToken: String
+        get() = onlyIfLoggedIn { tokens ->
+            tokens.idToken
+        }
+
     constructor(client: Client, session: UserSession) : this(client, session.tokens)
 
     internal constructor(client: Client, tokens: UserTokens) {
@@ -85,11 +93,6 @@ class User {
     fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) = onlyIfLoggedIn {
         client.schibstedAccountApi.userProfile(this, callback)
     }
-
-    /**
-     * Get idToken for User
-     * */
-    fun getIdToken(): String? = tokens?.idToken
 
     /**
      * Generate URL with embedded one-time code for creating a web session for the current user.
