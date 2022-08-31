@@ -193,7 +193,7 @@ $dokka.location:com.schibsted.account.webflows.user/User/User/#com.schibsted.acc
 $dokka.location:com.schibsted.account.webflows.user/User/accountPagesUrl/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/account-pages-url.html
 $dokka.location:com.schibsted.account.webflows.user/User/equals/#kotlin.Any?/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/equals.html
 $dokka.location:com.schibsted.account.webflows.user/User/fetchProfileData/#kotlin.Function1[com.schibsted.account.webflows.util.Either[com.schibsted.account.webflows.api.HttpError,com.schibsted.account.webflows.api.UserProfileResponse],kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/fetch-profile-data.html
-$dokka.location:com.schibsted.account.webflows.user/User/getIdToken/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/get-id-token.html
+$dokka.location:com.schibsted.account.webflows.user/User/idToken/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/id-token.html
 $dokka.location:com.schibsted.account.webflows.user/User/isLoggedIn/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/is-logged-in.html
 $dokka.location:com.schibsted.account.webflows.user/User/logout/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/logout.html
 $dokka.location:com.schibsted.account.webflows.user/User/makeAuthenticatedRequest/#okhttp3.Request#kotlin.Function1[com.schibsted.account.webflows.util.Either[kotlin.Throwable,okhttp3.Response],kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html
