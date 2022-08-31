@@ -6,14 +6,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/schibsted/account-sdk-android-web/blob/master/LICENSE)
 
 New implementation of the Schibsted account Android SDK using the web flows via
-[Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/).
+[Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/):
 
-API documentation can be
+* API documentation can be
 found [here](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/).
-
-Git repository includes a example implementation of the sdk, can be found
-found [here](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example)
-.
+* An example implementation of the SDK can be found
+[here](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example).
 
 ## Getting started
 
@@ -21,26 +19,27 @@ To implement login with Schibsted account in your app, please first have a look 
 [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/). This
 will help you create a client and configure the necessary data.
 
-**Note:** This SDK requires your client to be registered as a `public_mobile_client` in Self
-Service (
-see [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/) for
-more help).
+### Important notes
 
-**Note:** If you have implemented
-the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android) in your app, and want
-these users to remain logged in, do not forget to add the SessionStorageConfig to your Client (see
-Create a `Client` instance step below).
-
-**Note:** Using [App Links](https://developer.android.com/training/app-links) should be preferred
-for [security reasons](https://tools.ietf.org/html/rfc8252#appendix-B.2). To support older Android
-versions, configure a fallback page at the same address to forward authorization responses to your
-app via a custom scheme.
+* This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see
+  [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/)
+  for more information).
+* If you have implemented the
+  [previous Schibsted Android SDK](https://github.com/schibsted/account-sdk-android) in your app,
+  and want these users to remain logged in, don't forget to specify the `SessionStorageConfig`
+  when creating the `Client` instance.
+* Using [App Links](https://developer.android.com/training/app-links) should be preferred
+  for [security reasons](https://tools.ietf.org/html/rfc8252#appendix-B.2).
+  To support older Android versions, configure a fallback page at the same web address to forward
+  authorization responses to your app via a custom scheme.
 
 ### Installation
 
-The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/):
-
-* Using Gradle: `implementation 'com.schibsted.account:account-sdk-android-web:<version>'`
+The SDK is available via
+[Maven Central](https://search.maven.org/artifact/com.schibsted.account/account-sdk-android-web):
+```
+implementation 'com.schibsted.account:account-sdk-android-web:<version>'
+```
 
 ### Usage
 
@@ -59,47 +58,38 @@ The SDK is available via [Schibsted Artifactory](https://artifacts.schibsted.io/
        </intent-filter>
    </activity>
    ```
-   As example,
-   the [Example app](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example)
-   has the clientId `602525f2b41fa31789a95aa8` and redirect
-   url `com.sdk-example.pre.602525f2b41fa31789a95aa8:/login`, the data section in the manifest will
-   therefore be:
-      ```xml
-             <data android:scheme="com.sdk-example.pre.602525f2b41fa31789a95aa8"
-                    android:path="/login"/>
-   ```
-2. Create a `Client` instance (
-   see [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
+2. Create a `Client` instance (see
+   [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
    ```kotlin
    val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "<redirect uri>")
    val okHttpClient = OkHttpClient.Builder().build() // this client instance should be shared within your app
-   val sessionStorageConfig =
-    SessionStorageConfig("<oldClientId>", "<oldClientSecret>")
+   val sessionStorageConfig = SessionStorageConfig("<oldClientId>", "<oldClientSecret>")
    val client = Client(
-            context = applicationContext,
-            configuration = clientConfig,
-            httpClient = okHttpClient,
-            sessionStorageConfig = sessionStorageConfig
-            )
+       context = applicationContext,
+       configuration = clientConfig,
+       httpClient = okHttpClient,
+       sessionStorageConfig = sessionStorageConfig
+   )
    ```
-   **Note:** SessionStorageConfig is only needed if your app used
-   the [Old Schibsted SDK](https://github.com/schibsted/account-sdk-android)
-   for login to keep already logged in users logged in. If this is not the scenario,
-   sessionStorageConfig can be ignored.
+   **Note:** `SessionStorageConfig` is only needed if your app used
+   the [previous Schibsted Android SDK](https://github.com/schibsted/account-sdk-android),
+   to keep migrate already logged in users.
+   If this is not the scenario, `sessionStorageConfig` should not be specified.
 
-If you need Retrofit support, wrap the above client instance in a RetrofitClient instance:
+   If you need Retrofit support for making authenticated requests,
+   wrap the above client instance in a `RetrofitClient` instance:
 
    ```kotlin
    val retrofitClient = RetrofitClient<YourRetrofitInterface>(
-    client = client,
-    serviceClass = YourRetrofitInterface::class.java,
-    retrofitBuilder = Retrofit.Builder().baseUrl("https://your.api.com"),
-)
+       client = client,
+       serviceClass = YourRetrofitInterface::class.java,
+       retrofitBuilder = Retrofit.Builder().baseUrl("https://your.api.com")
+   )
    ```
 
-3. Initialise `AuthorizationManagementActivity` on app startup (
-   see [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
+3. Initialise `AuthorizationManagementActivity` on app startup (see
+   [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
    ```kotlin
    class App : Application() {
@@ -116,12 +106,12 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
        }
    }
      ``` 
-   **Note:** completionIntent and cancelIntent is not mandatory, but optional if you want to
-   redirect user to specific activity on login result. You can also observe
-   AuthResultLiveData and navigate on its result (see step 4. below).
+   **Note:** `completionIntent` and `cancelIntent` are optional if you want to
+   redirect user to a specific activity on login completion. You can also observe
+   `AuthResultLiveData` and navigate on its result (see step 4. below).
 
-4. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (
-   see [MainActivity](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt)
+4. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (see
+   [MainActivity](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt)
    as reference):
    ```kotlin
    class MainActivity : AppCompatActivity() {
@@ -142,7 +132,7 @@ If you need Retrofit support, wrap the above client instance in a RetrofitClient
        private fun handleNotAuthedState(state: NotAuthed): Unit {
            when {
                state === NotAuthed.NoLoggedInUser -> {
-                   // TODO  no logged-in user could be resumed or user was logged-out
+                   // TODO no logged-in user could be resumed or user was logged-out
                }
                state === NotAuthed.CancelledByUser -> {
                    // TODO the user cancelled the login flow (by pressing back or closing auth activity)
@@ -175,8 +165,8 @@ The recommended usage (see above) automatically handles the following cases for 
   details.
 * Makes the logged-in user easily accessible via a `LiveData` instance.
 
-But if you want/need more control over the flow you can manually manage the flow. To do that, follow
-these steps:
+If you want/need more control over the flow you can manage the flow manually,
+by following these steps:
 
 1. Create a new `Activity` that will receive the auth response via deep link and add it to your
    `AndroidManifest.xml`:
