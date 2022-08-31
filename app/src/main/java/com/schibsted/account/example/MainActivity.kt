@@ -44,8 +44,8 @@ class MainActivity : AppCompatActivity() {
     private fun observeAuthResultLiveData() {
         AuthResultLiveData.get().observe(this, Observer { result: Either<NotAuthed, User> ->
             result
-                .foreach { user: User -> startLoggedInActivity(user) }
-                .left().foreach { state: NotAuthed ->
+                .onSuccess { user: User -> startLoggedInActivity(user) }
+                .onFailure { state: NotAuthed ->
                     handleNotAuthedState(state)
                 }
         } as Observer<Either<NotAuthed, User>>)
