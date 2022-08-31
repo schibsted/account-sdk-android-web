@@ -5,8 +5,8 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.nimbusds.jose.jwk.JWKSet
-import com.nimbusds.jose.shaded.json.parser.ParseException
 import java.lang.reflect.Type
+import java.text.ParseException
 
 internal class JWKSetDeserializer : JsonDeserializer<JWKSet> {
     override fun deserialize(
