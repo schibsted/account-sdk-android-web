@@ -55,8 +55,8 @@ internal class TokenHandler(
         )
         schibstedAccountApi.makeTokenRequest(tokenRequest) { result ->
             result
-                .foreach { handleTokenResponse(it, authState, callback) }
-                .left().foreach { err ->
+                .onSuccess { handleTokenResponse(it, authState, callback) }
+                .onFailure { err ->
                     Timber.d("Token request error response: $err")
                     callback(Left(TokenRequestError(err)))
                 }
@@ -104,7 +104,7 @@ internal class TokenHandler(
 
         IdTokenValidator.validate(idToken, jwks, idTokenValidationContext) { result ->
             result
-                .foreach {
+                .onSuccess {
                     val tokens = UserTokens(
                         tokenResponse.access_token,
                         tokenResponse.refresh_token,
@@ -121,7 +121,7 @@ internal class TokenHandler(
                         )
                     )
                 }
-                .left().foreach { callback(Left(IdTokenNotValid(it))) }
+                .onFailure { callback(Left(IdTokenNotValid(it))) }
         }
     }
 }

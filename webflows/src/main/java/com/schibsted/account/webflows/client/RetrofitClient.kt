@@ -26,7 +26,7 @@ class RetrofitClient<S>(
     override fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
         internalClient.resumeLastLoggedInUser { result ->
             result
-                .foreach { resumedUser: User? ->
+                .onSuccess { resumedUser: User? ->
                     when {
                         user?.equals(resumedUser) == true -> {
                             callback(Either.Right(user))
@@ -46,7 +46,7 @@ class RetrofitClient<S>(
                         }
                     }
                 }
-                .left().foreach {
+                .onFailure {
                     reset()
                     callback(Either.Left(it))
                 }

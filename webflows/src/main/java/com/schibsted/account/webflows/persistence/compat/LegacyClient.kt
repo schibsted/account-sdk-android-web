@@ -24,10 +24,10 @@ internal class LegacyClient(
             newClientId
         ) { result ->
             result
-                .map { codeExchangeResponse ->
+                .onSuccess { codeExchangeResponse ->
                     callback(Either.Right(value = codeExchangeResponse))
                 }
-                .left().map { error ->
+                .onFailure { error ->
                     when (error) {
                         is HttpError.ErrorResponse -> {
                             if (error.code == 401 && legacyTokens.refreshToken != null) {
@@ -64,11 +64,11 @@ internal class LegacyClient(
             refreshToken
         ) { userTokenApiResponse ->
             userTokenApiResponse
-                .map { userTokenResponse ->
+                .onSuccess { userTokenResponse ->
                     Timber.d("Refreshed legacy tokens successfully")
                     callback(userTokenResponse.access_token)
                 }
-                .left().map { err ->
+                .onFailure { err ->
                     Timber.e("Failed to refresh legacy tokens: $err")
                     callback(null)
                 }

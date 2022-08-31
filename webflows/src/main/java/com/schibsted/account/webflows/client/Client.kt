@@ -177,11 +177,11 @@ class Client : ClientInterface {
             ?: return callback(Left(LoginError.UnexpectedError("Missing authorization code in authentication response")))
         makeTokenRequest(authCode, stored) { storedUserSession ->
             storedUserSession
-                .foreach { session ->
+                .onSuccess { session ->
                     sessionStorage.save(session)
                     callback(Right(User(this, session.userTokens)))
                 }
-                .left().foreach { err ->
+                .onFailure { err ->
                     Timber.d("Token error response: $err")
                     val oauthError = err.toOauthError()
                     if (oauthError != null) {
@@ -215,7 +215,7 @@ class Client : ClientInterface {
     override fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
         sessionStorage.get(configuration.clientId) { result ->
             result
-                .foreach { storedUserSession: StoredUserSession? ->
+                .onSuccess { storedUserSession: StoredUserSession? ->
                     if (storedUserSession == null) {
                         callback(Right(null))
                     } else {
@@ -223,7 +223,7 @@ class Client : ClientInterface {
                         callback(Right(user))
                     }
                 }
-                .left().foreach {
+                .onFailure {
                     callback(Left(it))
                 }
         }

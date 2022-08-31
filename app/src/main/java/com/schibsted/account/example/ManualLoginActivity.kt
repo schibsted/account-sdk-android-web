@@ -37,9 +37,8 @@ class ManualLoginActivity : AppCompatActivity() {
         client.handleAuthenticationResponse(intent) { result: Either<LoginError?, User> ->
             Timber.i("Login complete")
             result
-                .foreach { user: User -> startLoggedInActivity(user) }
-                .left()
-                .foreach { error: LoginError? ->
+                .onSuccess { user: User -> startLoggedInActivity(user) }
+                .onFailure { error: LoginError? ->
                     Timber.i("Something went wrong: $error")
                     Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
                 }
@@ -64,7 +63,7 @@ class ManualLoginActivity : AppCompatActivity() {
         binding.resumeButton.setOnClickListener {
             client.resumeLastLoggedInUser { result ->
                 result
-                    .foreach { user ->
+                    .onSuccess { user ->
                         if (user != null) {
                             startLoggedInActivity(user)
                         } else {
@@ -72,7 +71,7 @@ class ManualLoginActivity : AppCompatActivity() {
                                 .show()
                         }
                     }
-                    .left().foreach {
+                    .onFailure {
                         when (it) {
                             is StorageError.UnexpectedError ->
                                 Toast.makeText(

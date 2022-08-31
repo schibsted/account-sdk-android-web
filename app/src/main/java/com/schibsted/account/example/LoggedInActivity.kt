@@ -54,11 +54,10 @@ class LoggedInActivity : AppCompatActivity() {
             if (isUserLoggedIn) {
                 user?.fetchProfileData { result: Either<HttpError?, UserProfileResponse> ->
                     result
-                        .foreach { value: UserProfileResponse ->
+                        .onSuccess { value: UserProfileResponse ->
                             Timber.i("Profile data $value")
                         }
-                        .left()
-                        .foreach { error: HttpError? ->
+                        .onFailure { error: HttpError? ->
                             Timber.i("Failed to fetch profile data $error")
                         }
                 }
@@ -75,11 +74,10 @@ class LoggedInActivity : AppCompatActivity() {
                 )
                 { result: Either<HttpError?, URL> ->
                     result
-                        .foreach { value: URL ->
+                        .onSuccess { value: URL ->
                             Timber.i("Session exchange URL: $value")
                         }
-                        .left()
-                        .foreach { error: HttpError? ->
+                        .onFailure { error: HttpError? ->
                             Timber.i("Failed to start session exchange $error")
                         }
                 }

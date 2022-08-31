@@ -42,7 +42,7 @@ internal class MigratingSessionStorage(
         // try new storage first
         newStorage.get(clientId) { result ->
             result
-                .foreach { newSession ->
+                .onSuccess { newSession ->
                     if (newSession != null) {
                         callback(Either.Right(newSession))
                     } else {
@@ -50,7 +50,7 @@ internal class MigratingSessionStorage(
                         lookupLegacyStorage(callback)
                     }
                 }
-                .left().foreach {
+                .onFailure {
                     lookupLegacyStorage(callback)
                 }
         }
@@ -73,21 +73,21 @@ internal class MigratingSessionStorage(
             client.configuration.clientId
         ) { codeResult ->
             codeResult
-                .map { codeResponse ->
+                .onSuccess { codeResponse ->
                     client.makeTokenRequest(codeResponse.code, null) { storedUserSession ->
                         storedUserSession
-                            .foreach { migratedSession ->
+                            .onSuccess { migratedSession ->
                                 newStorage.save(migratedSession)
                                 legacyStorage.remove()
                                 callback(Either.Right(migratedSession))
                             }
-                            .left().foreach { tokenError ->
+                            .onFailure { tokenError ->
                                 Timber.e("Failed to migrate tokens: $tokenError")
                                 callback(Either.Right(null))
                             }
                     }
                 }
-                .left().map { httpError ->
+                .onFailure { httpError ->
                     Timber.e("Failed to migrate tokens: $httpError")
                     callback(Either.Right(null))
                 }
