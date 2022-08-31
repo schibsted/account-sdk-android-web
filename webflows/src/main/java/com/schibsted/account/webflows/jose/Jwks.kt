@@ -11,8 +11,8 @@ internal class RemoteJwks(private val schibstedAccountApi: SchibstedAccountApi) 
     override fun fetch(callback: (JWKSet?) -> Unit) {
         schibstedAccountApi.getJwks {
             it
-                .foreach { jwks -> callback(jwks) }
-                .left().foreach { callback(null) }
+                .onSuccess { jwks -> callback(jwks) }
+                .onFailure { callback(null) }
         }
     }
 }

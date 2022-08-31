@@ -1,6 +1,5 @@
 package com.schibsted.account.webflows.util
 
-import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -19,48 +18,34 @@ class EitherTest {
     }
 
     @Test
-    fun foreachShouldApplyToRightValue() {
+    fun onSuccessShouldApplyToRightValue() {
         var called = false
         val value = Right(1)
-        assertEquals(value, value.foreach { called = true })
+        assertEquals(value, value.onSuccess { called = true })
         assertTrue(called)
     }
 
     @Test
-    fun foreachShouldNotApplyToLeftValue() {
+    fun onSuccessShouldNotApplyToLeftValue() {
         var called = false
         val value = Left(1)
-        assertEquals(value, value.foreach { called = true })
+        assertEquals(value, value.onSuccess { called = true })
         assertFalse(called)
     }
 
-    class LeftProjectionTest {
-        @Test
-        fun mapShouldTransformLeftValue() {
-            val projection = Left(1).left()
-            assertEquals(Left(2), projection.map { it + 1 })
-        }
+    @Test
+    fun onFailureShouldApplyToLeftValue() {
+        var called = false
+        val value = Left(1)
+        assertEquals(value, value.onFailure { called = true })
+        assertTrue(called)
+    }
 
-        @Test
-        fun mapShouldNotTransformRightValue() {
-            val projection: LeftProjection<Int, Int> = Right(1).left()
-            assertEquals(Right(1), projection.map { it + 1 })
-        }
-
-        @Test
-        fun foreachShouldApplyToLeftValue() {
-            var called = false
-            val value = Left(1).left()
-            assertEquals(value, value.foreach { called = true })
-            assertTrue(called)
-        }
-
-        @Test
-        fun foreachShouldNotApplyToRightValue() {
-            var called = false
-            val value = Right(1).left()
-            assertEquals(value, value.foreach { called = true })
-            assertFalse(called)
-        }
+    @Test
+    fun onFailureShouldNotApplyToRightValue() {
+        var called = false
+        val value = Right(1)
+        assertEquals(value, value.onFailure  { called = true })
+        assertFalse(called)
     }
 }

@@ -41,14 +41,14 @@ class AuthResultLiveData private constructor(private val client: Client) :
     init {
         client.resumeLastLoggedInUser { result ->
             result
-                .foreach { resumedUser ->
+                .onSuccess { resumedUser ->
                     value = if (resumedUser != null) {
                         Right(resumedUser)
                     } else {
                         Left(NotAuthed.NoLoggedInUser)
                     }
                 }
-                .left().foreach {
+                .onFailure {
                     value = Left(NotAuthed.NoLoggedInUser)
                 }
         }
