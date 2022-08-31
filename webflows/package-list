@@ -208,17 +208,13 @@ $dokka.location:com.schibsted.account.webflows.util////PointingToDeclaration/we
 $dokka.location:com.schibsted.account.webflows.util/Either.Left///PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left/index.html
 $dokka.location:com.schibsted.account.webflows.util/Either.Left/Left/#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left/-left.html
 $dokka.location:com.schibsted.account.webflows.util/Either.Left/value/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left/value.html
-$dokka.location:com.schibsted.account.webflows.util/Either.LeftProjection///PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left-projection/index.html
-$dokka.location:com.schibsted.account.webflows.util/Either.LeftProjection/LeftProjection/#com.schibsted.account.webflows.util.Either[TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left-projection/-left-projection.html
-$dokka.location:com.schibsted.account.webflows.util/Either.LeftProjection/foreach/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left-projection/foreach.html
-$dokka.location:com.schibsted.account.webflows.util/Either.LeftProjection/map/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-left-projection/map.html
 $dokka.location:com.schibsted.account.webflows.util/Either.Right///PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-right/index.html
 $dokka.location:com.schibsted.account.webflows.util/Either.Right/Right/#TypeParam(bounds=[kotlin.Any?])/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-right/-right.html
 $dokka.location:com.schibsted.account.webflows.util/Either.Right/value/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/-right/value.html
 $dokka.location:com.schibsted.account.webflows.util/Either///PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/index.html
-$dokka.location:com.schibsted.account.webflows.util/Either/foreach/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/foreach.html
-$dokka.location:com.schibsted.account.webflows.util/Either/left/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/left.html
 $dokka.location:com.schibsted.account.webflows.util/Either/map/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/map.html
+$dokka.location:com.schibsted.account.webflows.util/Either/onFailure/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/on-failure.html
+$dokka.location:com.schibsted.account.webflows.util/Either/onSuccess/#kotlin.Function1[TypeParam(bounds=[kotlin.Any?]),kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.util/-either/on-success.html
 com.schibsted.account.webflows.activities
 com.schibsted.account.webflows.api
 com.schibsted.account.webflows.client
