@@ -187,23 +187,6 @@ $dokka.location:com.schibsted.account.webflows.persistence/StorageError.Unexpect
 $dokka.location:com.schibsted.account.webflows.persistence/StorageError.UnexpectedError/UnexpectedError/#kotlin.Throwable/PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/-storage-error/-unexpected-error/-unexpected-error.html
 $dokka.location:com.schibsted.account.webflows.persistence/StorageError.UnexpectedError/cause/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/-storage-error/-unexpected-error/cause.html
 $dokka.location:com.schibsted.account.webflows.persistence/StorageError///PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/-storage-error/index.html
-$dokka.location:com.schibsted.account.webflows.token////PointingToDeclaration/webflows/com.schibsted.account.webflows.token/index.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims///PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/index.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/IdTokenClaims/#kotlin.String#kotlin.String#kotlin.String#kotlin.collections.List[kotlin.String]#kotlin.Long#kotlin.String?#kotlin.collections.List[kotlin.String]?/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/-id-token-claims.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/amr/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/amr.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/aud/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/aud.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/exp/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/exp.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/iss/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/iss.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/nonce/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/nonce.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/sub/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/sub.html
-$dokka.location:com.schibsted.account.webflows.token/IdTokenClaims/userId/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-id-token-claims/user-id.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens///PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/index.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/UserTokens/#kotlin.String#kotlin.String?#kotlin.String#com.schibsted.account.webflows.token.IdTokenClaims/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/-user-tokens.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/accessToken/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/access-token.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/idToken/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/id-token.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/idTokenClaims/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/id-token-claims.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/refreshToken/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/refresh-token.html
-$dokka.location:com.schibsted.account.webflows.token/UserTokens/toString/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.token/-user-tokens/to-string.html
 $dokka.location:com.schibsted.account.webflows.user////PointingToDeclaration/webflows/com.schibsted.account.webflows.user/index.html
 $dokka.location:com.schibsted.account.webflows.user/User///PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/index.html
 $dokka.location:com.schibsted.account.webflows.user/User/User/#com.schibsted.account.webflows.client.Client#com.schibsted.account.webflows.user.UserSession/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/-user.html
@@ -216,7 +199,6 @@ $dokka.location:com.schibsted.account.webflows.user/User/logout/#/PointingToDecl
 $dokka.location:com.schibsted.account.webflows.user/User/makeAuthenticatedRequest/#okhttp3.Request#kotlin.Function1[com.schibsted.account.webflows.util.Either[kotlin.Throwable,okhttp3.Response],kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html
 $dokka.location:com.schibsted.account.webflows.user/User/oneTimeCode/#kotlin.String#kotlin.Function1[com.schibsted.account.webflows.util.Either[com.schibsted.account.webflows.api.HttpError,kotlin.String],kotlin.Unit]/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/one-time-code.html
 $dokka.location:com.schibsted.account.webflows.user/User/session/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/session.html
-$dokka.location:com.schibsted.account.webflows.user/User/setUserTokensForTesting/#com.schibsted.account.webflows.token.UserTokens/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/set-user-tokens-for-testing.html
 $dokka.location:com.schibsted.account.webflows.user/User/toString/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/to-string.html
 $dokka.location:com.schibsted.account.webflows.user/User/userId/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/user-id.html
 $dokka.location:com.schibsted.account.webflows.user/User/uuid/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.user/-user/uuid.html
@@ -241,7 +223,6 @@ com.schibsted.account.webflows.activities
 com.schibsted.account.webflows.api
 com.schibsted.account.webflows.client
 com.schibsted.account.webflows.persistence
-com.schibsted.account.webflows.token
 com.schibsted.account.webflows.user
 com.schibsted.account.webflows.util
 
