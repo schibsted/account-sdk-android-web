@@ -1,5 +1,6 @@
 package com.schibsted.account.webflows.client
 
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -22,27 +23,33 @@ class RetrofitClient<S>(
      * This should ideally only be used on app startup
      * User will only be updated with new user if resumedUser contains a new user
      * */
-    override fun resumeLastLoggedInUser(callback: (User?) -> Unit) {
-        internalClient.resumeLastLoggedInUser { resumedUser ->
-            when {
-                user?.equals(resumedUser) == true -> {
-                    callback(user)
-                }
-                resumedUser != null -> {
-                    user = resumedUser
-                    retrofitApi = retrofitBuilder
-                        .client(resumedUser.httpClient)
-                        .build()
-                        .create(serviceClass)
+    override fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
+        internalClient.resumeLastLoggedInUser { result ->
+            result
+                .foreach { resumedUser: User? ->
+                    when {
+                        user?.equals(resumedUser) == true -> {
+                            callback(Either.Right(user))
+                        }
+                        resumedUser != null -> {
+                            user = resumedUser
+                            retrofitApi = retrofitBuilder
+                                .client(resumedUser.httpClient)
+                                .build()
+                                .create(serviceClass)
 
-                    callback(resumedUser)
+                            callback(Either.Right(resumedUser))
+                        }
+                        else -> {
+                            reset()
+                            callback(Either.Right(null))
+                        }
+                    }
                 }
-                else -> {
-                    user = null
-                    retrofitApi = null
-                    callback(null)
+                .left().foreach {
+                    reset()
+                    callback(Either.Left(it))
                 }
-            }
         }
     }
 
@@ -76,5 +83,10 @@ class RetrofitClient<S>(
 
     internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
         return internalClient.refreshTokensForUser(user)
+    }
+
+    private fun reset() {
+        user = null
+        retrofitApi = null
     }
 }

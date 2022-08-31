@@ -5,8 +5,10 @@ import androidx.annotation.VisibleForTesting
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
+import com.schibsted.account.webflows.persistence.StorageReadCallback
 import com.schibsted.account.webflows.user.MigrationStoredUserSession
 import com.schibsted.account.webflows.user.StoredUserSession
+import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 
 internal class MigratingSessionStorage(
@@ -36,22 +38,21 @@ internal class MigratingSessionStorage(
         newStorage.save(session)
     }
 
-    override fun get(clientId: String, callback: (StoredUserSession?) -> Unit) {
+    override fun get(clientId: String, callback: StorageReadCallback) {
         // try new storage first
-        newStorage.get(clientId) { newSession ->
-            if (newSession != null) {
-                callback(newSession)
-            } else {
-                // if no existing session found, look in legacy storage
-                val legacySession = legacyStorage.get(legacyClientId)
-                if (legacySession != null) {
-                    val legacyClient =
-                        LegacyClient(legacyClientId, legacyClientSecret, client.schibstedAccountApi)
-                    migrateSession(legacySession, legacyClient, callback)
-                } else {
-                    callback(null)
+        newStorage.get(clientId) { result ->
+            result
+                .foreach { newSession ->
+                    if (newSession != null) {
+                        callback(Either.Right(newSession))
+                    } else {
+                        // if no existing session found, look in legacy storage
+                        lookupLegacyStorage(callback)
+                    }
                 }
-            }
+                .left().foreach {
+                    lookupLegacyStorage(callback)
+                }
         }
     }
 
@@ -64,7 +65,7 @@ internal class MigratingSessionStorage(
     internal fun migrateSession(
         legacySession: MigrationStoredUserSession,
         legacyClient: LegacyClient,
-        callback: (StoredUserSession?) -> Unit
+        callback: StorageReadCallback
     ) {
         // use tokens from legacy session to get OAuth auth code for the new client
         legacyClient.getAuthCodeFromTokens(
@@ -78,18 +79,33 @@ internal class MigratingSessionStorage(
                             .foreach { migratedSession ->
                                 newStorage.save(migratedSession)
                                 legacyStorage.remove()
-                                callback(migratedSession)
+                                callback(Either.Right(migratedSession))
                             }
                             .left().foreach { tokenError ->
                                 Timber.e("Failed to migrate tokens: $tokenError")
-                                callback(null)
+                                callback(Either.Right(null))
                             }
                     }
                 }
                 .left().map { httpError ->
                     Timber.e("Failed to migrate tokens: $httpError")
-                    callback(null)
+                    callback(Either.Right(null))
                 }
+        }
+    }
+
+    private fun lookupLegacyStorage(callback: StorageReadCallback) {
+        val legacySession = legacyStorage.get(legacyClientId)
+        if (legacySession != null) {
+            val legacyClient =
+                LegacyClient(
+                    legacyClientId,
+                    legacyClientSecret,
+                    client.schibstedAccountApi
+                )
+            migrateSession(legacySession, legacyClient, callback)
+        } else {
+            callback(Either.Right(null))
         }
     }
 }

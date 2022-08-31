@@ -19,6 +19,7 @@ sealed class NotAuthed {
 
 
 typealias AuthResult = Either<NotAuthed, User>
+
 /**
  * Holds current logged-in state of user.
  *
@@ -38,12 +39,18 @@ class AuthResultLiveData private constructor(private val client: Client) :
     }
 
     init {
-        client.resumeLastLoggedInUser { resumedUser ->
-            value = if (resumedUser != null) {
-                Right(resumedUser)
-            } else {
-                Left(NotAuthed.NoLoggedInUser)
-            }
+        client.resumeLastLoggedInUser { result ->
+            result
+                .foreach { resumedUser ->
+                    value = if (resumedUser != null) {
+                        Right(resumedUser)
+                    } else {
+                        Left(NotAuthed.NoLoggedInUser)
+                    }
+                }
+                .left().foreach {
+                    value = Left(NotAuthed.NoLoggedInUser)
+                }
         }
     }
 

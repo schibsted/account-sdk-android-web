@@ -13,9 +13,11 @@ import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.RefreshTokenError
 import com.schibsted.account.webflows.persistence.SessionStorage
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
@@ -338,8 +340,8 @@ class UserTest {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
         every { client.resumeLastLoggedInUser(any()) } answers {
-            val callback = firstArg<(User?) -> Unit>()
-            callback(user)
+            val callback = firstArg<(Either<StorageError, User?>) -> Unit>()
+            callback(Right(user))
         }
         AuthResultLiveData.create(client)
 
