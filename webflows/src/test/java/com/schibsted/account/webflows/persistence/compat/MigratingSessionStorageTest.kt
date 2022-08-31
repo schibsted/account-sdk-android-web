@@ -1,6 +1,7 @@
 package com.schibsted.account.webflows.persistence.compat
 
 import com.schibsted.account.testutil.Fixtures
+import com.schibsted.account.testutil.assertRight
 import com.schibsted.account.testutil.await
 import com.schibsted.account.testutil.withServer
 import com.schibsted.account.webflows.api.ApiResult
@@ -9,6 +10,8 @@ import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.persistence.SessionStorage
+import com.schibsted.account.webflows.persistence.StorageError
+import com.schibsted.account.webflows.persistence.StorageReadCallback
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.TokenRequestResult
@@ -75,8 +78,8 @@ class MigratingSessionStorageTest {
         val userSession = StoredUserSession(newClientId, Fixtures.userTokens, Date())
         val newStorage = mockk<SessionStorage>()
         every { newStorage.get(newClientId, any()) } answers {
-            val callback = secondArg<(StoredUserSession?) -> Unit>()
-            callback(userSession)
+            val callback = secondArg<StorageReadCallback>()
+            callback(Right(userSession))
         }
 
         val migratingStorage = MigratingSessionStorage(
@@ -88,7 +91,7 @@ class MigratingSessionStorageTest {
         )
 
         migratingStorage.get(newClientId) {
-            assertEquals(userSession, it)
+            it.assertRight { assertEquals(userSession, it) }
         }
 
         verify { legacyStorage wasNot Called }
@@ -115,8 +118,8 @@ class MigratingSessionStorageTest {
 
         val newStorage = mockk<SessionStorage>(relaxUnitFun = true)
         every { newStorage.get(newClientId, any()) } answers {
-            val callback = secondArg<(StoredUserSession?) -> Unit>()
-            callback(null)
+            val callback = secondArg<StorageReadCallback>()
+            callback(Right(null))
         }
 
         val tokenHandler = mockk<TokenHandler> {
@@ -154,8 +157,10 @@ class MigratingSessionStorageTest {
                 val expectedMigratedSession =
                     StoredUserSession(newClientId, Fixtures.userTokens, Date())
                 migratingStorage.get(newClientId) {
-                    assertEquals(expectedMigratedSession.clientId, it!!.clientId)
-                    assertEquals(expectedMigratedSession.userTokens, it.userTokens)
+                    it.assertRight {
+                        assertEquals(expectedMigratedSession.clientId, it!!.clientId)
+                        assertEquals(expectedMigratedSession.userTokens, it.userTokens)
+                    }
 
                     verify { newStorage.get(newClientId, any()) }
                     verify { legacyStorage.get(legacyClientId) }
@@ -179,8 +184,8 @@ class MigratingSessionStorageTest {
         every { legacyStorage.get(legacyClientId) } returns null
         val newStorage = mockk<SessionStorage>()
         every { newStorage.get(newClientId, any()) } answers {
-            val callback = secondArg<(StoredUserSession?) -> Unit>()
-            callback(null)
+            val callback = secondArg<StorageReadCallback>()
+            callback(Right(null))
         }
 
         val migratingStorage = MigratingSessionStorage(
@@ -191,8 +196,31 @@ class MigratingSessionStorageTest {
             legacyClientSecret = legacyClientSecret
         )
         migratingStorage.get(newClientId) {
-            assertNull(it)
+            it.assertRight { assertNull(it) }
         }
+
+        verify { newStorage.get(newClientId, any()) }
+        verify { legacyStorage.get(legacyClientId) }
+    }
+
+    @Test
+    fun testGetLooksUpLegacySessionWhenNewStorageFails() {
+        val legacyStorage = mockk<LegacySessionStorage>()
+        every { legacyStorage.get(legacyClientId) } returns null
+        val newStorage = mockk<SessionStorage>()
+        every { newStorage.get(newClientId, any()) } answers {
+            val callback = secondArg<StorageReadCallback>()
+            callback(Left(StorageError.UnexpectedError(Exception("Something went wrong"))))
+        }
+
+        val migratingStorage = MigratingSessionStorage(
+            client = mockk(),
+            newStorage = newStorage,
+            legacyStorage = legacyStorage,
+            legacyClientId = legacyClientId,
+            legacyClientSecret = legacyClientSecret
+        )
+        migratingStorage.get(newClientId) { }
 
         verify { newStorage.get(newClientId, any()) }
         verify { legacyStorage.get(legacyClientId) }
@@ -215,8 +243,8 @@ class MigratingSessionStorageTest {
 
         val newStorage = mockk<SessionStorage> {
             every { get(newClientId, any()) } answers {
-                val callback = secondArg<(StoredUserSession?) -> Unit>()
-                callback(null)
+                val callback = secondArg<StorageReadCallback>()
+                callback(Right(null))
             }
             every { save(any()) } just Runs
         }
@@ -240,12 +268,12 @@ class MigratingSessionStorageTest {
             legacyClientId = legacyClientId,
             legacyClientSecret = legacyClientSecret
         )
-        val callback = mockk<(StoredUserSession?) -> Unit>()
+        val callback = mockk<StorageReadCallback>()
         every { callback(any()) } just Runs
 
         migratingStorage.migrateSession(legacySession, legacyClient, callback)
 
-        verify(exactly = 1) { callback(migratedSession) }
+        verify(exactly = 1) { callback(Right(migratedSession)) }
     }
 
     @Test
@@ -265,8 +293,8 @@ class MigratingSessionStorageTest {
 
         val newStorage = mockk<SessionStorage> {
             every { get(newClientId, any()) } answers {
-                val callback = secondArg<(StoredUserSession?) -> Unit>()
-                callback(null)
+                val callback = secondArg<StorageReadCallback>()
+                callback(Right(null))
             }
             every { save(any()) } just Runs
         }
@@ -290,12 +318,12 @@ class MigratingSessionStorageTest {
             legacyClientId = legacyClientId,
             legacyClientSecret = legacyClientSecret
         )
-        val callback = mockk<(StoredUserSession?) -> Unit>()
+        val callback = mockk<StorageReadCallback>()
         every { callback(any()) } just Runs
 
         migratingStorage.migrateSession(legacySession, legacyClient, callback)
 
-        verify(exactly = 1) { callback(null) }
+        verify(exactly = 1) { callback(Right(null)) }
     }
 
     @Test
@@ -315,8 +343,8 @@ class MigratingSessionStorageTest {
 
         val newStorage = mockk<SessionStorage> {
             every { get(newClientId, any()) } answers {
-                val callback = secondArg<(StoredUserSession?) -> Unit>()
-                callback(null)
+                val callback = secondArg<StorageReadCallback>()
+                callback(Right(null))
             }
             every { save(any()) } just Runs
         }
@@ -335,12 +363,11 @@ class MigratingSessionStorageTest {
             legacyClientId = legacyClientId,
             legacyClientSecret = legacyClientSecret
         )
-        val callback = mockk<(StoredUserSession?) -> Unit>()
+        val callback = mockk<StorageReadCallback>()
         every { callback(any()) } just Runs
 
         migratingStorage.migrateSession(legacySession, legacyClient, callback)
 
-        verify(exactly = 1) { callback(null) }
+        verify(exactly = 1) { callback(Right(null)) }
     }
-
 }

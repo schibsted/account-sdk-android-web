@@ -3,7 +3,9 @@ package com.schibsted.account.webflows.client
 import android.content.Context
 import android.content.Intent
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.user.User
+import com.schibsted.account.webflows.util.Either
 
 interface ClientInterface {
     /**
@@ -31,5 +33,5 @@ interface ClientInterface {
     fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler)
 
     /** Resume any previously logged-in user session */
-    fun resumeLastLoggedInUser(callback: (User?) -> Unit)
+    fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit)
 }

@@ -7,6 +7,7 @@ import com.schibsted.account.databinding.ActivityManualLoginBinding
 import com.schibsted.account.example.LoggedInActivity.Companion.intentWithUser
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.LoginError
+import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
@@ -61,12 +62,27 @@ class ManualLoginActivity : AppCompatActivity() {
 
     private fun initResumeButton() {
         binding.resumeButton.setOnClickListener {
-            client.resumeLastLoggedInUser { user ->
-                if (user != null) {
-                    startLoggedInActivity(user)
-                } else {
-                    Toast.makeText(this, "User could not be resumed", Toast.LENGTH_SHORT).show()
-                }
+            client.resumeLastLoggedInUser { result ->
+                result
+                    .foreach { user ->
+                        if (user != null) {
+                            startLoggedInActivity(user)
+                        } else {
+                            Toast.makeText(this, "User could not be resumed", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                    .left().foreach {
+                        when (it) {
+                            is StorageError.UnexpectedError ->
+                                Toast.makeText(
+                                    this,
+                                    "User could not be resumed, error: ${it.cause.message} ",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                        }
+                    }
             }
         }
     }
