@@ -124,6 +124,35 @@ class ClientTest {
     }
 
     @Test
+    fun handleAuthenticationResponseCanParseHtmlErrorResponse() {
+        val tokenHandler: TokenHandler = mockk(relaxed = true) {
+            every { makeTokenRequest(any(), any(), any()) } answers {
+                val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                val errorResponse = HttpError.ErrorResponse(
+                    503,
+                    """<html><body>503</body></html>"""
+                )
+                callback(Left(TokenError.TokenRequestError(errorResponse)))
+            }
+        }
+        val authState = AuthState("testState", "testNonce", "codeVerifier", null)
+        val stateStorageMock: StateStorage = mockk(relaxUnitFun = true) {
+            every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
+        }
+        val client = getClient(
+            tokenHandler = tokenHandler,
+            stateStorage = stateStorageMock
+        )
+
+        client.handleAuthenticationResponse(authResultIntent("code=authCode&state=${authState.state}")) {
+            it.assertLeft { error ->
+                val expected = LoginError.UnexpectedError("TokenRequestError(cause=ErrorResponse(code=503, body=<html><body>503</body></html>))")
+                assertEquals(expected, error)
+            }
+        }
+    }
+
+    @Test
     fun existingSessionIsResumeable() {
         val userSession = StoredUserSession(clientConfig.clientId, Fixtures.userTokens, Date())
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
