@@ -285,7 +285,7 @@ data class OAuthError(val error: String, val errorDescription: String?) {
 }
 
 private fun TokenError.toOauthError(): OAuthError? {
-    if (this is TokenError.TokenRequestError && cause is HttpError.ErrorResponse && cause.body != null) {
+    if (this is TokenError.TokenRequestError && cause is HttpError.ErrorResponse && cause.code !in 500..504 && cause.body != null) {
         return OAuthError.fromJson(cause.body)
     }
 
