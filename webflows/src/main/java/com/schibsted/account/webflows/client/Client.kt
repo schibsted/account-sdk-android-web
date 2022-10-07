@@ -276,14 +276,14 @@ class Client : ClientInterface {
 data class OAuthError(val error: String, val errorDescription: String?) {
     companion object {
         fun fromJson(json: String): OAuthError? {
-            try {
+            return try {
                 val parsed = JSONObject(json)
-                return OAuthError(
+                OAuthError(
                     parsed.getString("error"),
                     parsed.optString("error_description")
                 )
             } catch (e: JSONException) {
-                return null
+                null
             }
         }
     }
