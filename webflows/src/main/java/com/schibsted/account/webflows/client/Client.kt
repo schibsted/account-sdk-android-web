@@ -24,6 +24,7 @@ import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
+import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.*
@@ -274,18 +275,22 @@ class Client : ClientInterface {
 
 data class OAuthError(val error: String, val errorDescription: String?) {
     companion object {
-        fun fromJson(json: String): OAuthError {
-            val parsed = JSONObject(json)
-            return OAuthError(
-                parsed.getString("error"),
-                parsed.optString("error_description")
-            )
+        fun fromJson(json: String): OAuthError? {
+            return try {
+                val parsed = JSONObject(json)
+                OAuthError(
+                    parsed.getString("error"),
+                    parsed.optString("error_description")
+                )
+            } catch (e: JSONException) {
+                null
+            }
         }
     }
 }
 
 private fun TokenError.toOauthError(): OAuthError? {
-    if (this is TokenError.TokenRequestError && cause is HttpError.ErrorResponse && cause.code !in 500..504 && cause.body != null) {
+    if (this is TokenError.TokenRequestError && cause is HttpError.ErrorResponse && cause.body != null) {
         return OAuthError.fromJson(cause.body)
     }
 

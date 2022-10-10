@@ -322,6 +322,24 @@ class UserTest {
     }
 
     @Test
+    fun refreshTokensDoesNotCauseLogoutOn500Response() {
+        val client: Client = mockk(relaxed = true)
+        val user = User(client, Fixtures.userTokens)
+        val tokenRefreshResponse = Left(
+            RefreshTokenError.RefreshRequestFailed(
+                HttpError.ErrorResponse(
+                    500,
+                    """<html>Error</html>"""
+                )
+            )
+        )
+        every { client.refreshTokensForUser(user) } returns tokenRefreshResponse
+
+        assertEquals(tokenRefreshResponse, user.refreshTokens())
+        assertNotNull(user.tokens)
+    }
+
+    @Test
     fun logoutDestroysTokensAndSession() {
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         val client = Fixtures.getClient(sessionStorage = sessionStorageMock)
