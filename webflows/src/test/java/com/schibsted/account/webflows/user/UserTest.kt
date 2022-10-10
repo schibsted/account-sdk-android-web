@@ -336,6 +336,7 @@ class UserTest {
         every { client.refreshTokensForUser(user) } returns tokenRefreshResponse
 
         assertEquals(tokenRefreshResponse, user.refreshTokens())
+        assertNotNull(user.tokens)
     }
 
     @Test
