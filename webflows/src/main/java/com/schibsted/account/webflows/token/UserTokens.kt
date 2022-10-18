@@ -20,9 +20,3 @@ internal data class UserTokens(
     }
 }
 
-internal data class MigrationUserTokens(
-    val accessToken: String,
-    val refreshToken: String,
-    val idToken: String?,
-    val idTokenClaims: IdTokenClaims?
-)
