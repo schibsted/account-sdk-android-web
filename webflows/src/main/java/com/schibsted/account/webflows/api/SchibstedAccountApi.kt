@@ -75,20 +75,6 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         }
     }
 
-    fun legacyRefreshTokenRequest(
-        clientCredentialsBasicAuth: String,
-        refreshToken: String,
-        callback: (ApiResult<UserTokenResponse>) -> Unit
-    ) {
-        val params = mutableMapOf(
-            "grant_type" to "refresh_token",
-            "refresh_token" to refreshToken,
-        )
-
-        schaccService.legacyTokenRequest(clientCredentialsBasicAuth, params)
-            .enqueue(ApiResultCallback(callback))
-    }
-
     fun getJwks(callback: (ApiResult<JWKSet>) -> Unit) {
         schaccService.jwks().enqueue(ApiResultCallback(callback))
     }
@@ -131,15 +117,6 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
             service.codeExchange(clientId)
                 .enqueue(ApiResultCallback { callback(it.unpack()) })
         }
-    }
-
-    fun legacyCodeExchange(
-        accessToken: String,
-        clientId: String,
-        callback: (ApiResult<CodeExchangeResponse>) -> Unit
-    ) {
-        schaccService.legacyCodeExchange("Bearer $accessToken", clientId)
-            .enqueue(ApiResultCallback { callback(it.unpack()) })
     }
 
     private fun proctectedSchaccApi(
