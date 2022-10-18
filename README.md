@@ -24,10 +24,6 @@ will help you create a client and configure the necessary data.
 * This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see
   [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/)
   for more information).
-* If you have implemented the
-  [previous Schibsted Android SDK](https://github.com/schibsted/account-sdk-android) in your app,
-  and want these users to remain logged in, don't forget to specify the `SessionStorageConfig`
-  when creating the `Client` instance.
 * Using [App Links](https://developer.android.com/training/app-links) should be preferred
   for [security reasons](https://tools.ietf.org/html/rfc8252#appendix-B.2).
   To support older Android versions, configure a fallback page at the same web address to forward
@@ -64,20 +60,13 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
    ```kotlin
    val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "<redirect uri>")
    val okHttpClient = OkHttpClient.Builder().build() // this client instance should be shared within your app
-   val sessionStorageConfig = SessionStorageConfig("<oldClientId>", "<oldClientSecret>")
    val client = Client(
        context = applicationContext,
        configuration = clientConfig,
-       httpClient = okHttpClient,
-       sessionStorageConfig = sessionStorageConfig
+       httpClient = okHttpClient
    )
    ```
-   **Note:** `SessionStorageConfig` is only needed if your app used
-   the [previous Schibsted Android SDK](https://github.com/schibsted/account-sdk-android),
-   to keep migrate already logged in users.
-   If this is not the scenario, `sessionStorageConfig` should not be specified.
-
-   If you need Retrofit support for making authenticated requests,
+   **Note:** If you need Retrofit support for making authenticated requests,
    wrap the above client instance in a `RetrofitClient` instance:
 
    ```kotlin
