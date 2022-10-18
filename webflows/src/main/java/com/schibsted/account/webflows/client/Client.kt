@@ -12,7 +12,6 @@ import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.persistence.StorageError
-import com.schibsted.account.webflows.persistence.compat.MigratingSessionStorage
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
@@ -46,23 +45,12 @@ class Client : ClientInterface {
         context: Context,
         configuration: ClientConfiguration,
         httpClient: OkHttpClient,
-        sessionStorageConfig: SessionStorageConfig? = null,
         logoutCallback: (() -> Unit)? = null
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
 
-        sessionStorage = if (sessionStorageConfig != null) {
-            MigratingSessionStorage(
-                context.applicationContext,
-                this,
-                sessionStorageConfig.legacyClientId,
-                sessionStorageConfig.legacyClientSecret,
-                sessionStorageConfig.legacySharedPrefsFilename
-            )
-        } else {
-            EncryptedSharedPrefsStorage(context.applicationContext)
-        }
+        sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
 
         schibstedAccountApi =
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
@@ -332,9 +320,3 @@ sealed class RefreshTokenError {
 }
 
 typealias LoginResultHandler = (Either<LoginError, User>) -> Unit
-
-data class SessionStorageConfig(
-    val legacyClientId: String,
-    val legacyClientSecret: String,
-    val legacySharedPrefsFilename: String? = null
-)
