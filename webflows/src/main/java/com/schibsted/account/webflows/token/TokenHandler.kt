@@ -86,7 +86,6 @@ internal class TokenHandler(
         authState: AuthState?,
         callback: (TokenRequestResult) -> Unit
     ) {
-        Timber.d("Token response: $tokenResponse")
 
         val idToken = tokenResponse.id_token
         if (idToken == null) {

@@ -189,7 +189,6 @@ class Client : ClientInterface {
     ) {
         tokenHandler.makeTokenRequest(authCode, authState) { result ->
             val session: Either<TokenError, StoredUserSession> = result.map { tokenResponse ->
-                Timber.d("Token response: $tokenResponse")
                 StoredUserSession(
                     configuration.clientId,
                     tokenResponse.userTokens,
@@ -242,7 +241,7 @@ class Client : ClientInterface {
                     val userSession =
                         StoredUserSession(configuration.clientId, userTokens, Date())
                     sessionStorage.save(userSession)
-                    Timber.d("Refreshed user tokens: $result")
+                    Timber.d("User tokens refreshed")
                     Right(userTokens)
                 } else {
                     Timber.i("User has logged-out during token refresh, discarding new tokens.")
