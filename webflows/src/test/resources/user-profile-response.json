@@ -61,5 +61,17 @@
   ],
   "updated": "1971-01-01 00:00:00",
   "passwordChanged": "1970-01-01 00:00:00",
-  "status": 1
+  "status": 1,
+  "mfaEnabled": true,
+  "mfaMethods": [
+    {
+      "type": "totp"
+    },
+    {
+      "type": "bankid"
+    },
+    {
+      "type": "sms"
+    }
+  ]
 }

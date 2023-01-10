@@ -85,6 +85,8 @@ class UserProfileResponseTest {
             passwordChanged = "1970-01-01 00:00:00",
             lastAuthenticated = "1970-01-01 00:00:00",
             lastLoggedIn = "1970-01-01 00:00:00",
+            mfaEnabled = true,
+            mfaMethods = listOf(MfaMethod(MfaMethod.MfaType.TOTP), MfaMethod(MfaMethod.MfaType.BANKID), MfaMethod(MfaMethod.MfaType.SMS)),
             locale = "sv_SE",
             utcOffset = "+02:00"
         )

@@ -33,6 +33,8 @@ data class UserProfileResponse(
     val passwordChanged: String? = null,
     val lastAuthenticated: String? = null,
     val lastLoggedIn: String? = null,
+    val mfaEnabled: Boolean? = null,
+    val mfaMethods: List<MfaMethod>? = null,
     val locale: String? = null,
     val utcOffset: String? = null
 )
@@ -93,6 +95,17 @@ data class Address(
         INVOICE;
 
         override fun toString(): String = super.toString().toLowerCase(Locale.ROOT)
+    }
+}
+
+data class MfaMethod(val type: MfaType) {
+    enum class MfaType {
+        @SerializedName("bankid")
+        BANKID,
+        @SerializedName("totp")
+        TOTP,
+        @SerializedName("sms")
+        SMS;
     }
 }
 
