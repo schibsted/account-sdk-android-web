@@ -147,6 +147,7 @@ $dokka.location:com.schibsted.account.webflows.client/LoginError.UnexpectedError
 $dokka.location:com.schibsted.account.webflows.client/LoginError.UnsolicitedResponse///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-login-error/-unsolicited-response/index.html
 $dokka.location:com.schibsted.account.webflows.client/LoginError///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-login-error/index.html
 $dokka.location:com.schibsted.account.webflows.client/MfaType.EID///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-mfa-type/-e-i-d/index.html
+$dokka.location:com.schibsted.account.webflows.client/MfaType.EID_FI///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-mfa-type/-e-i-d_-f-i/index.html
 $dokka.location:com.schibsted.account.webflows.client/MfaType.EID_NO///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-mfa-type/-e-i-d_-n-o/index.html
 $dokka.location:com.schibsted.account.webflows.client/MfaType.EID_SE///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-mfa-type/-e-i-d_-s-e/index.html
 $dokka.location:com.schibsted.account.webflows.client/MfaType.OTP///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-mfa-type/-o-t-p/index.html
