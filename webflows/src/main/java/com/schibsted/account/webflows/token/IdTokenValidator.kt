@@ -9,11 +9,11 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.proc.BadJWTException
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier
 import com.nimbusds.jwt.proc.DefaultJWTProcessor
+import com.schibsted.account.webflows.client.MfaType
 import com.schibsted.account.webflows.jose.AsyncJwks
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import com.schibsted.account.webflows.client.MfaType
 
 internal sealed class IdTokenValidationError {
     abstract val message: String
@@ -109,7 +109,10 @@ internal class IdTokenClaimsVerifier(
         val haystack = values ?: return false // no values to search among
 
         // Regardless of country, AMR will only contain EID value
-        if (needle == MfaType.EID_NO.value || needle == MfaType.EID_SE.value) {
+        if (needle == MfaType.EID_NO.value ||
+            needle == MfaType.EID_SE.value ||
+            needle == MfaType.EID_FI.value
+        ) {
             needle = MfaType.EID.value
         }
         return haystack.contains(needle)
