@@ -138,7 +138,7 @@ class User {
      * Generate URL for Schibsted account pages.
      */
     fun accountPagesUrl(): URL = onlyIfLoggedIn {
-        schibstedAccountUrl("/account/summary")
+        schibstedAccountUrl("/profile-pages")
     }
 
     /**

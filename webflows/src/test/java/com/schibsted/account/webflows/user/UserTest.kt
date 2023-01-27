@@ -374,7 +374,7 @@ class UserTest {
     fun accountPagesUrlIsCorrect() {
         val user = User(Fixtures.getClient(), Fixtures.userTokens)
         assertEquals(
-            "${Fixtures.clientConfig.serverUrl}/account/summary",
+            "${Fixtures.clientConfig.serverUrl}/profile-pages",
             user.accountPagesUrl().toString()
         )
     }
