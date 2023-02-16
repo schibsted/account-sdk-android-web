@@ -88,9 +88,10 @@ class Client : ClientInterface {
     override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest): Intent {
         val loginUrl = generateLoginUrl(authRequest)
         val intent: Intent = if (this.isCustomTabsSupported(context)) {
-            CustomTabsIntent.Builder().build().apply {
-                intent.data = loginUrl
-            }.intent
+            buildCustomTabsIntent()
+                .apply {
+                    intent.data = loginUrl
+                }.intent
         } else {
             Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
         }
@@ -106,13 +107,16 @@ class Client : ClientInterface {
     override fun launchAuth(context: Context, authRequest: AuthRequest) {
         val loginUrl = generateLoginUrl(authRequest)
         if (this.isCustomTabsSupported(context)) {
-            CustomTabsIntent.Builder()
-                .build()
-                .launchUrl(context, loginUrl)
+            buildCustomTabsIntent().launchUrl(context, loginUrl)
         } else {
             val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
             context.startActivity(intent)
         }
+    }
+
+    private fun buildCustomTabsIntent(): CustomTabsIntent {
+        return CustomTabsIntent.Builder()
+            .build()
     }
 
     private fun generateLoginUrl(authRequest: AuthRequest): Uri {

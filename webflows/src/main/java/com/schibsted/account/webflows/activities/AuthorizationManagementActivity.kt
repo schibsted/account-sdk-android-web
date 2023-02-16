@@ -112,7 +112,7 @@ class AuthorizationManagementActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val bundle = intent.extras ?: savedInstanceState
+        val bundle = savedInstanceState ?: intent.extras
         if (bundle != null) {
             // We're either first starting this activity or resuming it after completed auth
             extractState(bundle)
