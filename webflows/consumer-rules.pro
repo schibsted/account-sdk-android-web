@@ -29,6 +29,12 @@
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 
+# Data classes for HTTP JSON responses
+# https://r8.googlesource.com/r8/+/refs/heads/main/compatibility-faq.md#troubleshooting-gson
+-keepclassmembers class com.schibsted.account.webflows.api.* {
+ !transient <fields>;
+}
+
 ##---------------End: proguard configuration for Gson  ----------
 
 # EncryptedSharedPreferences initialization fails on R8 builds on 1.0.0-rc01
