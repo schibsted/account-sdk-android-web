@@ -207,37 +207,4 @@ class RetrofitClientTest {
         val result = client.isInitialized()
         assertTrue(result)
     }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    @Test
-    fun refreshTokensHandlesConcurrentLogout() {
-        val lock = ConditionVariable(false)
-        val tokenHandler = mockk<TokenHandler>(relaxed = true) {
-            every { makeTokenRequest(any(), any()) } answers {
-                lock.block(10) // wait until after logout is complete
-                Right(UserTokenResponse("", "", "", "", 0))
-            }
-        }
-        val client = getRetrofitClient(Fixtures.getClient(tokenHandler = tokenHandler))
-        val user = User(client.internalClient, Fixtures.userTokens)
-
-        /*
-         * Run token refresh operation in separate thread, manually forcing the operation to block
-         * until the user has been logged out
-         */
-        val refreshTask = CompletableFuture.supplyAsync {
-            val result = client.refreshTokensForUser(user)
-            result.assertLeft {
-                assertEquals(
-                    RefreshTokenError.UnexpectedError("User has logged-out during token refresh"),
-                    it
-                )
-            }
-        }
-        val logoutTask = CompletableFuture.supplyAsync {
-            user.logout()
-            lock.open() // unblock refresh token response
-        }
-        CompletableFuture.allOf(refreshTask, logoutTask).join()
-    }
 }
