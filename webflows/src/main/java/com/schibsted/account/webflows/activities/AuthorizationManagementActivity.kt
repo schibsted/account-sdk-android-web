@@ -34,6 +34,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.ClientInterface
 import com.schibsted.account.webflows.util.Either.Left
 import timber.log.Timber
 
@@ -196,7 +197,7 @@ class AuthorizationManagementActivity : Activity() {
 
         @JvmStatic
         fun setup(
-            client: Client,
+            client: ClientInterface,
             completionIntent: PendingIntent? = null,
             cancelIntent: PendingIntent? = null
         ) {

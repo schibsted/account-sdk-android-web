@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.client.ClientInterface
 import com.schibsted.account.webflows.client.LoginError
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -31,7 +32,7 @@ typealias AuthResult = Either<NotAuthed, User>
  *   3. Auth flow cancelled: Failure(NotAuthed.CancelledByUser)
  *   4. User logs out: Failure(NotAuthed.NoLoggedInUser)
  */
-class AuthResultLiveData private constructor(private val client: Client) :
+class AuthResultLiveData private constructor(private val client: ClientInterface) :
     LiveData<AuthResult>() {
 
     internal fun update(result: AuthResult) {
@@ -83,7 +84,7 @@ class AuthResultLiveData private constructor(private val client: Client) :
 
         @JvmStatic
         @MainThread
-        internal fun create(client: Client): AuthResultLiveData {
+        internal fun create(client: ClientInterface): AuthResultLiveData {
             if (::instance.isInitialized) {
                 throw IllegalStateException("Already initialized")
             }
