@@ -169,6 +169,27 @@ class User {
         })
     }
 
+    /**
+     * Bind this user to an [OkHttpClient] to automatically inject the user tokens for authorization.
+     *
+     * This will add an interceptor and override any authenticators already defined.
+     *
+     * @param builder instance of the [OkHttpClient.Builder] to update
+     * @return An [OkHttpClient.Builder] to which the authenticator and interceptor are attached
+     */
+    fun bind(builder: OkHttpClient.Builder): OkHttpClient.Builder {
+        builder.interceptors().removeAll { it is AuthenticatedRequestInterceptor }
+            .also { didRemoveInterceptor ->
+                if (didRemoveInterceptor) {
+                    Timber.w("The provided builder had previous sessions bound, these are now removed.")
+                }
+            }
+
+        return builder
+            .addInterceptor(AuthenticatedRequestInterceptor(this))
+            .authenticator(AccessTokenAuthenticator(this))
+    }
+
     internal fun refreshTokens(): TokenRefreshResult {
         val result = tokenRefreshTask.run()
         fun shouldLogout(result: TokenRefreshResult?): Boolean {
