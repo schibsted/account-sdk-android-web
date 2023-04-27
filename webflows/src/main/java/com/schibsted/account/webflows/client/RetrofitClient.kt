@@ -1,7 +1,7 @@
 package com.schibsted.account.webflows.client
 
+import android.content.Intent
 import com.schibsted.account.webflows.persistence.StorageError
-import com.schibsted.account.webflows.token.UserTokens
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import retrofit2.Retrofit
@@ -81,8 +81,13 @@ class RetrofitClient<S>(
         return null
     }
 
-    internal fun refreshTokensForUser(user: User): Either<RefreshTokenError, UserTokens> {
-        return internalClient.refreshTokensForUser(user)
+    override fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
+        internalClient.handleAuthenticationResponse(intent) { loginResult: Either<LoginError, User> ->
+            loginResult
+                .onSuccess { this.user = it }
+                .onFailure { this.reset() }
+            callback(loginResult)
+        }
     }
 
     private fun reset() {
