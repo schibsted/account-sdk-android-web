@@ -8,4 +8,5 @@
     <string name="start_session_exchange_button">Start session exchange</string>
     <string name="account_pages_button">Account pages</string>
     <string name="logout_button">Logout</string>
+    <string name="make_authenticated_request">Make authenticated request</string>
 </resources>

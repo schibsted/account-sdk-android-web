@@ -13,6 +13,11 @@ import com.schibsted.account.webflows.api.UserProfileResponse
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.await
 import timber.log.Timber
 import java.net.URL
 
@@ -37,7 +42,7 @@ class LoggedInActivity : AppCompatActivity() {
         initProfileDataButton()
         initSessionExchangeButtonButton()
         initAccountPagesButtonButton()
-
+        initMakeAuthenticatedRequestButton()
     }
 
     private fun initLogoutButton() {
@@ -105,6 +110,24 @@ class LoggedInActivity : AppCompatActivity() {
         val userSession: UserSession? = intent.getParcelableExtra(USER_SESSION_EXTRA)
         val user = if (userSession != null) User(client, userSession) else null
         updateUser(user)
+    }
+
+    private fun initMakeAuthenticatedRequestButton() {
+        binding.testRetrofitAuthenticatedRequest.setOnClickListener {
+            val myService: SimpleService = HttpClient.instance.newBuilder().let {
+                user?.bind(it)
+                Retrofit.Builder()
+                    .baseUrl(ClientConfig.environment.url)
+                    .client(it.build())
+                    .build()
+                    .create(SimpleService::class.java)
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val profileData = myService.userProfile(user?.userId.toString()).await()
+                Timber.i("Authenticated request profile data: $profileData")
+            }
+        }
     }
 
     private fun updateUser(user: User?) {
