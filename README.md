@@ -77,6 +77,9 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
    )
    ```
 
+   Then use this `RetrofitClient` instance as a replacement in all places where a `Client`
+   object is expected below.
+
 3. Initialise `AuthorizationManagementActivity` on app startup (see
    [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
    as reference):
