@@ -23,6 +23,7 @@ import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import org.junit.Assert.*
@@ -278,6 +279,23 @@ class UserTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun bindShouldClearPreviousInterceptor() {
+        val client: Client = mockk(relaxed = true)
+        val previousUser = User(client, Fixtures.userTokens.copy("other AT", "other RT"))
+        val previousAuthInterceptor = AuthenticatedRequestInterceptor(previousUser)
+
+        val okHttpBuilder = OkHttpClient.Builder().addInterceptor(previousAuthInterceptor)
+
+        val user = User(client, Fixtures.userTokens)
+        user.bind(okHttpBuilder)
+
+        val authInterceptors =
+            okHttpBuilder.interceptors().takeWhile { it is AuthenticatedRequestInterceptor }
+        assertEquals(1, authInterceptors.size)
+        assertNotEquals(authInterceptors.first(), previousAuthInterceptor)
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
