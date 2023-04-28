@@ -6,7 +6,12 @@ import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import retrofit2.Retrofit
 
-/**  Represents a client registered with Schibsted account - with Retrofit support. */
+/**
+ * Represents a client registered with Schibsted account - with Retrofit support.
+ *
+ * @deprecated use {@link com.schibsted.account.user.User#bind} instead.
+ */
+@Deprecated("Use User.bind instead")
 class RetrofitClient<S>(
     val internalClient: Client,
     private val serviceClass: Class<S>,

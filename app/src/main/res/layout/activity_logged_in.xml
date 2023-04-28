@@ -39,6 +39,12 @@
             android:text="@string/start_session_exchange_button" />
 
         <Button
+            android:id="@+id/testRetrofitAuthenticatedRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/make_authenticated_request" />
+
+        <Button
             android:id="@+id/accountPagesButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

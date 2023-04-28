@@ -66,19 +66,6 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
        httpClient = okHttpClient
    )
    ```
-   **Note:** If you need Retrofit support for making authenticated requests,
-   wrap the above client instance in a `RetrofitClient` instance:
-
-   ```kotlin
-   val retrofitClient = RetrofitClient<YourRetrofitInterface>(
-       client = client,
-       serviceClass = YourRetrofitInterface::class.java,
-       retrofitBuilder = Retrofit.Builder().baseUrl("https://your.api.com")
-   )
-   ```
-
-   Then use this `RetrofitClient` instance as a replacement in all places where a `Client`
-   object is expected below.
 
 3. Initialise `AuthorizationManagementActivity` on app startup (see
    [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
@@ -211,13 +198,25 @@ by following these steps:
       information.
 * Automatic and transparent management of user tokens.
     * Authenticated requests to backend services can be done via
-      [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html)
-      .
+      [`User.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/make-authenticated-request.html).
 
-      If using Retrofit the authenticated request should be done via
-      [`RetrofitClient.makeAuthenticatedRequest`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-retrofit-client-facade/make-authenticated-request.html)
-      .
+      If you want to use for example Retrofit, you can bind the current user session to an
+      `OkHttpClient` with      
+      [`User.bind`](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/webflows/com.schibsted.account.webflows.user/-user/bind.html).
 
+      **Security notice:** Use a separate `OkHttpClient` instance to make requests that
+      require tokens to avoid leaking user tokens to non-authorized APIs:
+      ```kotlin
+      val myService = OkHttpClient.Builder().let {
+          user?.bind(it)
+          Retrofit.Builder()
+              .baseUrl(<URL>)
+              .client(it.build())
+              .build()
+              .create(<Your service interface>)
+      }
+      ```
+      
       The SDK will automatically inject the user access token as a Bearer token in the HTTP
       Authorization request header. If the access token is rejected with a `401 Unauthorized`
       response (e.g. due to having expired), the SDK will try to use the refresh token to obtain a
