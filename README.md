@@ -207,7 +207,8 @@ by following these steps:
       **Security notice:** Use a separate `OkHttpClient` instance to make requests that
       require tokens to avoid leaking user tokens to non-authorized APIs:
       ```kotlin
-      val myService = OkHttpClient.Builder().let {
+      val clientBuilder = OkHttpClient.Builder() // or use client.newBuilder() if you already have an existing OkHttpClient, to ensure underlying resources are shared as recommended
+      val myService = clientBuilder.let {
           user?.bind(it)
           Retrofit.Builder()
               .baseUrl(<URL>)
