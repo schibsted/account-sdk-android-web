@@ -26,10 +26,71 @@ internal interface SessionStorage {
     fun remove(clientId: String)
 }
 
+internal class MigratingSessionStorage(
+    context: Context,
+    private val encryptedSharedPrefsStorage: EncryptedSharedPrefsStorage
+) : SessionStorage {
+    private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
+    private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
+
+    override fun save(session: StoredUserSession) {
+        val editor = prefs.edit()
+        editor.putString(session.clientId, gson.toJson(session))
+        editor.apply()
+    }
+
+    override fun get(clientId: String, callback: StorageReadCallback) {
+        try {
+            val json = prefs.getString(clientId, null)
+            if (json == null) {
+                encryptedSharedPrefsStorage.get(clientId, object : StorageReadCallback {
+                    override fun invoke(result: Either<StorageError, StoredUserSession?>) {
+                        if (result is Either.Right) {
+                            result.value?.let {
+                                save(result.value)
+                                callback(Either.Right(result.value))
+                            }
+                        }
+                    }
+                })
+            } else {
+                callback(
+                    Either.Right(
+                        gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(
+                            json
+                        )
+                    )
+                )
+            }
+        } catch (e: ClassCastException) {
+            Timber.e(e)
+            callback(Either.Left(StorageError.UnexpectedError(e)))
+        }
+    }
+
+    private fun Gson.getStoredUserSession(json: String): StoredUserSession? {
+        return try {
+            fromJson(json, StoredUserSession::class.java)
+        } catch (e: JsonSyntaxException) {
+            null
+        }
+    }
+
+    override fun remove(clientId: String) {
+        val editor = prefs.edit()
+        editor.remove(clientId)
+        editor.apply()
+    }
+
+    companion object {
+        const val PREFERENCE_FILENAME = "SCHACC_TOKENS_SHARED_PREFS"
+    }
+}
+
 internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
 
-    private val prefs: SharedPreferences by lazy {
+    private val prefs: SharedPreferences? by lazy {
         val masterKey = MasterKey.Builder(context.applicationContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -47,16 +108,16 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
                 "Error occurred while trying to build encrypted shared preferences",
                 e
             )
-            throw e
+            null
         }
     }
 
     override fun save(session: StoredUserSession) {
         try {
-            val editor = prefs.edit()
+            val editor = prefs?.edit()
             val json = gson.toJson(session)
-            editor.putString(session.clientId, json)
-            editor.apply()
+            editor?.putString(session.clientId, json)
+            editor?.apply()
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to write to encrypted shared preferences",
@@ -67,7 +128,7 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
-            val json = prefs.getString(clientId, null) ?: return callback(Either.Right(null))
+            val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
             callback(
                 Either.Right(
                     gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(
@@ -94,9 +155,9 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
 
     override fun remove(clientId: String) {
         try {
-            val editor = prefs.edit()
-            editor.remove(clientId)
-            editor.apply()
+            val editor = prefs?.edit()
+            editor?.remove(clientId)
+            editor?.apply()
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to delete from encrypted shared preferences",
