@@ -8,6 +8,7 @@ import androidx.lifecycle.Observer
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
+import com.schibsted.account.webflows.loginPrompt.LoginPromptFragment
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
@@ -38,6 +39,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.manualLoginButton.setOnClickListener {
             startActivity(Intent(this, ManualLoginActivity::class.java))
+        }
+
+        binding.showLoginPrompt.setOnClickListener {
+            val loginPromptFragment = LoginPromptFragment()
+            loginPromptFragment.show(supportFragmentManager, "12345")
         }
     }
 

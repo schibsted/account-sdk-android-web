@@ -1,5 +1,8 @@
 package com.schibsted.account.webflows.util
 
+import android.content.Context
+import android.content.Intent
+import androidx.browser.customtabs.CustomTabsService
 import java.net.URLDecoder
 import kotlin.random.Random
 
@@ -41,5 +44,12 @@ internal object Util {
         }
 
         return "${split[0]}.${split[1]}"
+    }
+
+    fun isCustomTabsSupported(context: Context): Boolean {
+        val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
+        val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
+
+        return !resolveInfos.isEmpty()
     }
 }

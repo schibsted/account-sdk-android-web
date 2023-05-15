@@ -21,6 +21,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -60,9 +64,12 @@ dependencies {
 
     api "androidx.browser:browser:1.4.0"
     implementation 'com.nimbusds:nimbus-jose-jwt:9.24.3'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
 
     //Logging
     implementation "com.jakewharton.timber:timber:$timber_version"
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha09'
+    implementation 'com.google.android.material:material:1.8.0'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:${mockkVersion}"
