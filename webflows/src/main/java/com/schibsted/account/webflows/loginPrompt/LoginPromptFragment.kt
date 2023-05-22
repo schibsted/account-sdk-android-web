@@ -38,10 +38,19 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
+        super.onCreateView(inflater, container, savedInstanceState)
         _binding = LoginPromptBinding.inflate(inflater, container, false)
-        initializeButtons()
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initializeButtons()
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
     }
 
     private fun initializeButtons() {
