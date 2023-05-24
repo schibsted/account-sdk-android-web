@@ -1,5 +1,8 @@
 package com.schibsted.account.webflows.util
 
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
+import com.schibsted.account.webflows.user.StoredUserSession
 import java.net.URLDecoder
 import kotlin.random.Random
 
@@ -41,5 +44,13 @@ internal object Util {
         }
 
         return "${split[0]}.${split[1]}"
+    }
+
+    fun Gson.getStoredUserSession(json: String?): StoredUserSession? {
+        return try {
+            fromJson(json, StoredUserSession::class.java)
+        } catch (e: JsonSyntaxException) {
+            null
+        }
     }
 }

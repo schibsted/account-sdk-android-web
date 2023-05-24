@@ -4,11 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.util.Either
+import com.schibsted.account.webflows.util.Util.getStoredUserSession
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
@@ -27,40 +26,32 @@ internal interface SessionStorage {
 }
 
 internal class MigratingSessionStorage(
-    context: Context,
-    private val encryptedSharedPrefsStorage: EncryptedSharedPrefsStorage
+    private val newStorage: SharedPrefsStorage,
+    private val previousStorage: EncryptedSharedPrefsStorage,
 ) : SessionStorage {
-    private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
-    private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
 
     override fun save(session: StoredUserSession) {
-        val editor = prefs.edit()
-        editor.putString(session.clientId, gson.toJson(session))
-        editor.apply()
+        newStorage.save(session)
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
-            val json = prefs.getString(clientId, null)
-            if (json == null) {
-                encryptedSharedPrefsStorage.get(clientId, object : StorageReadCallback {
-                    override fun invoke(result: Either<StorageError, StoredUserSession?>) {
-                        if (result is Either.Right) {
-                            result.value?.let {
-                                save(result.value)
-                                callback(Either.Right(result.value))
+            when (newStorage.getJsonForClientId(clientId)) {
+                null -> {
+                    previousStorage.get(clientId, object : StorageReadCallback {
+                        override fun invoke(result: Either<StorageError, StoredUserSession?>) {
+                            if (result is Either.Right) {
+                                result.value?.let {
+                                    save(result.value)
+                                    callback(Either.Right(result.value))
+                                }
                             }
                         }
-                    }
-                })
-            } else {
-                callback(
-                    Either.Right(
-                        gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(
-                            json
-                        )
-                    )
-                )
+                    })
+                }
+                else -> {
+                    newStorage.get(clientId, callback)
+                }
             }
         } catch (e: ClassCastException) {
             Timber.e(e)
@@ -68,22 +59,8 @@ internal class MigratingSessionStorage(
         }
     }
 
-    private fun Gson.getStoredUserSession(json: String): StoredUserSession? {
-        return try {
-            fromJson(json, StoredUserSession::class.java)
-        } catch (e: JsonSyntaxException) {
-            null
-        }
-    }
-
     override fun remove(clientId: String) {
-        val editor = prefs.edit()
-        editor.remove(clientId)
-        editor.apply()
-    }
-
-    companion object {
-        const val PREFERENCE_FILENAME = "SCHACC_TOKENS_SHARED_PREFS"
+        newStorage.remove(clientId)
     }
 }
 
@@ -129,27 +106,13 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
             val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
-            callback(
-                Either.Right(
-                    gson.getStoredUserSession(json) ?: Gson().getStoredUserSession(
-                        json
-                    )
-                )
-            )
+            callback(Either.Right(gson.getStoredUserSession(json)))
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to read from encrypted shared preferences",
                 e
             )
             callback(Either.Left(StorageError.UnexpectedError(e)))
-        }
-    }
-
-    private fun Gson.getStoredUserSession(json: String): StoredUserSession? {
-        return try {
-            fromJson(json, StoredUserSession::class.java)
-        } catch (e: JsonSyntaxException) {
-            null
         }
     }
 
@@ -167,6 +130,35 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     }
 
     companion object {
-        const val PREFERENCE_FILENAME = "SCHACC_TOKENS"
+        private const val PREFERENCE_FILENAME = "SCHACC_TOKENS"
+    }
+}
+
+internal class SharedPrefsStorage(context: Context) : SessionStorage {
+
+    private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
+    private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
+
+    override fun save(session: StoredUserSession) {
+        val editor = prefs.edit()
+        editor.putString(session.clientId, gson.toJson(session))
+        editor.apply()
+    }
+
+    override fun get(clientId: String, callback: StorageReadCallback) {
+        val json = prefs.getString(clientId, null)
+        callback(Either.Right(value = gson.getStoredUserSession(json)))
+    }
+
+    override fun remove(clientId: String) {
+        val editor = prefs.edit()
+        editor.remove(clientId)
+        editor.apply()
+    }
+
+    fun getJsonForClientId(clientId: String): String? = prefs.getString(clientId, null)
+
+    companion object {
+        private const val PREFERENCE_FILENAME = "SCHACC_TOKENS_SHARED_PREFS"
     }
 }

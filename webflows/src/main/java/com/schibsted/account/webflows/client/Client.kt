@@ -8,11 +8,11 @@ import androidx.browser.customtabs.CustomTabsService
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.persistence.*
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
-import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
@@ -52,7 +52,12 @@ class Client : ClientInterface {
         stateStorage = StateStorage(context.applicationContext)
 
         val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        sessionStorage = MigratingSessionStorage(context.applicationContext, encryptedStorage)
+        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext)
+
+        sessionStorage = MigratingSessionStorage(
+            newStorage = sharedPrefsStorage,
+            previousStorage = encryptedStorage
+        )
 
         schibstedAccountApi =
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
