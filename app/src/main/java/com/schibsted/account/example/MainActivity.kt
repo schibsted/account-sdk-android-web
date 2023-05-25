@@ -1,6 +1,7 @@
 package com.schibsted.account.example
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +9,7 @@ import androidx.lifecycle.Observer
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
+import com.schibsted.account.webflows.loginPrompt.LoginPromptContentProvider
 import com.schibsted.account.webflows.loginPrompt.LoginPromptFragment
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -44,6 +46,10 @@ class MainActivity : AppCompatActivity() {
         binding.showLoginPrompt.setOnClickListener {
             val loginPromptFragment = LoginPromptFragment()
             loginPromptFragment.show(supportFragmentManager, "12345")
+
+            val cursor = contentResolver.query(Uri.parse(LoginPromptContentProvider.PROVIDER_URL), null, null, null, null)
+            //temporary print, TODO: show login prompt only if count is greater than 0
+            println("${cursor?.count}")
         }
     }
 
