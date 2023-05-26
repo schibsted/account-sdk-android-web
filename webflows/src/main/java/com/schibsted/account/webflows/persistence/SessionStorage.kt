@@ -4,10 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.util.Either
-import com.schibsted.account.webflows.util.Util.getStoredUserSession
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
@@ -35,27 +36,30 @@ internal class MigratingSessionStorage(
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
-        try {
-            when (newStorage.getJsonForClientId(clientId)) {
-                null -> {
-                    previousStorage.get(clientId, object : StorageReadCallback {
-                        override fun invoke(result: Either<StorageError, StoredUserSession?>) {
-                            if (result is Either.Right) {
-                                result.value?.let {
-                                    save(result.value)
-                                    callback(Either.Right(result.value))
-                                }
-                            }
-                        }
-                    })
+        newStorage.get(clientId) { result ->
+            result
+                .onSuccess { newSession ->
+                    if (newSession != null) {
+                        callback(Either.Right(newSession))
+                    } else {
+                        // if no existing session found, look in previous storage
+                        lookupPreviousStorage(clientId, callback)
+                    }
                 }
-                else -> {
-                    newStorage.get(clientId, callback)
+                .onFailure { lookupPreviousStorage(clientId, callback) }
+        }
+    }
+
+    private fun lookupPreviousStorage(clientId: String, callback: StorageReadCallback) {
+        previousStorage.get(clientId) { result ->
+            result.onSuccess {
+                it?.let {
+                    // migrate existing session
+                    newStorage.save(it)
+                    previousStorage.remove(clientId)
                 }
             }
-        } catch (e: ClassCastException) {
-            Timber.e(e)
-            callback(Either.Left(StorageError.UnexpectedError(e)))
+            callback(result)
         }
     }
 
@@ -156,9 +160,15 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
         editor.apply()
     }
 
-    fun getJsonForClientId(clientId: String): String? = prefs.getString(clientId, null)
-
     companion object {
         private const val PREFERENCE_FILENAME = "SCHACC_TOKENS_SHARED_PREFS"
+    }
+}
+
+private fun Gson.getStoredUserSession(json: String?): StoredUserSession? {
+    return try {
+        fromJson(json, StoredUserSession::class.java)
+    } catch (e: JsonSyntaxException) {
+        null
     }
 }

@@ -45,12 +45,4 @@ internal object Util {
 
         return "${split[0]}.${split[1]}"
     }
-
-    fun Gson.getStoredUserSession(json: String?): StoredUserSession? {
-        return try {
-            fromJson(json, StoredUserSession::class.java)
-        } catch (e: JsonSyntaxException) {
-            null
-        }
-    }
 }
