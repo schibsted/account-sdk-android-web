@@ -3,7 +3,6 @@ package com.schibsted.account.testutil
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.ClientConfiguration
-import com.schibsted.account.webflows.client.RetrofitClient
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.IdTokenClaims
@@ -48,18 +47,6 @@ internal object Fixtures {
             httpClient,
             tokenHandler,
             schibstedAccountApi
-        )
-    }
-
-    fun getRetrofitClient(
-        client: Client,
-        serviceClass: Class<TestRetrofitApi> = TestRetrofitApi::class.java,
-    ): RetrofitClient<TestRetrofitApi> {
-        return RetrofitClient(
-            internalClient = client,
-            serviceClass = serviceClass,
-            retrofitBuilder = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://some.not.existing.domain")
         )
     }
 
