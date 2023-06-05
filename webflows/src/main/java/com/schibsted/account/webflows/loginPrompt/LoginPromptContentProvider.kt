@@ -9,21 +9,10 @@ import android.net.Uri
 
 class LoginPromptContentProvider : ContentProvider() {
   companion object {
-    const val PROVIDER_NAME = "com.schibsted.account"
-    const val PROVIDER_URL = "content://$PROVIDER_NAME/sessions"
     const val uriCode = 1
-    val CONTENT_URI = Uri.parse(PROVIDER_URL)
     var uriMatcher: UriMatcher? = null
     var db: SessionInfoDatabase? = null
-  }
-
-  init {
-    uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-    uriMatcher!!.addURI(
-      PROVIDER_NAME,
-      "sessions",
-      uriCode
-    )
+    lateinit var contentURI: Uri
   }
 
   override fun getType(uri: Uri): String? {
@@ -36,6 +25,17 @@ class LoginPromptContentProvider : ContentProvider() {
   override fun onCreate(): Boolean {
     if(context == null) return false
     db = SessionInfoDatabase(context!!)
+
+    val providerName = "${context?.packageName}.contentprovider"
+    val providerUrl = "content://$providerName/sessions"
+
+    contentURI = Uri.parse(providerUrl)
+    uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
+    uriMatcher!!.addURI(
+      providerName,
+      "sessions",
+      uriCode
+    )
     return db != null
   }
 
@@ -52,7 +52,7 @@ class LoginPromptContentProvider : ContentProvider() {
   override fun insert(uri: Uri, values: ContentValues?): Uri? {
     val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String)
     if(rowId != null) {
-      val uri: Uri = ContentUris.withAppendedId(CONTENT_URI, rowId)
+      val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
       context!!.contentResolver.notifyChange(uri, null)
       return uri
     }

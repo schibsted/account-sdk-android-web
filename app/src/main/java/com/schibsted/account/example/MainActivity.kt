@@ -11,6 +11,7 @@ import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.loginPrompt.LoginPromptContentProvider
 import com.schibsted.account.webflows.loginPrompt.LoginPromptFragment
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
@@ -22,7 +23,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
         setContentView(binding.root)
 
         if (intent.getBooleanExtra(LOGIN_FAILED_EXTRA, false)) {
@@ -46,10 +46,9 @@ class MainActivity : AppCompatActivity() {
         binding.showLoginPrompt.setOnClickListener {
             val loginPromptFragment = LoginPromptFragment()
             loginPromptFragment.show(supportFragmentManager, "12345")
-
-            val cursor = contentResolver.query(Uri.parse(LoginPromptContentProvider.PROVIDER_URL), null, null, null, null)
+            val sessionInfoManager = SessionInfoManager(application)
             //temporary print, TODO: show login prompt only if count is greater than 0
-            println("${cursor?.count}")
+            println("ContentProvider is session present: ${sessionInfoManager.isSessionPresent()}")
         }
     }
 
