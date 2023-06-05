@@ -1,8 +1,5 @@
 package com.schibsted.account.webflows.util
 
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import com.schibsted.account.webflows.user.StoredUserSession
 import java.net.URLDecoder
 import kotlin.random.Random
 
