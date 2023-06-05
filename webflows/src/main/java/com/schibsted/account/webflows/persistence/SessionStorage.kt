@@ -12,7 +12,8 @@ import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
-internal typealias StorageReadCallback = (Either<StorageError, StoredUserSession?>) -> Unit
+internal typealias StorageReadResult = Either<StorageError, StoredUserSession?>
+internal typealias StorageReadCallback = (StorageReadResult) -> Unit
 
 /**
  * User session storage.
@@ -110,7 +111,7 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
             val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
-            callback(Either.Right(gson.getStoredUserSession(json)))
+            callback(gson.getStoredUserSession(json))
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to read from encrypted shared preferences",
@@ -151,7 +152,7 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         val json = prefs.getString(clientId, null)
-        callback(Either.Right(value = gson.getStoredUserSession(json)))
+        callback(gson.getStoredUserSession(json))
     }
 
     override fun remove(clientId: String) {
@@ -165,10 +166,10 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
     }
 }
 
-private fun Gson.getStoredUserSession(json: String?): StoredUserSession? {
+private fun Gson.getStoredUserSession(json: String?): StorageReadResult {
     return try {
-        fromJson(json, StoredUserSession::class.java)
+        Either.Right(fromJson(json, StoredUserSession::class.java))
     } catch (e: JsonSyntaxException) {
-        null
+        Either.Left(StorageError.UnexpectedError(e))
     }
 }
