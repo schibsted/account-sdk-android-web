@@ -14,6 +14,7 @@ import com.schibsted.account.webflows.loginPrompt.LoginPromptFragment
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -47,8 +48,11 @@ class MainActivity : AppCompatActivity() {
             val loginPromptFragment = LoginPromptFragment()
             loginPromptFragment.show(supportFragmentManager, "12345")
             val sessionInfoManager = SessionInfoManager(application)
-            //temporary print, TODO: show login prompt only if count is greater than 0
-            println("ContentProvider is session present: ${sessionInfoManager.isSessionPresent()}")
+            runBlocking {
+              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
+              //TODO: temporary info is user session was found on the device sessionInfoManager.isUserLoggedInOnTheDevice function will be called from the client
+              println("User has session on the device: $userHasSession")
+            }
         }
     }
 
