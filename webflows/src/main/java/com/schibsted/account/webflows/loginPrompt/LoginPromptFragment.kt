@@ -16,7 +16,7 @@ import com.schibsted.account.webflows.databinding.LoginPromptBinding
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
-internal class LoginPromptFragment : BottomSheetDialogFragment() {
+class LoginPromptFragment : BottomSheetDialogFragment() {
     private var _binding: LoginPromptBinding? = null
     private val binding get() = _binding!!
     lateinit var loginPromptConfig: LoginPromptConfig
@@ -53,17 +53,18 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
     }
 
     private fun initializeButtons() {
-        binding.loginPromptButton.setOnClickListener {
-            loginPromptConfig.client.launchAuth(loginPromptConfig.context)
+        binding.loginPromptAuth.setOnClickListener {
+            startActivity(loginPromptConfig.client.getAuthenticationIntent(this.requireContext()))
         }
         binding.loginPromptSkip.setOnClickListener {
             dismiss()
         }
 
         binding.loginPromptPrivacy.setOnClickListener {
+            var loginPromptContext = this.requireContext()
             val uri = Uri.parse(getString(R.string.login_prompt_privacy_url))
-            if (Util.isCustomTabsSupported(this.requireContext())) {
-                CustomTabsIntent.Builder().build().launchUrl(this.requireContext(), uri)
+            if (Util.isCustomTabsSupported(loginPromptContext)) {
+                CustomTabsIntent.Builder().build().launchUrl(loginPromptContext, uri)
             } else {
                 startActivity(
                     Intent(

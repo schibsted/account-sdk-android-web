@@ -35,8 +35,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun initializeButtons() {
-        val loginPromptConfig = LoginPromptConfig(ExampleApp.client, this, true )
-        val loginPromptManager = LoginPromptManager(loginPromptConfig)
+        val loginPromptManager = LoginPromptManager(LoginPromptConfig(ExampleApp.client, true))
+        val loginPromptFragment = loginPromptManager.initializeLoginPrompt()
 
         binding.loginButton.setOnClickListener {
             startActivity(ExampleApp.client.getAuthenticationIntent(this))
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.showLoginPrompt.setOnClickListener {
-            loginPromptManager.showLoginPrompt(supportFragmentManager)
+            loginPromptManager.showLoginPrompt(loginPromptFragment, supportFragmentManager)
         }
     }
 
@@ -67,13 +67,16 @@ class MainActivity : AppCompatActivity() {
                 Timber.i("No logged-in user")
                 Toast.makeText(this, "No logged-in user", Toast.LENGTH_SHORT).show()
             }
+
             NotAuthed.CancelledByUser -> {
                 Timber.i("Login cancelled")
                 Toast.makeText(this, "Login cancelled", Toast.LENGTH_SHORT).show()
             }
+
             NotAuthed.AuthInProgress -> {
                 Timber.i("Auth in progress")
             }
+
             else -> {
                 Timber.i("Something went wrong: $state")
                 Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
@@ -82,7 +85,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLoggedInActivity(user: User) {
-        startActivity(LoggedInActivity.intentWithUser(this, user, LoggedInActivity.Companion.Flow.AUTOMATIC))
+        startActivity(
+            LoggedInActivity.intentWithUser(
+                this,
+                user,
+                LoggedInActivity.Companion.Flow.AUTOMATIC
+            )
+        )
     }
 
     companion object {
