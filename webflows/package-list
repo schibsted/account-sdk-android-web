@@ -166,13 +166,6 @@ $dokka.location:com.schibsted.account.webflows.client/RefreshTokenError.Unexpect
 $dokka.location:com.schibsted.account.webflows.client/RefreshTokenError.UnexpectedError/message/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-refresh-token-error/-unexpected-error/message.html
 $dokka.location:com.schibsted.account.webflows.client/RefreshTokenError.UserWasLoggedOut///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-refresh-token-error/-user-was-logged-out/index.html
 $dokka.location:com.schibsted.account.webflows.client/RefreshTokenError///PointingToDeclaration/webflows/com.schibsted.account.webflows.client/-refresh-token-error/index.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt////PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/index.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment///PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/index.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment/LoginPromptFragment/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/-login-prompt-fragment.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment/onCreate/#android.os.Bundle?/PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/on-create.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment/onCreateView/#android.view.LayoutInflater#android.view.ViewGroup?#android.os.Bundle?/PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/on-create-view.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment/onDestroyView/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/on-destroy-view.html
-$dokka.location:com.schibsted.account.webflows.loginPrompt/LoginPromptFragment/onViewCreated/#android.view.View#android.os.Bundle?/PointingToDeclaration/webflows/com.schibsted.account.webflows.loginPrompt/-login-prompt-fragment/on-view-created.html
 $dokka.location:com.schibsted.account.webflows.persistence////PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/index.html
 $dokka.location:com.schibsted.account.webflows.persistence/StorageError.UnexpectedError///PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/-storage-error/-unexpected-error/index.html
 $dokka.location:com.schibsted.account.webflows.persistence/StorageError.UnexpectedError/UnexpectedError/#kotlin.Throwable/PointingToDeclaration/webflows/com.schibsted.account.webflows.persistence/-storage-error/-unexpected-error/-unexpected-error.html
@@ -210,7 +203,6 @@ $dokka.location:com.schibsted.account.webflows.util/Either/onSuccess/#kotlin.Fun
 com.schibsted.account.webflows.activities
 com.schibsted.account.webflows.api
 com.schibsted.account.webflows.client
-com.schibsted.account.webflows.loginPrompt
 com.schibsted.account.webflows.persistence
 com.schibsted.account.webflows.user
 com.schibsted.account.webflows.util
