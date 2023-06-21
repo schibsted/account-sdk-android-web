@@ -92,7 +92,7 @@ data class Address(
         @SerializedName("invoice")
         INVOICE;
 
-        override fun toString(): String = super.toString().toLowerCase(Locale.ROOT)
+        override fun toString(): String = super.toString().lowercase(Locale.ROOT)
     }
 }
 

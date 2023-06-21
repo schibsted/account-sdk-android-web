@@ -23,6 +23,7 @@ import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
+import com.schibsted.account.webflows.util.Util.isCustomTabsSupported
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.json.JSONException
@@ -95,7 +96,7 @@ class Client {
     @JvmOverloads
     fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
         val loginUrl = generateLoginUrl(authRequest)
-        val intent: Intent = if (this.isCustomTabsSupported(context)) {
+        val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
                 .apply {
                     intent.data = loginUrl
@@ -114,7 +115,7 @@ class Client {
     @JvmOverloads
     fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
         val loginUrl = generateLoginUrl(authRequest)
-        if (this.isCustomTabsSupported(context)) {
+        if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent().launchUrl(context, loginUrl)
         } else {
             val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
@@ -131,13 +132,6 @@ class Client {
         val loginUrl = urlBuilder.loginUrl(authRequest)
         Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
-    }
-
-    private fun isCustomTabsSupported(context: Context): Boolean {
-        val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
-        val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
-
-        return !resolveInfos.isEmpty()
     }
 
     /**
