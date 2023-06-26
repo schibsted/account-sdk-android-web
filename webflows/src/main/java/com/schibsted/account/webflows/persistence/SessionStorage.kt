@@ -76,7 +76,6 @@ internal class MigratingSessionStorage(
 
 internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
-    private val sessionInfoManager = SessionInfoManager(context)
 
 
     private val prefs: SharedPreferences? by lazy {
@@ -107,7 +106,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
             val json = gson.toJson(session)
             editor?.putString(session.clientId, json)
             editor?.apply()
-            sessionInfoManager.save()
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to write to encrypted shared preferences",
@@ -134,7 +132,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
             val editor = prefs?.edit()
             editor?.remove(clientId)
             editor?.apply()
-            sessionInfoManager.clear()
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to delete from encrypted shared preferences",
@@ -152,11 +149,13 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
 
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
     private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
+    private val sessionInfoManager = SessionInfoManager(context)
 
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
         editor.putString(session.clientId, gson.toJson(session))
         editor.apply()
+        sessionInfoManager.save()
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
@@ -168,6 +167,7 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
         val editor = prefs.edit()
         editor.remove(clientId)
         editor.apply()
+        sessionInfoManager.clear()
     }
 
     companion object {
