@@ -9,7 +9,9 @@ import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
+import com.schibsted.account.webflows.persistence.MigratingSessionStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
+import com.schibsted.account.webflows.persistence.SharedPrefsStorage
 import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
@@ -30,7 +32,7 @@ import timber.log.Timber
 import java.util.*
 
 /**  Represents a client registered with Schibsted account. */
-class Client : ClientInterface {
+class Client {
     internal val httpClient: OkHttpClient
     internal val schibstedAccountApi: SchibstedAccountApi
     internal val configuration: ClientConfiguration
@@ -51,7 +53,13 @@ class Client : ClientInterface {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
 
-        sessionStorage = EncryptedSharedPrefsStorage(context.applicationContext)
+        val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
+        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext)
+
+        sessionStorage = MigratingSessionStorage(
+            newStorage = sharedPrefsStorage,
+            previousStorage = encryptedStorage
+        )
 
         schibstedAccountApi =
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
@@ -86,7 +94,7 @@ class Client : ClientInterface {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest): Intent {
+    fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
         val loginUrl = generateLoginUrl(authRequest)
         val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
@@ -105,7 +113,7 @@ class Client : ClientInterface {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    override fun launchAuth(context: Context, authRequest: AuthRequest) {
+    fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
         val loginUrl = generateLoginUrl(authRequest)
         if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent().launchUrl(context, loginUrl)
@@ -132,7 +140,7 @@ class Client : ClientInterface {
      * This only needs to be used if manually starting the login flow using [launchAuth].
      * If using [getAuthenticationIntent] this step will be handled for you.
      */
-    override fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
+    fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
         val authResponse = intent.data?.query ?: return callback(
             Left(LoginError.UnexpectedError("No authentication response"))
         )
@@ -198,7 +206,7 @@ class Client : ClientInterface {
     }
 
     /** Resume any previously logged-in user session */
-    override fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
+    fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
         sessionStorage.get(configuration.clientId) { result ->
             result
                 .onSuccess { storedUserSession: StoredUserSession? ->
