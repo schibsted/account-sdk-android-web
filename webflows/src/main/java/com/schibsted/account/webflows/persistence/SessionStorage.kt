@@ -113,7 +113,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
                 "Error occurred while trying to write to encrypted shared preferences",
                 e
             )
-            throw e
         }
     }
 

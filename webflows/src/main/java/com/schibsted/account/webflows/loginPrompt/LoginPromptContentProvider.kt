@@ -1,4 +1,5 @@
 package com.schibsted.account.webflows.loginPrompt
+
 import android.content.ContentProvider
 import android.content.ContentUris
 import android.content.ContentValues
@@ -8,70 +9,67 @@ import android.database.sqlite.SQLiteException
 import android.net.Uri
 
 class LoginPromptContentProvider : ContentProvider() {
-  companion object {
-    const val uriCode = 1
-    var uriMatcher: UriMatcher? = null
-    var db: SessionInfoDatabase? = null
+
+    lateinit var uriMatcher: UriMatcher
+    lateinit var db: SessionInfoDatabase
     lateinit var contentURI: Uri
-  }
+    private val uriCode = 1
 
-  override fun getType(uri: Uri): String? {
-    return when (uriMatcher!!.match(uri)) {
-      uriCode -> "vnd.android.cursor.dir/sessions"
-      else -> throw IllegalArgumentException("Unsupported URI: $uri")
+    override fun getType(uri: Uri): String? {
+        return when (uriMatcher.match(uri)) {
+            uriCode -> "vnd.android.cursor.dir/sessions"
+            else -> throw IllegalArgumentException("Unsupported URI: $uri")
+        }
     }
-  }
 
-  override fun onCreate(): Boolean {
-    if(context == null) return false
-    db = SessionInfoDatabase(context!!)
+    override fun onCreate(): Boolean {
+        context?.let { db = SessionInfoDatabase(it) } ?: return false
 
-    val providerName = "${context?.packageName}.contentprovider"
-    val providerUrl = "content://$providerName/sessions"
+        val providerName = "${context?.packageName}.contentprovider"
+        val providerUrl = "content://$providerName/sessions"
 
-    contentURI = Uri.parse(providerUrl)
-    uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-    uriMatcher!!.addURI(
-      providerName,
-      "sessions",
-      uriCode
-    )
-    return db != null
-  }
+        contentURI = Uri.parse(providerUrl)
+        uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
+        uriMatcher.addURI(
+            providerName, "sessions", uriCode
+        )
 
-  override fun query(
-    uri: Uri, projection: Array<String>?, selection: String?,
-    selectionArgs: Array<String>?, sortOrder: String?
-  ): Cursor? {
-    if(uriMatcher!!.match(uri) != uriCode) {
-      throw IllegalArgumentException("Unknown URI $uri")
+        return db != null
     }
-    return db?.getSessions()
-  }
 
-  override fun insert(uri: Uri, values: ContentValues?): Uri? {
-    val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String)
-    if(rowId != null) {
-      val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
-      context!!.contentResolver.notifyChange(uri, null)
-      return uri
+    override fun query(
+        uri: Uri,
+        projection: Array<String>?,
+        selection: String?,
+        selectionArgs: Array<String>?,
+        sortOrder: String?
+    ): Cursor? {
+        if (uriMatcher.match(uri) != uriCode) {
+            throw IllegalArgumentException("Unknown URI $uri")
+        }
+        return db?.getSessions()
     }
-    throw SQLiteException("Failed to add a record into $uri")
-  }
 
-  override fun update(
-    uri: Uri, values: ContentValues?, selection: String?,
-    selectionArgs: Array<String>?
-  ): Int {
-    return 0
-  }
+    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+        val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String)
+        if (rowId != null) {
+            val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
+            context!!.contentResolver.notifyChange(uri, null)
+            return uri
+        }
+        throw SQLiteException("Failed to add a record into $uri")
+    }
 
-  override fun delete(
-    uri: Uri,
-    selection: String?,
-    selectionArgs: Array<String>?
-  ): Int {
-    val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String);
-    return rowsAffected ?: 0
-  }
+    override fun update(
+        uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?
+    ): Int {
+        return 0
+    }
+
+    override fun delete(
+        uri: Uri, selection: String?, selectionArgs: Array<String>?
+    ): Int {
+        val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String);
+        return rowsAffected ?: 0
+    }
 }
