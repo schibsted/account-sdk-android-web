@@ -56,18 +56,20 @@ class SessionInfoManager(context: Context) {
                     intent,
                     PackageManager.ResolveInfoFlags.of(0)
                 )
-            } else {
+            } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 packageManager.queryIntentContentProviders(intent, PackageManager.MATCH_ALL)
             }
+            else {
+                packageManager.queryIntentContentProviders(intent, 0)
+            }
             val result = async {
-                var isSessionFound = false;
                 for (contentProvider in contentProviders) {
                     if (isSessionPresent(contentProvider.providerInfo.authority)) {
-                        isSessionFound = true
+                        return@async true
                         break
                     }
                 }
-                isSessionFound
+                return@async false
             }
             result.await()
         }
