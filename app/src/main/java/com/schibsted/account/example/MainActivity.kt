@@ -10,8 +10,10 @@ import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.loginPrompt.LoginPromptConfig
 import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
+import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +23,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
         setContentView(binding.root)
 
         if (intent.getBooleanExtra(LOGIN_FAILED_EXTRA, false)) {
@@ -47,6 +48,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.showLoginPrompt.setOnClickListener {
             loginPromptManager.showLoginPrompt(loginPromptFragment, supportFragmentManager)
+            val sessionInfoManager = SessionInfoManager(application)
+            runBlocking {
+              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
+              //TODO: temporary info is user session was found on the device sessionInfoManager.isUserLoggedInOnTheDevice function will be called from the client
+              println("User has session on the device: $userHasSession")
+            }
         }
     }
 
