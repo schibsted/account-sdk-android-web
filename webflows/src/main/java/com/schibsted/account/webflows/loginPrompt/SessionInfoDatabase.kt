@@ -50,7 +50,8 @@ class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         val projection = arrayOf("id", "packageName", "timestamp")
         val selection = "timestamp > ?"
         //get sessions the last year period
-        val arguments = arrayOf("${java.util.Date().time - (60 * 24 * 365)}")
+        val oneYearPeriodInMinutes = 60 * 24 * 365;
+        val arguments = arrayOf("${java.util.Date().time - (oneYearPeriodInMinutes)}")
         val sortOrder = "timestamp DESC"
         return this.readableDatabase.query(
             TABLE_NAME,
