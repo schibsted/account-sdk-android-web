@@ -1,5 +1,6 @@
 package com.schibsted.account.webflows.loginPrompt
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -14,10 +15,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.schibsted.account.webflows.R
 import com.schibsted.account.webflows.databinding.LoginPromptBinding
 import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptCreated
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptDestroyed
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptLeave
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptView
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.*
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
@@ -32,7 +31,7 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                isCancelable = false
+                isCancelable = true
             }
 
         }
@@ -70,12 +69,19 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
         super.onDestroyView()
     }
 
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        SchibstedAccountTracker.track(LoginPromptClickOutside)
+    }
+
     private fun initializeButtons() {
         binding.loginPromptButton.setOnClickListener {
             // placeholder TODO: add call to handleAuthenticationResponse
+            SchibstedAccountTracker.track(LoginPromptClickToLogin)
             dismiss()
         }
         binding.loginPromptSkip.setOnClickListener {
+            SchibstedAccountTracker.track(LoginPromptClickToContinueWithoutLogin)
             dismiss()
         }
 

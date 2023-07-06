@@ -5,4 +5,7 @@ sealed class SchibstedAccountTrackingEvent {
     object LoginPromptView : SchibstedAccountTrackingEvent()
     object LoginPromptLeave : SchibstedAccountTrackingEvent()
     object LoginPromptDestroyed : SchibstedAccountTrackingEvent()
+    object LoginPromptClickToLogin : SchibstedAccountTrackingEvent()
+    object LoginPromptClickToContinueWithoutLogin : SchibstedAccountTrackingEvent()
+    object LoginPromptClickOutside : SchibstedAccountTrackingEvent()
 }
