@@ -1,3 +1,8 @@
 package com.schibsted.account.webflows.tracking
 
-sealed interface SchibstedAccountTrackingEvent
+sealed class SchibstedAccountTrackingEvent {
+    object LoginPromptCreated : SchibstedAccountTrackingEvent()
+    object LoginPromptView : SchibstedAccountTrackingEvent()
+    object LoginPromptLeave : SchibstedAccountTrackingEvent()
+    object LoginPromptDestroyed : SchibstedAccountTrackingEvent()
+}

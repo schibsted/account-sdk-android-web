@@ -13,6 +13,11 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.schibsted.account.webflows.R
 import com.schibsted.account.webflows.databinding.LoginPromptBinding
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptCreated
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptDestroyed
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptLeave
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.LoginPromptView
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
@@ -46,10 +51,22 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeButtons()
+        SchibstedAccountTracker.track(LoginPromptCreated)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        SchibstedAccountTracker.track(LoginPromptView)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        SchibstedAccountTracker.track(LoginPromptLeave)
     }
 
     override fun onDestroyView() {
         _binding = null
+        SchibstedAccountTracker.track(LoginPromptDestroyed)
         super.onDestroyView()
     }
 
