@@ -1,0 +1,3 @@
+package com.schibsted.account.webflows.tracking
+
+sealed interface SchibstedAccountTrackingEvent
