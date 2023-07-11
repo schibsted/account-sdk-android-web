@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeButtons() {
         val loginPromptManager = LoginPromptManager(LoginPromptConfig(ExampleApp.client, true))
-        val loginPromptFragment = loginPromptManager.initializeLoginPrompt()
 
         binding.loginButton.setOnClickListener {
             startActivity(ExampleApp.client.getAuthenticationIntent(this))
@@ -47,12 +46,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.showLoginPrompt.setOnClickListener {
-            loginPromptManager.showLoginPrompt(loginPromptFragment, supportFragmentManager)
+            loginPromptManager.showLoginPrompt(supportFragmentManager)
             val sessionInfoManager = SessionInfoManager(application)
             runBlocking {
-              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
-              //TODO: temporary info is user session was found on the device sessionInfoManager.isUserLoggedInOnTheDevice function will be called from the client
-              println("User has session on the device: $userHasSession")
+                var userHasSession =
+                    sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
+                //TODO: temporary info is user session was found on the device sessionInfoManager.isUserLoggedInOnTheDevice function will be called from the client
+                println("User has session on the device: $userHasSession")
             }
         }
     }

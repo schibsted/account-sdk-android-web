@@ -15,6 +15,7 @@ class LoginPromptConfig {
 
 class LoginPromptManager {
     val loginPromptConfig: LoginPromptConfig
+    val fragmentTag = "schibsted_account_login_prompt"
 
     constructor(loginPromptConfig: LoginPromptConfig) {
         this.loginPromptConfig = loginPromptConfig
@@ -25,11 +26,11 @@ class LoginPromptManager {
      *
      * @param supportFragmentManager Calling entity's fragment manager.
      */
-    fun showLoginPrompt(
-        loginPromptFragment: LoginPromptFragment,
-        supportFragmentManager: FragmentManager
-    ) {
-        loginPromptFragment?.show(supportFragmentManager, null)
+    fun showLoginPrompt(supportFragmentManager: FragmentManager) {
+        var loginPromptFragment =
+            supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
+                ?: initializeLoginPrompt()
+        loginPromptFragment.show(supportFragmentManager, fragmentTag)
     }
 
     fun initializeLoginPrompt(): LoginPromptFragment {
