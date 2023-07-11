@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 class LoginPromptFragment : BottomSheetDialogFragment() {
     private var _binding: LoginPromptBinding? = null
     private val binding get() = _binding!!
+
+    // TODO: look into not keeping a reference to loginPromptConfig inside loginPromptFragment
     lateinit var loginPromptConfig: LoginPromptConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
