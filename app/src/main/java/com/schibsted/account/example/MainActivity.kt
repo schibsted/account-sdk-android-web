@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
@@ -13,6 +14,7 @@ import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
@@ -48,11 +50,11 @@ class MainActivity : AppCompatActivity() {
         binding.showLoginPrompt.setOnClickListener {
             loginPromptManager.showLoginPrompt(supportFragmentManager)
             val sessionInfoManager = SessionInfoManager(application)
-            runBlocking {
-                var userHasSession =
-                    sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
-                //TODO: temporary info is user session was found on the device sessionInfoManager.isUserLoggedInOnTheDevice function will be called from the client
-                println("User has session on the device: $userHasSession")
+
+            //presentation of the SessionManager usage, function should decide if login prompt fragment should be presented to the user
+            lifecycleScope.launch {
+              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
+              println("User has session on the device: $userHasSession")
             }
         }
     }
