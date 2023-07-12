@@ -15,7 +15,6 @@ import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -76,16 +75,13 @@ class MainActivity : AppCompatActivity() {
                 Timber.i("No logged-in user")
                 Toast.makeText(this, "No logged-in user", Toast.LENGTH_SHORT).show()
             }
-
             NotAuthed.CancelledByUser -> {
                 Timber.i("Login cancelled")
                 Toast.makeText(this, "Login cancelled", Toast.LENGTH_SHORT).show()
             }
-
             NotAuthed.AuthInProgress -> {
                 Timber.i("Auth in progress")
             }
-
             else -> {
                 Timber.i("Something went wrong: $state")
                 Toast.makeText(this, "Login failed", Toast.LENGTH_SHORT).show()
