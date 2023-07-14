@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_prompt_title">Log ind</string>
+    <string name="login_prompt_text">Du er allerede logget ind på en Schibsted-tjeneste og kan derfor hurtigt logge ind på denne tjeneste</string>
+    <string name="login_prompt_privacy_policy"><u>Fortrolighedserklæring</u></string>
+    <string name="login_prompt_skip"><u>Fortsæt uden at logge ind</u></string>
+    <string name="login_prompt_button">Log ind</string>
+    <string name="login_prompt_privacy_url">https://info.privacy.schibsted.com/dk/persondata-og-cookiepolitik/</string>
+</resources>

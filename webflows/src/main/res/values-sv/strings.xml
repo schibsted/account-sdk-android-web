@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_prompt_title">Logga in</string>
+    <string name="login_prompt_text">Du är redan inloggad på en Schibsted-tjänst och kan därför snabbt logga in på denna tjänst</string>
+    <string name="login_prompt_privacy_policy"><u>Personuppgiftspolicy</u></string>
+    <string name="login_prompt_skip"><u>Fortsätt utan att logga in</u></string>
+    <string name="login_prompt_button">Logga in</string>
+    <string name="login_prompt_privacy_url">https://info.privacy.schibsted.com/se/schibsted-sverige-personuppgiftspolicy/</string>
+</resources>

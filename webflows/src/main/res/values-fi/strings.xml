@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_prompt_title">Kirjaudu sisään</string>
+    <string name="login_prompt_text">Voit kirjautua sisään nopeasti, koska olet jo kirjautunut Schibsted-palveluun</string>
+    <string name="login_prompt_privacy_policy"><u>Tietosuojakäytännöistämme</u></string>
+    <string name="login_prompt_skip"><u>Jatka kirjautumatta sisään</u></string>
+    <string name="login_prompt_button">Kirjaudu sisään</string>
+    <string name="login_prompt_privacy_url">https://info.privacy.schibsted.com/fi/tietosuoja-ja-evastekaytannot/</string>
+</resources>
