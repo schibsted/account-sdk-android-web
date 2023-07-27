@@ -26,7 +26,7 @@ import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 
 /**  Represents a client registered with Schibsted account. */
 class Client : ClientInterface {
@@ -85,7 +85,8 @@ class Client : ClientInterface {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest): Intent {
+    override fun getAuthenticationIntent(context: Context, authRequest: AuthRequest
+    ): Intent {
         val loginUrl = generateLoginUrl(authRequest)
         val intent: Intent = if (this.isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
@@ -157,11 +158,23 @@ class Client : ClientInterface {
             callback(Left(LoginError.UnsolicitedResponse))
             return
         }
+
+        val eidUserCancelError = mapOf(
+            "error" to "access_denied",
+            "error_description" to "EID authentication was canceled by the user"
+        )
+        val error = authResponse["error"]
+        val errorDescription = authResponse["error_description"]
+        if (error != null && error == eidUserCancelError["error"] && errorDescription == eidUserCancelError["error_description"]) {
+            val oauthError = OAuthError(error, errorDescription)
+            callback(Left(LoginError.CanceledByUser(oauthError)))
+            return
+        }
+
         stateStorage.removeValue(AUTH_STATE_KEY)
 
-        val error = authResponse["error"]
         if (error != null) {
-            val oauthError = OAuthError(error, authResponse["error_description"])
+            val oauthError = OAuthError(error, errorDescription)
             callback(Left(LoginError.AuthenticationErrorResponse(oauthError)))
             return
         }
@@ -252,6 +265,7 @@ class Client : ClientInterface {
                     Left(RefreshTokenError.UnexpectedError("User has logged-out during token refresh"))
                 }
             }
+
             is Left -> {
                 Timber.e("Failed to refresh token: $result")
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
@@ -309,6 +323,9 @@ sealed class LoginError {
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenErrorResponse" target="_top">Token Error Response</a>
      */
     data class TokenErrorResponse(val error: OAuthError) : LoginError()
+
+    /** User canceled login. */
+    data class CanceledByUser(val error: OAuthError) : LoginError()
 
     /** Something went wrong. */
     data class UnexpectedError(val message: String) : LoginError()
