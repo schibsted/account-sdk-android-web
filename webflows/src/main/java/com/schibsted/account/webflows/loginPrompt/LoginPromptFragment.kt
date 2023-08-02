@@ -16,7 +16,7 @@ import com.schibsted.account.webflows.databinding.LoginPromptBinding
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
-class LoginPromptFragment : BottomSheetDialogFragment() {
+internal class LoginPromptFragment : BottomSheetDialogFragment() {
     private var _binding: LoginPromptBinding? = null
     private val binding get() = _binding!!
 

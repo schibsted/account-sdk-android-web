@@ -8,7 +8,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteException
 import android.net.Uri
 
-class LoginPromptContentProvider : ContentProvider() {
+internal class LoginPromptContentProvider : ContentProvider() {
 
     lateinit var uriMatcher: UriMatcher
     lateinit var db: SessionInfoDatabase

@@ -9,7 +9,7 @@ import android.net.Uri
 import android.os.Build
 
 
-class SessionInfoManager(context: Context) {
+internal class SessionInfoManager(context: Context) {
     private val contentResolver = context.contentResolver;
     private val packageName = context.packageName
     private val packageManager = context.packageManager

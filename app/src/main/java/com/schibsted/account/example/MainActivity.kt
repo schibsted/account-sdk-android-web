@@ -9,9 +9,6 @@ import androidx.lifecycle.lifecycleScope
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
-import com.schibsted.account.webflows.loginPrompt.LoginPromptConfig
-import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
-import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
@@ -35,26 +32,21 @@ class MainActivity : AppCompatActivity() {
         observeAuthResultLiveData()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        lifecycleScope.launch {
+            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true)
+        }
+    }
+
 
     private fun initializeButtons() {
-        val loginPromptManager = LoginPromptManager(LoginPromptConfig(ExampleApp.client, true))
-
         binding.loginButton.setOnClickListener {
             startActivity(ExampleApp.client.getAuthenticationIntent(this))
         }
         binding.manualLoginButton.setOnClickListener {
             startActivity(Intent(this, ManualLoginActivity::class.java))
-        }
-
-        binding.showLoginPrompt.setOnClickListener {
-            loginPromptManager.showLoginPrompt(supportFragmentManager)
-            val sessionInfoManager = SessionInfoManager(application)
-
-            //presentation of the SessionManager usage, function should decide if login prompt fragment should be presented to the user
-            lifecycleScope.launch {
-              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
-              println("User has session on the device: $userHasSession")
-            }
         }
     }
 

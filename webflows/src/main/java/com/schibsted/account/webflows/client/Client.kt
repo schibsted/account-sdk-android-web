@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.browser.customtabs.CustomTabsService
+import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.loginPrompt.LoginPromptConfig
+import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
@@ -29,7 +32,7 @@ import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -94,7 +97,10 @@ class Client {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
+    fun getAuthenticationIntent(
+        context: Context,
+        authRequest: AuthRequest = AuthRequest()
+    ): Intent {
         val loginUrl = generateLoginUrl(authRequest)
         val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
@@ -106,6 +112,7 @@ class Client {
         }
         return AuthorizationManagementActivity.createStartIntent(context, intent)
     }
+
 
     /**
      * Start auth activity manually.
@@ -146,6 +153,7 @@ class Client {
         )
         handleAuthenticationResponse(authResponse, callback)
     }
+
 
     private fun handleAuthenticationResponse(
         authResponseParameters: String,
@@ -254,10 +262,32 @@ class Client {
                     Left(RefreshTokenError.UnexpectedError("User has logged-out during token refresh"))
                 }
             }
+
             is Left -> {
                 Timber.e("Failed to refresh token: $result")
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
             }
+        }
+    }
+
+    /**
+     * Start auth activity manually.
+     *
+     * @param supportFragmentManager Activity's Fragment manager.
+     * @param isCancelable set if loginPrompt should be cancelable by user.
+     */
+    @JvmOverloads
+    suspend fun requestLoginPrompt(
+        context: Context,
+        supportFragmentManager: FragmentManager,
+        isCancelable: Boolean = true
+    ) {
+        val loginPromptManager = LoginPromptManager(LoginPromptConfig(this, isCancelable))
+        val sessionInfoManager = SessionInfoManager(context.applicationContext)
+        var userHasSessionOnDevice =
+            sessionInfoManager.isUserLoggedInOnTheDevice(context.applicationContext)
+        if (userHasSessionOnDevice) {
+            loginPromptManager.showLoginPrompt(supportFragmentManager)
         }
     }
 
