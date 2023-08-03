@@ -172,7 +172,7 @@ class Client {
         val errorDescription = authResponse["error_description"]
         if (error != null && error == eidUserCancelError["error"] && errorDescription == eidUserCancelError["error_description"]) {
             val oauthError = OAuthError(error, errorDescription)
-            callback(Left(LoginError.CanceledByUser(oauthError)))
+            callback(Left(LoginError.CancelledByUser(oauthError)))
             return
         }
 
@@ -335,7 +335,7 @@ sealed class LoginError {
     data class TokenErrorResponse(val error: OAuthError) : LoginError()
 
     /** User canceled login. */
-    data class CanceledByUser(val error: OAuthError) : LoginError()
+    data class CancelledByUser(val error: OAuthError) : LoginError()
 
     /** Something went wrong. */
     data class UnexpectedError(val message: String) : LoginError()
