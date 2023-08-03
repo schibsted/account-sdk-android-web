@@ -164,11 +164,6 @@ class Client {
         val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
             ?: return callback(Left(LoginError.AuthStateReadError))
 
-        if (stored.state != authResponse["state"]) {
-            callback(Left(LoginError.UnsolicitedResponse))
-            return
-        }
-
         val eidUserCancelError = mapOf(
             "error" to "access_denied",
             "error_description" to "EID authentication was canceled by the user"
@@ -178,6 +173,11 @@ class Client {
         if (error != null && error == eidUserCancelError["error"] && errorDescription == eidUserCancelError["error_description"]) {
             val oauthError = OAuthError(error, errorDescription)
             callback(Left(LoginError.CanceledByUser(oauthError)))
+            return
+        }
+
+        if (stored.state != authResponse["state"]) {
+            callback(Left(LoginError.UnsolicitedResponse))
             return
         }
 
