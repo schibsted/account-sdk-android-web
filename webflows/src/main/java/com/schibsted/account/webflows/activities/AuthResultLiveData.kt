@@ -62,7 +62,7 @@ class AuthResultLiveData private constructor(private val client: ClientInterface
                 is Left -> update(
                     Left(
                         when (result.value) {
-                            is LoginError.CanceledByUser -> NotAuthed.CancelledByUser
+                            is LoginError.CancelledByUser -> NotAuthed.CancelledByUser
                             else -> NotAuthed.LoginFailed(result.value)
                         }
                     )
