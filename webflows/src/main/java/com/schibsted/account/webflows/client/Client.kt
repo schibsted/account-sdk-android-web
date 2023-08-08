@@ -113,7 +113,6 @@ class Client {
         return AuthorizationManagementActivity.createStartIntent(context, intent)
     }
 
-
     /**
      * Start auth activity manually.
      *
@@ -153,7 +152,6 @@ class Client {
         )
         handleAuthenticationResponse(authResponse, callback)
     }
-
 
     private fun handleAuthenticationResponse(
         authResponseParameters: String,
@@ -271,7 +269,7 @@ class Client {
     }
 
     /**
-     * Start auth activity manually.
+     * Show native login prompt if user already has a valid session on device.
      *
      * @param supportFragmentManager Activity's Fragment manager.
      * @param isCancelable set if loginPrompt should be cancelable by user.
