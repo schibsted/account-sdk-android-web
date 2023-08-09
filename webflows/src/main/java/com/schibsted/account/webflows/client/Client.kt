@@ -163,15 +163,27 @@ class Client {
         val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
             ?: return callback(Left(LoginError.AuthStateReadError))
 
+        val eidUserCancelError = mapOf(
+            "error" to "access_denied",
+            "error_description" to "EID authentication was canceled by the user"
+        )
+        val error = authResponse["error"]
+        val errorDescription = authResponse["error_description"]
+        if (error != null && error == eidUserCancelError["error"] && errorDescription == eidUserCancelError["error_description"]) {
+            val oauthError = OAuthError(error, errorDescription)
+            callback(Left(LoginError.CancelledByUser(oauthError)))
+            return
+        }
+
         if (stored.state != authResponse["state"]) {
             callback(Left(LoginError.UnsolicitedResponse))
             return
         }
+
         stateStorage.removeValue(AUTH_STATE_KEY)
 
-        val error = authResponse["error"]
         if (error != null) {
-            val oauthError = OAuthError(error, authResponse["error_description"])
+            val oauthError = OAuthError(error, errorDescription)
             callback(Left(LoginError.AuthenticationErrorResponse(oauthError)))
             return
         }
@@ -343,6 +355,9 @@ sealed class LoginError {
      * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html#TokenErrorResponse" target="_top">Token Error Response</a>
      */
     data class TokenErrorResponse(val error: OAuthError) : LoginError()
+
+    /** User canceled login. */
+    data class CancelledByUser(val error: OAuthError) : LoginError()
 
     /** Something went wrong. */
     data class UnexpectedError(val message: String) : LoginError()
