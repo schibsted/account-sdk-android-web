@@ -59,7 +59,14 @@ class AuthResultLiveData private constructor(private val client: ClientInterface
         client.handleAuthenticationResponse(intent) { result ->
             when (result) {
                 is Right -> update(result)
-                is Left -> update(Left(NotAuthed.LoginFailed(result.value)))
+                is Left -> update(
+                    Left(
+                        when (result.value) {
+                            is LoginError.CancelledByUser -> NotAuthed.CancelledByUser
+                            else -> NotAuthed.LoginFailed(result.value)
+                        }
+                    )
+                )
             }
         }
     }
