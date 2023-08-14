@@ -3,7 +3,7 @@ package com.schibsted.account.webflows.loginPrompt
 import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.client.Client
 
-class LoginPromptConfig {
+internal class LoginPromptConfig {
     var client: Client
     var isCancelable: Boolean
 
@@ -13,7 +13,7 @@ class LoginPromptConfig {
     }
 }
 
-class LoginPromptManager {
+internal class LoginPromptManager {
     val loginPromptConfig: LoginPromptConfig
     val fragmentTag = "schibsted_account_login_prompt"
 
