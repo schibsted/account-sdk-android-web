@@ -280,13 +280,13 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
     ) {
-        val loginPromptManager = LoginPromptManager(LoginPromptConfig(this, isCancelable))
-        val sessionInfoManager = SessionInfoManager(context.applicationContext)
-        var userHasSessionOnDevice =
-            sessionInfoManager.isUserLoggedInOnTheDevice(context.applicationContext)
-        if (userHasSessionOnDevice) {
-            loginPromptManager.showLoginPrompt(supportFragmentManager)
+        if(userHasSessionOnDevice(context.applicationContext)) {
+            LoginPromptManager(LoginPromptConfig(this, isCancelable)).showLoginPrompt(supportFragmentManager)
         }
+    }
+
+    private suspend fun userHasSessionOnDevice(context: Context): Boolean {
+        return SessionInfoManager(context).isUserLoggedInOnTheDevice(context)
     }
 
     internal companion object {
