@@ -20,10 +20,12 @@ import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.*
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
-
-class LoginPromptFragment : BottomSheetDialogFragment() {
+internal class LoginPromptFragment : BottomSheetDialogFragment() {
     private var _binding: LoginPromptBinding? = null
     private val binding get() = _binding!!
+
+    // TODO: look into not keeping a reference to loginPromptConfig inside loginPromptFragment
+    lateinit var loginPromptConfig: LoginPromptConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +33,8 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                isCancelable = true
+                isCancelable = loginPromptConfig.isCancelable
             }
-
         }
     }
 
@@ -75,10 +76,9 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
     }
 
     private fun initializeButtons() {
-        binding.loginPromptButton.setOnClickListener {
-            // placeholder TODO: add call to handleAuthenticationResponse
+        binding.loginPromptAuth.setOnClickListener {
+            startActivity(loginPromptConfig.client.getAuthenticationIntent(this.requireContext()))
             SchibstedAccountTracker.track(LoginPromptClickToLogin)
-            dismiss()
         }
         binding.loginPromptSkip.setOnClickListener {
             SchibstedAccountTracker.track(LoginPromptClickToContinueWithoutLogin)
@@ -86,9 +86,10 @@ class LoginPromptFragment : BottomSheetDialogFragment() {
         }
 
         binding.loginPromptPrivacy.setOnClickListener {
+            var loginPromptContext = this.requireContext()
             val uri = Uri.parse(getString(R.string.login_prompt_privacy_url))
-            if (Util.isCustomTabsSupported(this.requireContext())) {
-                CustomTabsIntent.Builder().build().launchUrl(this.requireContext(), uri)
+            if (Util.isCustomTabsSupported(loginPromptContext)) {
+                CustomTabsIntent.Builder().build().launchUrl(loginPromptContext, uri)
             } else {
                 startActivity(
                     Intent(

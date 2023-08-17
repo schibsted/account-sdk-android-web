@@ -14,6 +14,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+        resConfigs "en", "sv", "no", "fi", "dk"
     }
 
     compileOptions {

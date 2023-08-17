@@ -1,7 +1,6 @@
 package com.schibsted.account.example
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -10,13 +9,9 @@ import androidx.lifecycle.lifecycleScope
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
-import com.schibsted.account.webflows.loginPrompt.LoginPromptContentProvider
-import com.schibsted.account.webflows.loginPrompt.LoginPromptFragment
-import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -37,6 +32,14 @@ class MainActivity : AppCompatActivity() {
         observeAuthResultLiveData()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        lifecycleScope.launch {
+            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true)
+        }
+    }
+
 
     private fun initializeButtons() {
         binding.loginButton.setOnClickListener {
@@ -44,17 +47,6 @@ class MainActivity : AppCompatActivity() {
         }
         binding.manualLoginButton.setOnClickListener {
             startActivity(Intent(this, ManualLoginActivity::class.java))
-        }
-
-        binding.showLoginPrompt.setOnClickListener {
-            val loginPromptFragment = LoginPromptFragment()
-            loginPromptFragment.show(supportFragmentManager, "12345")
-            val sessionInfoManager = SessionInfoManager(application)
-            //presentation of the SessionManager usage, function should decide if login prompt fragment should be presented to the user
-            lifecycleScope.launch {
-              var userHasSession = sessionInfoManager.isUserLoggedInOnTheDevice(applicationContext);
-              println("User has session on the device: $userHasSession")
-            }
         }
     }
 
@@ -90,7 +82,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLoggedInActivity(user: User) {
-        startActivity(LoggedInActivity.intentWithUser(this, user, LoggedInActivity.Companion.Flow.AUTOMATIC))
+        startActivity(
+            LoggedInActivity.intentWithUser(
+                this,
+                user,
+                LoggedInActivity.Companion.Flow.AUTOMATIC
+            )
+        )
     }
 
     companion object {
