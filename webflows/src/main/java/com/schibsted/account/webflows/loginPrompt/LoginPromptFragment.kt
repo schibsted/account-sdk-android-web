@@ -15,7 +15,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.schibsted.account.webflows.R
 import com.schibsted.account.webflows.databinding.LoginPromptBinding
 import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.*
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
