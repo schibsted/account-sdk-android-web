@@ -1,16 +1,12 @@
 package com.schibsted.account.webflows.persistence
 
 import android.content.Context
-import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.SharedPreferences
-import android.net.Uri
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import com.schibsted.account.webflows.loginPrompt.LoginPromptContentProvider
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.util.Either
