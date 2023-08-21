@@ -8,4 +8,10 @@ sealed class SchibstedAccountTrackingEvent {
     object LoginPromptClickToLogin : SchibstedAccountTrackingEvent()
     object LoginPromptClickToContinueWithoutLogin : SchibstedAccountTrackingEvent()
     object LoginPromptClickOutside : SchibstedAccountTrackingEvent()
+    object LoginPromptContentProviderInsert : SchibstedAccountTrackingEvent()
+    object LoginPromptContentProviderDelete : SchibstedAccountTrackingEvent()
+
+    object UserLoginSuccessful : SchibstedAccountTrackingEvent()
+    object UserLoginFailed : SchibstedAccountTrackingEvent()
+    object UserLoginCanceled : SchibstedAccountTrackingEvent()
 }

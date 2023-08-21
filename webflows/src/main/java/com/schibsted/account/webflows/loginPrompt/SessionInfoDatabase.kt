@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 
-class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
+internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
     context,
     DATABASE_NAME,
     null,

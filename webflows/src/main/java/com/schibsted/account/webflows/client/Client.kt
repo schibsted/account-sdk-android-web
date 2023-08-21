@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.browser.customtabs.CustomTabsService
+import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.loginPrompt.LoginPromptConfig
+import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
@@ -17,6 +20,8 @@ import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -29,7 +34,7 @@ import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.*
+import java.util.Date
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -94,7 +99,10 @@ class Client {
      * @param authRequest Authentication request parameters.
      */
     @JvmOverloads
-    fun getAuthenticationIntent(context: Context, authRequest: AuthRequest = AuthRequest()): Intent {
+    fun getAuthenticationIntent(
+        context: Context,
+        authRequest: AuthRequest = AuthRequest()
+    ): Intent {
         val loginUrl = generateLoginUrl(authRequest)
         val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
@@ -174,10 +182,12 @@ class Client {
             storedUserSession
                 .onSuccess { session ->
                     sessionStorage.save(session)
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginSuccessful)
                     callback(Right(User(this, session.userTokens)))
                 }
                 .onFailure { err ->
                     Timber.d("Token error response: $err")
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginFailed)
                     val oauthError = err.toOauthError()
                     if (oauthError != null) {
                         callback(Left(LoginError.TokenErrorResponse(oauthError)))
@@ -254,11 +264,33 @@ class Client {
                     Left(RefreshTokenError.UnexpectedError("User has logged-out during token refresh"))
                 }
             }
+
             is Left -> {
                 Timber.e("Failed to refresh token: $result")
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
             }
         }
+    }
+
+    /**
+     * Show native login prompt if user already has a valid session on device.
+     *
+     * @param supportFragmentManager Activity's Fragment manager.
+     * @param isCancelable set if loginPrompt should be cancelable by user.
+     */
+    @JvmOverloads
+    suspend fun requestLoginPrompt(
+        context: Context,
+        supportFragmentManager: FragmentManager,
+        isCancelable: Boolean = true
+    ) {
+        if(userHasSessionOnDevice(context.applicationContext)) {
+            LoginPromptManager(LoginPromptConfig(this, isCancelable)).showLoginPrompt(supportFragmentManager)
+        }
+    }
+
+    private suspend fun userHasSessionOnDevice(context: Context): Boolean {
+        return SessionInfoManager(context).isUserLoggedInOnTheDevice(context)
     }
 
     internal companion object {
