@@ -7,6 +7,8 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.database.sqlite.SQLiteException
 import android.net.Uri
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 
 internal class LoginPromptContentProvider : ContentProvider() {
 
@@ -55,6 +57,7 @@ internal class LoginPromptContentProvider : ContentProvider() {
         if (rowId != null) {
             val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
             context!!.contentResolver.notifyChange(uri, null)
+            SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptContentProviderInsert)
             return uri
         }
         throw SQLiteException("Failed to add a record into $uri")
@@ -70,6 +73,7 @@ internal class LoginPromptContentProvider : ContentProvider() {
         uri: Uri, selection: String?, selectionArgs: Array<String>?
     ): Int {
         val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String);
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptContentProviderDelete)
         return rowsAffected ?: 0
     }
 }

@@ -20,6 +20,8 @@ import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
@@ -180,10 +182,12 @@ class Client {
             storedUserSession
                 .onSuccess { session ->
                     sessionStorage.save(session)
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginSuccessful)
                     callback(Right(User(this, session.userTokens)))
                 }
                 .onFailure { err ->
                     Timber.d("Token error response: $err")
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginFailed)
                     val oauthError = err.toOauthError()
                     if (oauthError != null) {
                         callback(Left(LoginError.TokenErrorResponse(oauthError)))
