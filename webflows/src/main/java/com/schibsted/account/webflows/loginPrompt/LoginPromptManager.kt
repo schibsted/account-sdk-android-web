@@ -30,13 +30,12 @@ internal class LoginPromptManager {
         var loginPromptFragment =
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
                 ?: initializeLoginPrompt()
+        loginPromptFragment.loginPromptConfig = this.loginPromptConfig
         loginPromptFragment.show(supportFragmentManager, fragmentTag)
     }
 
-    fun initializeLoginPrompt(): LoginPromptFragment {
+    internal fun initializeLoginPrompt(): LoginPromptFragment {
         var loginPromptFragment = LoginPromptFragment()
-        loginPromptFragment.loginPromptConfig = this.loginPromptConfig
-
         return loginPromptFragment
     }
 }
