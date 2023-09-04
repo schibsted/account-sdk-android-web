@@ -12,7 +12,9 @@ interface SchibstedAccountTrackerStore {
          * Adds listener for tracking events
          */
         override fun addTrackingListener(trackingListener: SchibstedAccountTrackingListener) {
-            accountListenersList.add(trackingListener)
+            synchronized(accountListenersList) {
+                accountListenersList.add(trackingListener)
+            }
         }
 
         /**
@@ -21,12 +23,16 @@ interface SchibstedAccountTrackerStore {
          * removed after all tests.
          */
         override fun removeTrackingListener(trackingListener: SchibstedAccountTrackingListener) {
-            accountListenersList.remove(trackingListener)
+            synchronized(accountListenersList) {
+                accountListenersList.remove(trackingListener)
+            }
         }
 
         internal fun notifyListeners(event: SchibstedAccountTrackingEvent) {
-            accountListenersList.forEach {
-                it.onEvent(event)
+            synchronized(accountListenersList) {
+                accountListenersList.forEach {
+                    it.onEvent(event)
+                }
             }
         }
     }

@@ -13,13 +13,8 @@ internal class LoginPromptConfig {
     }
 }
 
-internal class LoginPromptManager {
-    val loginPromptConfig: LoginPromptConfig
-    val fragmentTag = "schibsted_account_login_prompt"
-
-    constructor(loginPromptConfig: LoginPromptConfig) {
-        this.loginPromptConfig = loginPromptConfig
-    }
+internal class LoginPromptManager(val loginPromptConfig: LoginPromptConfig) {
+    private val fragmentTag = "schibsted_account_login_prompt"
 
     /**
      * Show login prompt.
@@ -31,10 +26,12 @@ internal class LoginPromptManager {
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
                 ?: initializeLoginPrompt()
         loginPromptFragment.loginPromptConfig = this.loginPromptConfig
-        loginPromptFragment.show(supportFragmentManager, fragmentTag)
+        if(!loginPromptFragment?.dialog?.isShowing!!) {
+            loginPromptFragment.show(supportFragmentManager, fragmentTag)
+        }
     }
 
-    internal fun initializeLoginPrompt(): LoginPromptFragment {
+    fun initializeLoginPrompt(): LoginPromptFragment {
         var loginPromptFragment = LoginPromptFragment()
         return loginPromptFragment
     }
