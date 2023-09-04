@@ -302,7 +302,7 @@ class Client {
     }
 
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
-        return SessionInfoManager(context).isUserLoggedInOnTheDevice(context)
+        return SessionInfoManager(context).isUserLoggedInOnTheDevice()
     }
 
     internal companion object {

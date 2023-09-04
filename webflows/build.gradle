@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         minSdkVersion 21
@@ -69,8 +69,10 @@ dependencies {
 
     //Logging
     implementation "com.jakewharton.timber:timber:$timber_version"
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha09'
-    implementation 'com.google.android.material:material:1.8.0'
+
+    //Login prompt
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0-alpha12'
+    implementation 'com.google.android.material:material:1.9.0'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:${mockkVersion}"

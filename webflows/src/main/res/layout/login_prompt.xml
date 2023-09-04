@@ -9,9 +9,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/loginPromptText">
+            app:layout_constraintStart_toStartOf="parent">
 
         <TextView
                 android:id="@+id/loginPromptTitle"
@@ -24,9 +22,8 @@
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
         <View
                 android:layout_width="match_parent"
@@ -42,29 +39,29 @@
             android:gravity="center"
             android:padding="16dp"
             android:text="@string/login_prompt_text"
-            android:textColor="#535259"
+            android:textColor="@color/loginPromptText"
             android:fontFamily="Inter"
             android:textSize="16sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/titleLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/titleLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
             android:id="@+id/loginPromptAuth"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="0dp"
             android:layout_height="56dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:text="@string/login_prompt_button"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/white"
             android:textSize="16sp"
-            app:backgroundTint="#3274D4"
+            app:backgroundTint="@color/loginPromptPrimary"
             app:cornerRadius="24dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/loginPromptText" />
+            app:layout_constraintTop_toBottomOf="@id/loginPromptText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp" />
 
     <TextView
             android:id="@+id/loginPromptSkip"
@@ -75,11 +72,11 @@
             android:paddingBottom="8dp"
             android:text="@string/login_prompt_skip"
             android:fontFamily="Inter"
-            android:textColor="#3274D4"
+            android:textColor="@color/loginPromptPrimary"
             android:textSize="16sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/loginPromptAuth" />
+            app:layout_constraintTop_toBottomOf="@id/loginPromptAuth"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="0dp"
@@ -88,10 +85,10 @@
             android:background="@drawable/rounded_layout"
             android:gravity="center"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/loginPromptSkip">
+            app:layout_constraintTop_toBottomOf="@id/loginPromptSkip"
+            app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
                 android:layout_width="match_parent"
@@ -107,11 +104,10 @@
                 android:padding="12dp"
                 android:text="@string/login_prompt_privacy_policy"
                 android:fontFamily="Inter"
-                android:textColor="#35343A"
+                android:textColor="@color/loginPromptPrivacyText"
                 android:textSize="14sp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/loginPromptAuth" />
+                app:layout_constraintTop_toBottomOf="@id/loginPromptAuth"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

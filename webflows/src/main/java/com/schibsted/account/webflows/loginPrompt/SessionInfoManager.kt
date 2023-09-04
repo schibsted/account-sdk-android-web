@@ -42,7 +42,7 @@ internal class SessionInfoManager(context: Context) {
         return cursor?.count != null && cursor.count > 0
     }
 
-    suspend fun isUserLoggedInOnTheDevice(context: Context): Boolean {
+    suspend fun isUserLoggedInOnTheDevice(): Boolean {
         var contentProviders: List<ResolveInfo>;
         val intent = Intent("com.schibsted.account.LOGIN_PROMPT_CONTENT_PROVIDER")
         contentProviders = when {
