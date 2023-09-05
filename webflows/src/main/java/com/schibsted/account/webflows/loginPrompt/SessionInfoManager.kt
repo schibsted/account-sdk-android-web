@@ -10,7 +10,7 @@ import android.os.Build
 
 
 internal class SessionInfoManager(context: Context) {
-    private val contentResolver = context.contentResolver;
+    private val contentResolver = context.contentResolver
     private val packageName = context.packageName
     private val packageManager = context.packageManager
 
@@ -39,11 +39,13 @@ internal class SessionInfoManager(context: Context) {
                 null,
                 null
             )
-        return cursor?.count != null && cursor.count > 0
+        val isSessionPresent = cursor?.count != null && cursor.count > 0
+        cursor?.close()
+        return isSessionPresent
     }
 
     suspend fun isUserLoggedInOnTheDevice(): Boolean {
-        var contentProviders: List<ResolveInfo>;
+        val contentProviders: List<ResolveInfo>
         val intent = Intent("com.schibsted.account.LOGIN_PROMPT_CONTENT_PROVIDER")
         contentProviders = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> packageManager.queryIntentContentProviders(

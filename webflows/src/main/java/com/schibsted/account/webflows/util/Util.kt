@@ -50,6 +50,6 @@ internal object Util {
         val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
         val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
 
-        return !resolveInfos.isEmpty()
+        return resolveInfos.isNotEmpty()
     }
 }
