@@ -33,7 +33,7 @@ internal class SessionInfoManager(context: Context) {
     private fun isSessionPresent(authority: String): Boolean {
         val cursor =
             contentResolver.query(
-                Uri.parse("content://${authority}.contentprovider/sessions"),
+                Uri.parse("content://${authority}/sessions"),
                 null,
                 null,
                 null,
