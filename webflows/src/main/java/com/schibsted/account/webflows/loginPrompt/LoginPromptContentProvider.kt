@@ -12,12 +12,12 @@ import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 
 internal class LoginPromptContentProvider : ContentProvider() {
 
-    lateinit var uriMatcher: UriMatcher
-    lateinit var db: SessionInfoDatabase
-    lateinit var contentURI: Uri
+    private lateinit var uriMatcher: UriMatcher
+    private lateinit var db: SessionInfoDatabase
+    private lateinit var contentURI: Uri
     private val uriCode = 1
 
-    override fun getType(uri: Uri): String? {
+    override fun getType(uri: Uri): String {
         return when (uriMatcher.match(uri)) {
             uriCode -> "vnd.android.cursor.dir/sessions"
             else -> throw IllegalArgumentException("Unsupported URI: $uri")
@@ -52,7 +52,7 @@ internal class LoginPromptContentProvider : ContentProvider() {
         return db?.getSessions()
     }
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+    override fun insert(uri: Uri, values: ContentValues?): Uri {
         val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String)
         if (rowId != null) {
             val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
@@ -72,7 +72,7 @@ internal class LoginPromptContentProvider : ContentProvider() {
     override fun delete(
         uri: Uri, selection: String?, selectionArgs: Array<String>?
     ): Int {
-        val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String);
+        val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String)
         SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptContentProviderDelete)
         return rowsAffected ?: 0
     }
