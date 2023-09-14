@@ -26,7 +26,7 @@ internal class LoginPromptManager(val loginPromptConfig: LoginPromptConfig) {
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
                 ?: initializeLoginPrompt()
         loginPromptFragment.loginPromptConfig = this.loginPromptConfig
-        if (loginPromptFragment.dialog != null && loginPromptFragment?.dialog?.isShowing == true) {
+        if (loginPromptFragment?.dialog?.isShowing == true) {
             return
         }
 
