@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import java.util.Date
 
 
 internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
@@ -41,7 +42,7 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
     fun saveSessionTimestamp(packageName: String): Long {
         val values = ContentValues().apply {
             put("packageName", packageName)
-            put("timestamp", java.util.Date().time)
+            put("timestamp", Date().time)
         }
         return this.readableDatabase.insert(TABLE_NAME, null, values)
     }
@@ -50,8 +51,8 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         val projection = arrayOf("id", "packageName", "timestamp")
         val selection = "timestamp > ?"
         //get sessions the last year period
-        val oneYearPeriodInMinutes = 60 * 24 * 365
-        val arguments = arrayOf("${java.util.Date().time - (oneYearPeriodInMinutes)}")
+        val oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000
+        val arguments = arrayOf("${Date().time - (oneYearInMilliseconds)}")
         val sortOrder = "timestamp DESC"
         return this.readableDatabase.query(
             TABLE_NAME,
