@@ -19,11 +19,10 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         const val TABLE_NAME = "Sessions"
         const val DATABASE_VERSION = 1
         const val CREATE_DB_TABLE = """
-      CREATE TABLE $TABLE_NAME (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        packageName STRING NOT NULL,
+      CREATE TABLE  IF NOT EXISTS $TABLE_NAME (
+        packageName STRING PRIMARY KEY,
         timestamp INTEGER NOT NULL
-    );"""
+    )  WITHOUT ROWID;"""
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -44,11 +43,16 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
             put("packageName", packageName)
             put("timestamp", Date().time)
         }
-        return this.readableDatabase.insert(TABLE_NAME, null, values)
+        return this.writableDatabase.insertWithOnConflict(
+            TABLE_NAME,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE,
+        )
     }
 
     fun getSessions(): Cursor? {
-        val projection = arrayOf("id", "packageName", "timestamp")
+        val projection = arrayOf("packageName", "timestamp")
         val selection = "timestamp > ?"
         //get sessions the last year period
         val oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000
