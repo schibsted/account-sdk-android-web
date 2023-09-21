@@ -43,7 +43,7 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
             put("packageName", packageName)
             put("timestamp", Date().time)
         }
-        return this.readableDatabase.insertWithOnConflict(
+        return this.writableDatabase.insertWithOnConflict(
             TABLE_NAME,
             null,
             values,
