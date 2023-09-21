@@ -43,7 +43,12 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
             put("packageName", packageName)
             put("timestamp", Date().time)
         }
-        return this.readableDatabase.insert(TABLE_NAME, null, values)
+        return this.readableDatabase.insertWithOnConflict(
+            TABLE_NAME,
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE,
+        )
     }
 
     fun getSessions(): Cursor? {
