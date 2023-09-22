@@ -31,15 +31,13 @@ internal class SessionInfoManager(context: Context) {
     }
 
     private fun isSessionPresent(authority: String): Boolean {
-        val cursor =
-            contentResolver.query(
-                Uri.parse("content://${authority}/sessions"),
-                null,
-                null,
-                null,
-                null
-            )
-        return cursor?.use {
+        return contentResolver.query(
+            Uri.parse("content://${authority}/sessions"),
+            null,
+            null,
+            null,
+            null
+        )?.use {
             it.count > 0
         } ?: false
     }
