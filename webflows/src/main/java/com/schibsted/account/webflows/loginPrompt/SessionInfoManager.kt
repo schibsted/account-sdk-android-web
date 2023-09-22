@@ -31,17 +31,15 @@ internal class SessionInfoManager(context: Context) {
     }
 
     private fun isSessionPresent(authority: String): Boolean {
-        val cursor =
-            contentResolver.query(
-                Uri.parse("content://${authority}/sessions"),
-                null,
-                null,
-                null,
-                null
-            )
-        val isSessionPresent = cursor?.count != null && cursor.count > 0
-        cursor?.close()
-        return isSessionPresent
+        return contentResolver.query(
+            Uri.parse("content://${authority}/sessions"),
+            null,
+            null,
+            null,
+            null
+        )?.use {
+            it.count > 0
+        } ?: false
     }
 
     suspend fun isUserLoggedInOnTheDevice(): Boolean {
