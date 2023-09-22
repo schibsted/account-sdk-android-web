@@ -39,9 +39,9 @@ internal class SessionInfoManager(context: Context) {
                 null,
                 null
             )
-        val isSessionPresent = cursor?.count != null && cursor.count > 0
-        cursor?.close()
-        return isSessionPresent
+        return cursor?.use {
+            it.count > 0
+        } ?: false
     }
 
     suspend fun isUserLoggedInOnTheDevice(): Boolean {
