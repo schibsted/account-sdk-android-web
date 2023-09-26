@@ -5,6 +5,8 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.LoginError
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
@@ -61,7 +63,10 @@ class AuthResultLiveData private constructor(private val client: Client) :
                 is Left -> update(
                     Left(
                         when (result.value) {
-                            is LoginError.CancelledByUser -> NotAuthed.CancelledByUser
+                            is LoginError.CancelledByUser -> {
+                                SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
+                                NotAuthed.CancelledByUser
+                            }
                             else -> NotAuthed.LoginFailed(result.value)
                         }
                     )
