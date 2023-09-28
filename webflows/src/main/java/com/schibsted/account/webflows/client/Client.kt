@@ -296,8 +296,13 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
     ) {
-        if(userHasSessionOnDevice(context.applicationContext)) {
-            LoginPromptManager(LoginPromptConfig(this, isCancelable)).showLoginPrompt(supportFragmentManager)
+        if (userHasSessionOnDevice(context.applicationContext)) {
+            LoginPromptManager(
+                LoginPromptConfig(
+                    this.getAuthenticationIntent(context),
+                    isCancelable
+                )
+            ).showLoginPrompt(supportFragmentManager)
         }
     }
 

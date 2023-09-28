@@ -1,19 +1,19 @@
 package com.schibsted.account.webflows.loginPrompt
 
+import android.content.Intent
+import android.os.Bundle
+import android.os.Parcelable
 import androidx.fragment.app.FragmentManager
-import com.schibsted.account.webflows.client.Client
+import kotlinx.parcelize.Parcelize
 
-internal class LoginPromptConfig {
-    var client: Client
-    var isCancelable: Boolean
 
-    constructor(client: Client, isCancelable: Boolean = true) {
-        this.client = client
-        this.isCancelable = isCancelable
-    }
-}
+@Parcelize
+internal data class LoginPromptConfig(
+    val authIntent: Intent,
+    val isCancelable: Boolean = true
+) : Parcelable
 
-internal class LoginPromptManager(val loginPromptConfig: LoginPromptConfig) {
+internal class LoginPromptManager(private val loginPromptConfig: LoginPromptConfig) {
     private val fragmentTag = "schibsted_account_login_prompt"
 
     /**
@@ -22,10 +22,10 @@ internal class LoginPromptManager(val loginPromptConfig: LoginPromptConfig) {
      * @param supportFragmentManager Calling entity's fragment manager.
      */
     fun showLoginPrompt(supportFragmentManager: FragmentManager) {
-        var loginPromptFragment =
+        val loginPromptFragment =
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
-                ?: initializeLoginPrompt()
-        loginPromptFragment.loginPromptConfig = this.loginPromptConfig
+                ?: initializeLoginPrompt(this.loginPromptConfig)
+
         if (loginPromptFragment?.dialog?.isShowing == true) {
             return
         }
@@ -33,8 +33,10 @@ internal class LoginPromptManager(val loginPromptConfig: LoginPromptConfig) {
         loginPromptFragment.show(supportFragmentManager, fragmentTag)
     }
 
-    fun initializeLoginPrompt(): LoginPromptFragment {
-        var loginPromptFragment = LoginPromptFragment()
-        return loginPromptFragment
-    }
+    private fun initializeLoginPrompt(config: LoginPromptConfig): LoginPromptFragment =
+        LoginPromptFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(LoginPromptFragment.ARG_CONFIG, config)
+            }
+        }
 }
