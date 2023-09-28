@@ -21,7 +21,8 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         const val CREATE_DB_TABLE = """
       CREATE TABLE  IF NOT EXISTS $TABLE_NAME (
         packageName STRING PRIMARY KEY,
-        timestamp INTEGER NOT NULL
+        timestamp INTEGER NOT NULL,
+        serverUrl STRING NOT NULL
     )  WITHOUT ROWID;"""
     }
 
@@ -38,10 +39,11 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         onCreate(db)
     }
 
-    fun saveSessionTimestamp(packageName: String): Long {
+    fun saveSessionTimestamp(packageName: String, serverUrl: String): Long {
         val values = ContentValues().apply {
             put("packageName", packageName)
             put("timestamp", Date().time)
+            put("serverUrl", serverUrl)
         }
         return this.writableDatabase.insertWithOnConflict(
             TABLE_NAME,
@@ -51,12 +53,12 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
         )
     }
 
-    fun getSessions(): Cursor? {
-        val projection = arrayOf("packageName", "timestamp")
-        val selection = "timestamp > ?"
+    fun getSessions(serverUrl: String): Cursor? {
+        val projection = arrayOf("packageName", "timestamp", "serverUrl")
+        val selection = "timestamp > ? AND serverUrl = ?"
         //get sessions the last year period
         val oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000
-        val arguments = arrayOf("${Date().time - (oneYearInMilliseconds)}")
+        val arguments = arrayOf("${Date().time - (oneYearInMilliseconds)}", "${serverUrl}")
         val sortOrder = "timestamp DESC"
         return this.readableDatabase.query(
             TABLE_NAME,

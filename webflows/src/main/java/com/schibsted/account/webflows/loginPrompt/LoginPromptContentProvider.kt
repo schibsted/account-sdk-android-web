@@ -49,11 +49,11 @@ internal class LoginPromptContentProvider : ContentProvider() {
         if (uriMatcher.match(uri) != uriCode) {
             throw IllegalArgumentException("Unknown URI $uri")
         }
-        return db?.getSessions()
+        return db?.getSessions(selectionArgs?.first() as String)
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri {
-        val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String)
+        val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String, values?.get("serverUrl") as String)
         if (rowId != null) {
             val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
             context!!.contentResolver.notifyChange(uri, null)

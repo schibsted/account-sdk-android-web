@@ -9,16 +9,18 @@ import android.net.Uri
 import android.os.Build
 
 
-internal class SessionInfoManager(context: Context) {
+internal class SessionInfoManager(context: Context, serverUrl: String) {
     private val contentResolver = context.contentResolver
     private val packageName = context.packageName
     private val packageManager = context.packageManager
+    private val serverUrl = serverUrl
 
     fun save() {
         contentResolver.insert(
             Uri.parse("content://${packageName}.contentprovider/sessions"),
             ContentValues().apply {
                 put("packageName", packageName)
+                put("serverUrl", serverUrl)
             })
     }
 
@@ -35,7 +37,7 @@ internal class SessionInfoManager(context: Context) {
             Uri.parse("content://${authority}/sessions"),
             null,
             null,
-            null,
+            arrayOf(serverUrl),
             null
         )?.use {
             it.count > 0
