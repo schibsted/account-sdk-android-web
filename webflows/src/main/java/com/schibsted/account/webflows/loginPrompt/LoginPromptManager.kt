@@ -21,16 +21,13 @@ internal class LoginPromptManager(private val loginPromptConfig: LoginPromptConf
      *
      * @param supportFragmentManager Calling entity's fragment manager.
      */
-    fun showLoginPrompt(supportFragmentManager: FragmentManager) {
+    fun showLoginPromptIfAbsent(supportFragmentManager: FragmentManager) {
         val loginPromptFragment =
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
-                ?: initializeLoginPrompt(this.loginPromptConfig)
 
-        if (loginPromptFragment?.dialog?.isShowing == true) {
-            return
+        if (loginPromptFragment == null) {
+            initializeLoginPrompt(loginPromptConfig).show(supportFragmentManager, fragmentTag)
         }
-
-        loginPromptFragment.show(supportFragmentManager, fragmentTag)
     }
 
     private fun initializeLoginPrompt(config: LoginPromptConfig): LoginPromptFragment =

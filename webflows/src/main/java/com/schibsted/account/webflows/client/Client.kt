@@ -302,7 +302,7 @@ class Client {
                     this.getAuthenticationIntent(context),
                     isCancelable
                 )
-            ).showLoginPrompt(supportFragmentManager)
+            ).showLoginPromptIfAbsent(supportFragmentManager)
         }
     }
 
