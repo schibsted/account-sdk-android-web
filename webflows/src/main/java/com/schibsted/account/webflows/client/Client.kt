@@ -59,7 +59,7 @@ class Client {
         stateStorage = StateStorage(context.applicationContext)
 
         val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext)
+        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
         sessionStorage = MigratingSessionStorage(
             newStorage = sharedPrefsStorage,
@@ -307,7 +307,7 @@ class Client {
     }
 
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
-        return SessionInfoManager(context).isUserLoggedInOnTheDevice()
+        return SessionInfoManager(context, configuration.serverUrl.toString()).isUserLoggedInOnTheDevice()
     }
 
     internal companion object {

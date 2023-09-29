@@ -141,11 +141,11 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     }
 }
 
-internal class SharedPrefsStorage(context: Context) : SessionStorage {
+internal class SharedPrefsStorage(context: Context, serverUrl: String) : SessionStorage {
 
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
     private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
-    private val sessionInfoManager = SessionInfoManager(context)
+    private val sessionInfoManager = SessionInfoManager(context, serverUrl)
 
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
