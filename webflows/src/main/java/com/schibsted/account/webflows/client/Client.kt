@@ -59,7 +59,8 @@ class Client {
         stateStorage = StateStorage(context.applicationContext)
 
         val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
+        val sharedPrefsStorage =
+            SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
         sessionStorage = MigratingSessionStorage(
             newStorage = sharedPrefsStorage,
@@ -285,7 +286,7 @@ class Client {
     }
 
     /**
-     * Show native login prompt if user already has a valid session on device.
+     * Show native login prompt if user already has a valid session on device and if no user session is found in the app.
      *
      * @param supportFragmentManager Activity's Fragment manager.
      * @param isCancelable set if loginPrompt should be cancelable by user.
@@ -296,7 +297,13 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
     ) {
-        if (userHasSessionOnDevice(context.applicationContext)) {
+        var internalSessionFound = true
+        sessionStorage.get(configuration.clientId) { result ->
+            result.onSuccess { }
+                .onFailure { internalSessionFound = false }
+        }
+
+        if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
                     this.getAuthenticationIntent(context),
@@ -307,7 +314,10 @@ class Client {
     }
 
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
-        return SessionInfoManager(context, configuration.serverUrl.toString()).isUserLoggedInOnTheDevice()
+        return SessionInfoManager(
+            context,
+            configuration.serverUrl.toString()
+        ).isUserLoggedInOnTheDevice()
     }
 
     internal companion object {
