@@ -23,11 +23,11 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
     private var _binding: LoginPromptBinding? = null
     private val binding get() = _binding!!
 
-    // TODO: look into not keeping a reference to loginPromptConfig inside loginPromptFragment
-    lateinit var loginPromptConfig: LoginPromptConfig
+    private lateinit var loginPromptConfig: LoginPromptConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loginPromptConfig = requireArguments().getParcelable(ARG_CONFIG)!!
         setStyle(STYLE_NORMAL, R.style.LoginPromptDialog)
 
         lifecycleScope.launch {
@@ -76,7 +76,7 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
 
     private fun initializeButtons() {
         binding.loginPromptAuth.setOnClickListener {
-            startActivity(loginPromptConfig.client.getAuthenticationIntent(this.requireContext()))
+            startActivity(loginPromptConfig.authIntent)
             SchibstedAccountTracker.track(LoginPromptClickToLogin)
         }
         binding.loginPromptSkip.setOnClickListener {
@@ -99,4 +99,9 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
             }
         }
     }
+
+    companion object {
+        const val ARG_CONFIG = "LOGIN_PROMPT_CONFIG_ARG"
+    }
+
 }
