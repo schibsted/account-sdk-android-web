@@ -29,12 +29,14 @@ import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
 import com.schibsted.account.webflows.util.Util.isCustomTabsSupported
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -297,11 +299,7 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
     ) {
-        var internalSessionFound = true
-        sessionStorage.get(configuration.clientId) { result ->
-            result.onSuccess { }
-                .onFailure { internalSessionFound = false }
-        }
+        val internalSessionFound = hasSessionStorage(configuration.clientId)
 
         if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
@@ -312,6 +310,15 @@ class Client {
             ).showLoginPromptIfAbsent(supportFragmentManager)
         }
     }
+
+    private suspend fun hasSessionStorage(clientId: String) =
+        suspendCancellableCoroutine<Boolean> { continuation ->
+            sessionStorage.get(clientId) { result ->
+                result
+                    .onSuccess { continuation.resume(true) }
+                    .onFailure { continuation.resume(false) }
+            }
+        }
 
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
         return SessionInfoManager(
