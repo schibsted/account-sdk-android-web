@@ -29,12 +29,14 @@ import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
 import com.schibsted.account.webflows.util.Util.isCustomTabsSupported
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -59,7 +61,8 @@ class Client {
         stateStorage = StateStorage(context.applicationContext)
 
         val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
+        val sharedPrefsStorage =
+            SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
         sessionStorage = MigratingSessionStorage(
             newStorage = sharedPrefsStorage,
@@ -285,7 +288,7 @@ class Client {
     }
 
     /**
-     * Show native login prompt if user already has a valid session on device.
+     * Show native login prompt if user already has a valid session on device and if no user session is found in the app.
      *
      * @param supportFragmentManager Activity's Fragment manager.
      * @param isCancelable set if loginPrompt should be cancelable by user.
@@ -296,7 +299,9 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
     ) {
-        if (userHasSessionOnDevice(context.applicationContext)) {
+        val internalSessionFound = hasSessionStorage(configuration.clientId)
+
+        if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
                     this.getAuthenticationIntent(context),
@@ -306,8 +311,20 @@ class Client {
         }
     }
 
+    private suspend fun hasSessionStorage(clientId: String) =
+        suspendCancellableCoroutine<Boolean> { continuation ->
+            sessionStorage.get(clientId) { result ->
+                result
+                    .onSuccess { continuation.resume(true) }
+                    .onFailure { continuation.resume(false) }
+            }
+        }
+
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
-        return SessionInfoManager(context, configuration.serverUrl.toString()).isUserLoggedInOnTheDevice()
+        return SessionInfoManager(
+            context,
+            configuration.serverUrl.toString()
+        ).isUserLoggedInOnTheDevice()
     }
 
     internal companion object {
