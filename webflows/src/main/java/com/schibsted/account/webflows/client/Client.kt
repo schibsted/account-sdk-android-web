@@ -315,7 +315,7 @@ class Client {
         suspendCancellableCoroutine<Boolean> { continuation ->
             sessionStorage.get(clientId) { result ->
                 result
-                    .onSuccess { continuation.resume(true) }
+                    .onSuccess { continuation.resume(it != null) }
                     .onFailure { continuation.resume(false) }
             }
         }
