@@ -78,6 +78,7 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
         binding.loginPromptAuth.setOnClickListener {
             startActivity(loginPromptConfig.authIntent)
             SchibstedAccountTracker.track(LoginPromptClickToLogin)
+            dismissAllowingStateLoss()
         }
         binding.loginPromptSkip.setOnClickListener {
             SchibstedAccountTracker.track(LoginPromptClickToContinueWithoutLogin)
