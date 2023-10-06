@@ -229,15 +229,17 @@ by following these steps:
 
 #### Login prompt
 
-This is a light version of simplified-login, allowing mobile app developers integrating this 
+This is a light version of simplified-login, allowing mobile app developers integrating this
 SDK to prompt users for log in if a valid session was already detected on the device.
 This feature is making use of the single-sign on feature from web, allowing users to log in with
 only two taps.
 
-**Note** that for this feature to work, both the app where the user has a valid session, and the app that implements and
+**Note** that for this feature to work, both the app where the user has a valid session, and the app
+that implements and
 requests the login prompt need to use Android SDK Web version 6.1.0 or newer.
 
-**Note** that it is the calling app's responsibility to request the login prompt only if the user is not
+**Note** that it is the calling app's responsibility to request the login prompt only if the user is
+not
 already logged in, or if any other specific conditions are met.
 
 Example:
@@ -252,8 +254,15 @@ if (!user?.isLoggedIn()) {
 
 #### Pulse tracking
 
-We have also added a way of integrating the app's Pulse event transmitter into the SDK and send SDK internal
-events that way. This is a temporary solution and will be subject to changes in the future, but in the meanwhile
+We have also added a way of integrating the app's Pulse instance into the SDK allowing internal
+events to be sent.
+
+**Important:** When integrating with the SDK defined events, please keep in mind that the Pulse
+instance needs to map `[SchibstedAccountTrackingEvent].providerComponent` to `provider.component`
+and `[SchibstedAccountTrackingEvent].deployTag` to `deploy_tag` before pushing the created events.
+
+This is a temporary solution and will be subject to changes in the future, but in the meanwhile
 you can use the provided example from ExampleApp to connect your Pulse event transmitter, which
-will be then used internally to track login-prompt flows and also send events if the login was successful or not.
+will be then used internally to track login-prompt flows and also send events if the login was
+successful or not.
 
