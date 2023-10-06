@@ -180,6 +180,7 @@ class Client {
 
         if (stored.state != authResponse["state"]) {
             callback(Left(LoginError.UnsolicitedResponse))
+            SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginFailed)
             return
         }
 

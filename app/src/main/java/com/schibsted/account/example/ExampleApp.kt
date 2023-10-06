@@ -33,8 +33,8 @@ class ExampleApp : Application() {
             override fun onEvent(event: SchibstedAccountTrackingEvent) {
                 Timber.d("Tracked event ${event::class.simpleName.toString()}")
             }
-
         }
+
         SchibstedAccountTrackerStore.addTrackingListener(listener)
     }
 

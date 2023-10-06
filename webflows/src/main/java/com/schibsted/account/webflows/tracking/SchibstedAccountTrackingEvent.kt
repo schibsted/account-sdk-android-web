@@ -6,7 +6,14 @@ const val PACKAGE_NAME = "account-sdk-android-web"
 const val PROVIDER_COMPONENT = "schibsted-account"
 
 sealed class SchibstedAccountTrackingEvent {
+    /**
+     * This value needs to be mapped to the "provider.component" property of the Pulse event
+     */
     val providerComponent = PROVIDER_COMPONENT
+
+    /**
+     * This value needs to be mapped to the "deploy_tag" property of the Pulse event
+     */
     val deployTag = "${PACKAGE_NAME}-${BuildConfig.VERSION_NAME}"
 
     object LoginPromptCreated : SchibstedAccountTrackingEvent()
