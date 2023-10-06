@@ -34,6 +34,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import com.schibsted.account.webflows.client.Client
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.util.Either.Left
 import timber.log.Timber
 
@@ -177,6 +179,7 @@ class AuthorizationManagementActivity : Activity() {
 
     private fun handleAuthorizationCanceled() {
         Timber.d("Authorization flow canceled by user")
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
         AuthResultLiveData.get().update(Left(NotAuthed.CancelledByUser))
         cancelIntent?.send()
     }

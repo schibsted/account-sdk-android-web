@@ -4,6 +4,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
+        <provider
+          android:name="com.schibsted.account.webflows.loginPrompt.LoginPromptContentProvider"
+          android:authorities="${applicationId}.contentprovider"
+          android:enabled="true"
+          android:exported="true">
+          <intent-filter>
+            <action android:name="com.schibsted.account.LOGIN_PROMPT_CONTENT_PROVIDER" />
+          </intent-filter>
+        </provider>
         <activity
             android:name="com.schibsted.account.webflows.activities.AuthorizationManagementActivity"
             android:exported="false"
@@ -14,6 +23,9 @@
     <queries>
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <intent>
+          <action android:name="com.schibsted.account.LOGIN_PROMPT_CONTENT_PROVIDER" />
         </intent>
     </queries>
 </manifest>

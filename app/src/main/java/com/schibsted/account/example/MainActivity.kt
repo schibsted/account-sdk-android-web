@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -19,7 +21,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
         setContentView(binding.root)
 
         if (intent.getBooleanExtra(LOGIN_FAILED_EXTRA, false)) {
@@ -29,6 +30,14 @@ class MainActivity : AppCompatActivity() {
 
         initializeButtons()
         observeAuthResultLiveData()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        lifecycleScope.launch {
+            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true)
+        }
     }
 
 
@@ -73,7 +82,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startLoggedInActivity(user: User) {
-        startActivity(LoggedInActivity.intentWithUser(this, user, LoggedInActivity.Companion.Flow.AUTOMATIC))
+        startActivity(
+            LoggedInActivity.intentWithUser(
+                this,
+                user,
+                LoggedInActivity.Companion.Flow.AUTOMATIC
+            )
+        )
     }
 
     companion object {

@@ -11,6 +11,9 @@ import com.schibsted.account.example.MainActivity.Companion.LOGIN_FAILED_EXTRA
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.ClientConfiguration
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackerStore
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingListener
 import timber.log.Timber
 
 class ExampleApp : Application() {
@@ -22,6 +25,17 @@ class ExampleApp : Application() {
         initManualClient()
         initAuthorizationManagement()
         initTimber()
+        initTracking()
+    }
+
+    private fun initTracking() {
+        val listener = object : SchibstedAccountTrackingListener {
+            override fun onEvent(event: SchibstedAccountTrackingEvent) {
+                Timber.d("Tracked event ${event::class.simpleName.toString()}")
+            }
+        }
+
+        SchibstedAccountTrackerStore.addTrackingListener(listener)
     }
 
     private fun initTimber() {

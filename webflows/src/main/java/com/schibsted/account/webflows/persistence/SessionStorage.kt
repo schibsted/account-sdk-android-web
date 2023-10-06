@@ -7,6 +7,7 @@ import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
@@ -71,6 +72,7 @@ internal class MigratingSessionStorage(
 
 internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
+
 
     private val prefs: SharedPreferences? by lazy {
         val masterKey = MasterKey.Builder(context.applicationContext)
@@ -139,15 +141,17 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     }
 }
 
-internal class SharedPrefsStorage(context: Context) : SessionStorage {
+internal class SharedPrefsStorage(context: Context, serverUrl: String) : SessionStorage {
 
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
     private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
+    private val sessionInfoManager = SessionInfoManager(context, serverUrl)
 
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
         editor.putString(session.clientId, gson.toJson(session))
         editor.apply()
+        sessionInfoManager.save()
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
@@ -159,6 +163,7 @@ internal class SharedPrefsStorage(context: Context) : SessionStorage {
         val editor = prefs.edit()
         editor.remove(clientId)
         editor.apply()
+        sessionInfoManager.clear()
     }
 
     companion object {

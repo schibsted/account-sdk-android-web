@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.browser.customtabs.CustomTabsService
+import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.loginPrompt.LoginPromptConfig
+import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
+import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
 import com.schibsted.account.webflows.persistence.SessionStorage
@@ -17,18 +20,23 @@ import com.schibsted.account.webflows.persistence.StorageError
 import com.schibsted.account.webflows.token.TokenError
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
+import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.user.StoredUserSession
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import com.schibsted.account.webflows.util.Util
+import com.schibsted.account.webflows.util.Util.isCustomTabsSupported
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.util.Date
+import kotlin.coroutines.resume
 
 /**  Represents a client registered with Schibsted account. */
 class Client {
@@ -53,7 +61,8 @@ class Client {
         stateStorage = StateStorage(context.applicationContext)
 
         val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
-        val sharedPrefsStorage = SharedPrefsStorage(context.applicationContext)
+        val sharedPrefsStorage =
+            SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
         sessionStorage = MigratingSessionStorage(
             newStorage = sharedPrefsStorage,
@@ -98,7 +107,7 @@ class Client {
         authRequest: AuthRequest = AuthRequest()
     ): Intent {
         val loginUrl = generateLoginUrl(authRequest)
-        val intent: Intent = if (this.isCustomTabsSupported(context)) {
+        val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
                 .apply {
                     intent.data = loginUrl
@@ -117,7 +126,7 @@ class Client {
     @JvmOverloads
     fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
         val loginUrl = generateLoginUrl(authRequest)
-        if (this.isCustomTabsSupported(context)) {
+        if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent().launchUrl(context, loginUrl)
         } else {
             val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
@@ -134,13 +143,6 @@ class Client {
         val loginUrl = urlBuilder.loginUrl(authRequest)
         Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
-    }
-
-    private fun isCustomTabsSupported(context: Context): Boolean {
-        val serviceIntent = Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION)
-        val resolveInfos = context.packageManager.queryIntentServices(serviceIntent, 0)
-
-        return !resolveInfos.isEmpty()
     }
 
     /**
@@ -178,6 +180,7 @@ class Client {
 
         if (stored.state != authResponse["state"]) {
             callback(Left(LoginError.UnsolicitedResponse))
+            SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginFailed)
             return
         }
 
@@ -195,10 +198,12 @@ class Client {
             storedUserSession
                 .onSuccess { session ->
                     sessionStorage.save(session)
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginSuccessful)
                     callback(Right(User(this, session.userTokens)))
                 }
                 .onFailure { err ->
                     Timber.d("Token error response: $err")
+                    SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginFailed)
                     val oauthError = err.toOauthError()
                     if (oauthError != null) {
                         callback(Left(LoginError.TokenErrorResponse(oauthError)))
@@ -281,6 +286,46 @@ class Client {
                 Left(RefreshTokenError.RefreshRequestFailed(result.value.cause))
             }
         }
+    }
+
+    /**
+     * Show native login prompt if user already has a valid session on device and if no user session is found in the app.
+     *
+     * @param supportFragmentManager Activity's Fragment manager.
+     * @param isCancelable set if loginPrompt should be cancelable by user.
+     */
+    @JvmOverloads
+    suspend fun requestLoginPrompt(
+        context: Context,
+        supportFragmentManager: FragmentManager,
+        isCancelable: Boolean = true
+    ) {
+        val internalSessionFound = hasSessionStorage(configuration.clientId)
+
+        if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
+            LoginPromptManager(
+                LoginPromptConfig(
+                    this.getAuthenticationIntent(context),
+                    isCancelable
+                )
+            ).showLoginPromptIfAbsent(supportFragmentManager)
+        }
+    }
+
+    private suspend fun hasSessionStorage(clientId: String) =
+        suspendCancellableCoroutine<Boolean> { continuation ->
+            sessionStorage.get(clientId) { result ->
+                result
+                    .onSuccess { continuation.resume(it != null) }
+                    .onFailure { continuation.resume(false) }
+            }
+        }
+
+    private suspend fun userHasSessionOnDevice(context: Context): Boolean {
+        return SessionInfoManager(
+            context,
+            configuration.serverUrl.toString()
+        ).isUserLoggedInOnTheDevice()
     }
 
     internal companion object {

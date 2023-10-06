@@ -9,9 +9,9 @@ New implementation of the Schibsted account Android SDK using the web flows via
 [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/):
 
 * API documentation can be
-found [here](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/).
+  found [here](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/).
 * An example implementation of the SDK can be found
-[here](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example).
+  [here](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example).
 
 ## Getting started
 
@@ -33,6 +33,7 @@ will help you create a client and configure the necessary data.
 
 The SDK is available via
 [Maven Central](https://search.maven.org/artifact/com.schibsted.account/account-sdk-android-web):
+
 ```
 implementation 'com.schibsted.account:account-sdk-android-web:<version>'
 ```
@@ -217,7 +218,7 @@ by following these steps:
               .create(<Your service interface>)
       }
       ```
-      
+
       The SDK will automatically inject the user access token as a Bearer token in the HTTP
       Authorization request header. If the access token is rejected with a `401 Unauthorized`
       response (e.g. due to having expired), the SDK will try to use the refresh token to obtain a
@@ -225,3 +226,43 @@ by following these steps:
 
       **Note:** If the refresh token request fails, due to the refresh token itself having expired
       or been invalidated by the user, the SDK will log the user out.
+
+#### Login prompt
+
+This is a light version of simplified-login, allowing mobile app developers integrating this
+SDK to prompt users for log in if a valid session was already detected on the device.
+This feature is making use of the single-sign on feature from web, allowing users to log in with
+only two taps.
+
+**Note** that for this feature to work, both the app where the user has a valid session, and the app
+that implements and
+requests the login prompt need to use Android SDK Web version 6.1.0 or newer.
+
+**Note** that it is the calling app's responsibility to request the login prompt only if the user is
+not
+already logged in, or if any other specific conditions are met.
+
+Example:
+
+```kotlin
+if (!user?.isLoggedIn()) {
+    lifecycleScope.launch {
+        ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true)
+    }
+}
+```
+
+#### Pulse tracking
+
+We have also added a way of integrating the app's Pulse instance into the SDK allowing internal
+events to be sent.
+
+**Important:** When integrating with the SDK defined events, please keep in mind that the Pulse
+instance needs to map `[SchibstedAccountTrackingEvent].providerComponent` to `provider.component`
+and `[SchibstedAccountTrackingEvent].deployTag` to `deploy_tag` before pushing the created events.
+
+This is a temporary solution and will be subject to changes in the future, but in the meanwhile
+you can use the provided example from ExampleApp to connect your Pulse event transmitter, which
+will be then used internally to track login-prompt flows and also send events if the login was
+successful or not.
+

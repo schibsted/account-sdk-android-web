@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_prompt_title">Log in</string>
+    <string name="login_prompt_text">You are already logged in to a Schibsted service and can therefore quickly log in to this one</string>
+    <string name="login_prompt_privacy_policy"><u>Privacy policy</u></string>
+    <string name="login_prompt_skip"><u>Continue without logging in</u></string>
+    <string name="login_prompt_button">Log in</string>
+    <string name="login_prompt_privacy_url">https://info.privacy.schibsted.com/en/privacy-and-cookie-policy-english-schibsted-sverige/</string>
+</resources>
