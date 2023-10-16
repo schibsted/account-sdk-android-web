@@ -25,7 +25,7 @@ jobs:
         if: success() && startsWith(github.ref, 'refs/tags/')
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
-          ORG_GRADLE_PROJECT_sonatypeUsername: samuelg
+          ORG_GRADLE_PROJECT_sonatypeUsername: sch-sonatype
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.ORG_GRADLE_PROJECT_SONATYPEPASSWORD }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
