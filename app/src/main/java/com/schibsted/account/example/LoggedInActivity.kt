@@ -10,6 +10,7 @@ import com.schibsted.account.R
 import com.schibsted.account.databinding.ActivityLoggedInBinding
 import com.schibsted.account.webflows.api.HttpError
 import com.schibsted.account.webflows.api.UserProfileResponse
+import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either
@@ -25,6 +26,7 @@ class LoggedInActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoggedInBinding
 
     private var user: User? = null
+    private var client: Client? = null
 
     private val isUserLoggedIn: Boolean
         get() = user?.isLoggedIn() == true
@@ -40,6 +42,7 @@ class LoggedInActivity : AppCompatActivity() {
 
         initLogoutButton()
         initProfileDataButton()
+        initExternalIdButton()
         initSessionExchangeButtonButton()
         initAccountPagesButtonButton()
         initMakeAuthenticatedRequestButton()
@@ -66,6 +69,14 @@ class LoggedInActivity : AppCompatActivity() {
                             Timber.i("Failed to fetch profile data $error")
                         }
                 }
+            }
+        }
+    }
+
+    private fun initExternalIdButton() {
+        binding.externalIdButton.setOnClickListener {
+            if (isUserLoggedIn) {
+                Timber.i("ExternalId ${client?.getExternalId("pairId", "externalParty")} ")
             }
         }
     }
@@ -101,15 +112,17 @@ class LoggedInActivity : AppCompatActivity() {
     }
 
     private fun evaluateAndUpdateUserSession() {
-        val client = when (intent.getSerializableExtra(FLOW_EXTRA)) {
+        client = when (intent.getSerializableExtra(FLOW_EXTRA)) {
             Flow.AUTOMATIC -> ExampleApp.client
             Flow.MANUAL -> ExampleApp.manualClient
             else -> throw RuntimeException("Must provide a flow enum")
         }
 
         val userSession: UserSession? = intent.getParcelableExtra(USER_SESSION_EXTRA)
-        val user = if (userSession != null) User(client, userSession) else null
-        updateUser(user)
+        client?.let { client ->
+            val user = if (userSession != null) User(client, userSession) else null
+            updateUser(user)
+        }
     }
 
     private fun initMakeAuthenticatedRequestButton() {

@@ -221,4 +221,20 @@ class ClientTest {
         }
         CompletableFuture.allOf(refreshTask, logoutTask).join()
     }
+
+    @Test
+    fun testExternalId() {
+        val client = getClient()
+        val externalIdAllParameters = client.getExternalId("pairId","externalParty","optionalSuffix")
+        // values generated via : https://emn178.github.io/online-tools/sha256.html
+        // pairId:externalParty:optionalSuffix
+        // e0b2b31df36848059b44ac0ee6784607b003a3688ac6bbdb196d8465bbc8b281
+        assertEquals(externalIdAllParameters, "e0b2b31df36848059b44ac0ee6784607b003a3688ac6bbdb196d8465bbc8b281" )
+
+        // values generated via : https://emn178.github.io/online-tools/sha256.html
+        // pairId:externalParty
+        // 386eb5f9c3e56843ff83e43fa3d69fc4c2b2072f8e8036332baefb04e96f28b9
+        val externalIdWithoutOptionalParameters = client.getExternalId("pairId","externalParty")
+        assertEquals(externalIdWithoutOptionalParameters, "386eb5f9c3e56843ff83e43fa3d69fc4c2b2072f8e8036332baefb04e96f28b9" )
+    }
 }
