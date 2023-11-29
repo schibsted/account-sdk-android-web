@@ -35,6 +35,7 @@ import okhttp3.OkHttpClient
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
+import java.security.MessageDigest
 import java.util.Date
 import kotlin.coroutines.resume
 
@@ -131,6 +132,32 @@ class Client {
         } else {
             val intent = Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
             context.startActivity(intent)
+        }
+    }
+
+    /**
+     * Get externalId represented as SHA-256 of given pair id, external party and optionalSuffix (if provided).
+     *
+     * @param pairId Pair id.
+     * @param externalParty External party.
+     * @param optionalSuffix Optional suffix.
+     * @return External id.
+     */
+    @JvmOverloads
+    fun getExternalId(pairId: String, externalParty: String, optionalSuffix: String = ""): String? {
+        return try {
+            val stringToHash =
+                if (optionalSuffix.isEmpty())
+                    "$pairId:$externalParty"
+                else
+                    "$pairId:$externalParty:$optionalSuffix"
+            MessageDigest
+                .getInstance(SHA256)
+                .digest(stringToHash.toByteArray())
+                .fold("") { str, it -> str + "%02x".format(it) }
+        } catch (e: Exception) {
+            Timber.e("Failed to getExternalId: $e")
+            null
         }
     }
 
@@ -330,6 +357,7 @@ class Client {
 
     internal companion object {
         const val AUTH_STATE_KEY = "AuthState"
+        const val SHA256 = "SHA-256"
     }
 }
 

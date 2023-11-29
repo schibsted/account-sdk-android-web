@@ -61,5 +61,7 @@
   ],
   "updated": "1971-01-01 00:00:00",
   "passwordChanged": "1970-01-01 00:00:00",
-  "status": 1
+  "status": 1,
+  "pairId": "12345",
+  "sdrn": "sdrn:schibsted:user:12345"
 }

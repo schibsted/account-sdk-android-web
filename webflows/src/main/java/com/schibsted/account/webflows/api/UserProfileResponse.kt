@@ -34,7 +34,9 @@ data class UserProfileResponse(
     val lastAuthenticated: String? = null,
     val lastLoggedIn: String? = null,
     val locale: String? = null,
-    val utcOffset: String? = null
+    val utcOffset: String? = null,
+    val pairId: String? = null,
+    val sdrn: String? = null
 )
 
 interface Identifier {
@@ -87,8 +89,10 @@ data class Address(
     enum class AddressType {
         @SerializedName("home")
         HOME,
+
         @SerializedName("delivery")
         DELIVERY,
+
         @SerializedName("invoice")
         INVOICE;
 
