@@ -252,6 +252,16 @@ if (!user?.isLoggedIn()) {
 }
 ```
 
+#### ExternalId for TCF
+To support TCF consent exchange between native and webview, we have added a new method to the SDK, which allows you to create an externalId for the consent sharing support.
+To get the externalId, you need to call the following method:
+
+```kotlin
+client.getExternalId(pairId: String, externalParty: String, optionalSuffix: String = "")
+```
+
+`pairId` can be found under `UserProfileResponse.pairId` property.
+
 #### Pulse tracking
 
 We have also added a way of integrating the app's Pulse instance into the SDK allowing internal
