@@ -16,14 +16,14 @@ New implementation of the Schibsted account Android SDK using the web flows via
 ## Getting started
 
 To implement login with Schibsted account in your app, please first have a look at our
-[getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/). This
+[best practices documentation](https://docs.schibsted.io/schibsted-account/#best-practices). This
 will help you create a client and configure the necessary data.
 
 ### Important notes
 
-* This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see
-  [getting started documentation](https://docs.schibsted.io/schibsted-account/gettingstarted/)
-  for more information).
+* This SDK requires your client to be registered as a `public_mobile_client` in Self Service (see the
+  [mobile sdk's](https://docs.schibsted.io/schibsted-account/#schibsted-account-mobile-sdk-s)
+  dedicated section for more information).
 * Using [App Links](https://developer.android.com/training/app-links) should be preferred
   for [security reasons](https://tools.ietf.org/html/rfc8252#appendix-B.2).
   To support older Android versions, configure a fallback page at the same web address to forward
@@ -56,7 +56,7 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
    </activity>
    ```
 2. Create a `Client` instance (see
-   [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
+   [ExampleApp](https://github.com/schibsted/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt#L47)
    as reference):
    ```kotlin
    val clientConfig = ClientConfiguration(Environment.PRE, "<clientId>", "<redirect uri>")
@@ -69,7 +69,7 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
    ```
 
 3. Initialise `AuthorizationManagementActivity` on app startup (see
-   [ExampleApp](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt)
+   [ExampleApp](https://github.com/schibsted/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/ExampleApp.kt#L75)
    as reference):
    ```kotlin
    class App : Application() {
@@ -91,7 +91,7 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
    `AuthResultLiveData` and navigate on its result (see step 4. below).
 
 4. Observe the `AuthResultLiveData` singleton instance to access the logged-in user (see
-   [MainActivity](https://github.schibsted.io/spt-identity/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt)
+   [MainActivity](https://github.com/schibsted/account-sdk-android-web/blob/master/app/src/main/java/com/schibsted/account/example/MainActivity.kt#L53)
    as reference):
    ```kotlin
    class MainActivity : AppCompatActivity() {
@@ -127,7 +127,7 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
        }
    }
    ```
-5. If no user is is logged-in, start the login flow. For example on button click:
+5. If no user is logged-in, start the login flow. For example on button click:
    ```kotlin
    loginButton.setOnClickListener { _ ->
        val authIntent = client.getAuthenticationIntent(this)
@@ -140,9 +140,7 @@ implementation 'com.schibsted.account:account-sdk-android-web:<version>'
 The recommended usage (see above) automatically handles the following cases for you:
 
 * If the user cancels the flow.
-* Managing the back stack such that the Custom Tabs instance is cleared from it. See for example
-  [this article](https://www.rallyhealth.com/back-stack-management-with-chrome-custom-tabs) for more
-  details.
+* Managing the back stack such that the Custom Tabs instance is cleared from it.
 * Makes the logged-in user easily accessible via a `LiveData` instance.
 
 If you want/need more control over the flow you can manage the flow manually,
