@@ -320,23 +320,24 @@ class Client {
      *
      * @param supportFragmentManager Activity's Fragment manager.
      * @param isCancelable set if loginPrompt should be cancelable by user.
+     * @return true if login prompt is shown, false otherwise.
      */
     @JvmOverloads
     suspend fun requestLoginPrompt(
         context: Context,
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
-    ) {
+    ) : Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
 
-        if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
+        return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
                     this.getAuthenticationIntent(context),
                     isCancelable
                 )
             ).showLoginPromptIfAbsent(supportFragmentManager)
-        }
+        } else false
     }
 
     private suspend fun hasSessionStorage(clientId: String) =
