@@ -20,14 +20,16 @@ internal class LoginPromptManager(private val loginPromptConfig: LoginPromptConf
      * Show login prompt.
      *
      * @param supportFragmentManager Calling entity's fragment manager.
+     * @return true if login prompt is shown, false otherwise.
      */
-    fun showLoginPromptIfAbsent(supportFragmentManager: FragmentManager) {
+    fun showLoginPromptIfAbsent(supportFragmentManager: FragmentManager) : Boolean{
         val loginPromptFragment =
             supportFragmentManager.findFragmentByTag(fragmentTag) as? LoginPromptFragment
 
-        if (loginPromptFragment == null) {
+        return if (loginPromptFragment == null) {
             initializeLoginPrompt(loginPromptConfig).show(supportFragmentManager, fragmentTag)
-        }
+            true
+        } else false
     }
 
     private fun initializeLoginPrompt(config: LoginPromptConfig): LoginPromptFragment =
