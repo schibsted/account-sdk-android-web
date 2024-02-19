@@ -46,3 +46,7 @@
 -keep public enum com.schibsted.account.webflows.client.* {
     *;
 }
+
+# Prevent obfuscation of com.nimbusds.jose.* since they are using their own TypeToken implementation
+# which collides with gson
+-keep class com.nimbusds.jose.** { *; }
