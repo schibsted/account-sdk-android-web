@@ -131,7 +131,7 @@ class AuthorizationManagementActivity : Activity() {
     override fun onResume() {
         super.onResume()
 
-        AuthResultLiveData.get().update(Left(NotAuthed.AuthInProgress))
+        AuthResultLiveData.get(client).update(Left(NotAuthed.AuthInProgress))
 
         /*
          * If this is the first run of the activity, start the auth intent.
@@ -173,14 +173,14 @@ class AuthorizationManagementActivity : Activity() {
     }
 
     private fun handleAuthorizationComplete() {
-        AuthResultLiveData.get().update(intent)
+        AuthResultLiveData.get(client).update(intent)
         completionIntent?.send()
     }
 
     private fun handleAuthorizationCanceled() {
         Timber.d("Authorization flow canceled by user")
         SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
-        AuthResultLiveData.get().update(Left(NotAuthed.CancelledByUser))
+        AuthResultLiveData.get(client).update(Left(NotAuthed.CancelledByUser))
         cancelIntent?.send()
     }
 
@@ -196,6 +196,7 @@ class AuthorizationManagementActivity : Activity() {
 
         internal var completionIntent: PendingIntent? = null
         internal var cancelIntent: PendingIntent? = null
+        internal lateinit var client: Client
 
         @JvmStatic
         fun setup(
@@ -203,6 +204,7 @@ class AuthorizationManagementActivity : Activity() {
             completionIntent: PendingIntent? = null,
             cancelIntent: PendingIntent? = null
         ) {
+            Companion.client = client
             AuthResultLiveData.create(client)
             Companion.completionIntent = completionIntent
             Companion.cancelIntent = cancelIntent
@@ -211,7 +213,6 @@ class AuthorizationManagementActivity : Activity() {
         /**
          * Creates an intent to start an authorization flow.
          * @param context the package context for the app.
-         * @param request the authorization request which is to be sent.
          * @param authIntent the intent to be used to get authorization from the user.
          * @throws IllegalStateException if {@link AuthorizationManagementActivity#setup) has not
          *  been called before this
@@ -227,7 +228,7 @@ class AuthorizationManagementActivity : Activity() {
 
         /**
          * Creates an intent to handle the completion of an authorization flow. This restores
-         * the original AuthorizationManagementActivity that was created at the start of the flow.
+         * the original [AuthorizationManagementActivity] that was created at the start of the flow.
          * @param context the package context for the app.
          * @param responseUri the response URI, which carries the parameters describing the response.
          */
