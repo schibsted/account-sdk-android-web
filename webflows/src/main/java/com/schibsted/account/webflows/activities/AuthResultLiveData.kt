@@ -67,6 +67,7 @@ class AuthResultLiveData private constructor(private val client: Client) :
                                 SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
                                 NotAuthed.CancelledByUser
                             }
+
                             else -> NotAuthed.LoginFailed(result.value)
                         }
                     )
@@ -91,7 +92,12 @@ class AuthResultLiveData private constructor(private val client: Client) :
             if (::instance.isInitialized) instance else null
 
         @JvmStatic
-        fun get(): AuthResultLiveData = instance
+        fun get(client: Client): AuthResultLiveData {
+            if (!::instance.isInitialized) {
+                instance = create(client)
+            }
+            return instance
+        }
 
         @JvmStatic
         @MainThread
