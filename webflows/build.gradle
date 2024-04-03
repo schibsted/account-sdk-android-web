@@ -14,7 +14,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        resConfigs "en", "sv", "no", "nn", "nb", "fi", "dk"
+        resConfigs 'en', 'sv', 'no', 'nn', 'nb', 'fi', 'dk'
     }
 
     compileOptions {
@@ -28,7 +28,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
@@ -41,6 +41,7 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            returnDefaultValues = true
         }
     }
 }
@@ -102,6 +103,7 @@ android {
             withJavadocJar()
         }
     }
+    namespace 'com.schibsted.account.webflows'
 }
 
 publishing {
@@ -155,5 +157,5 @@ static String base64Decode(String envVar) {
 
 signing {
     useInMemoryPgpKeys(base64Decode('SIGNING_KEY'), base64Decode('SIGNING_PASSWORD'))
-    sign publishing.publications
+    //sign publishing.publications
 }

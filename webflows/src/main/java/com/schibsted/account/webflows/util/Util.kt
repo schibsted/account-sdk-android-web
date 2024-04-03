@@ -35,6 +35,7 @@ internal object Util {
 
     fun removeJwtSignature(jwt: String?): String {
         jwt ?: return ""
+        if (jwt.isEmpty()) return ""
 
         val split = jwt.split(".")
 

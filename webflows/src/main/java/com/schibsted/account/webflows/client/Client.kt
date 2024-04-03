@@ -3,6 +3,7 @@ package com.schibsted.account.webflows.client
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
@@ -13,6 +14,7 @@ import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
+import com.schibsted.account.webflows.persistence.ObfuscatedSessionFinder
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.SharedPrefsStorage
 import com.schibsted.account.webflows.persistence.StateStorage
@@ -260,12 +262,16 @@ class Client {
 
     /** Resume any previously logged-in user session */
     fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
+        Log.d("###","Resuming last logged in user")
         sessionStorage.get(configuration.clientId) { result ->
             result
                 .onSuccess { storedUserSession: StoredUserSession? ->
+                    Log.d("###","Stored user session: $storedUserSession")
                     if (storedUserSession == null) {
+                        Log.d("###","Stored user session was null. Logging out")
                         callback(Right(null))
                     } else {
+                        Log.d("###","Stored user session was valid. Passing User info.")
                         val user = User(this, storedUserSession.userTokens)
                         callback(Right(user))
                     }
@@ -327,8 +333,9 @@ class Client {
         context: Context,
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true
-    ) : Boolean {
+    ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
+        Log.d("###","Found session: $internalSessionFound")
 
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
@@ -343,6 +350,7 @@ class Client {
     private suspend fun hasSessionStorage(clientId: String) =
         suspendCancellableCoroutine<Boolean> { continuation ->
             sessionStorage.get(clientId) { result ->
+                Log.d("###","hasSessionStorage: " + result)
                 result
                     .onSuccess { continuation.resume(it != null) }
                     .onFailure { continuation.resume(false) }
