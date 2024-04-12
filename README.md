@@ -9,9 +9,9 @@ New implementation of the Schibsted account Android SDK using the web flows via
 [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/):
 
 * API documentation can be
-  found [here](https://pages.github.schibsted.io/spt-identity/account-sdk-android-web/).
+  found [here](https://schibsted.github.io/account-sdk-android-web/).
 * An example implementation of the SDK can be found
-  [here](https://github.schibsted.io/spt-identity/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example).
+  [here](https://github.com/schibsted/account-sdk-android-web/tree/master/app/src/main/java/com/schibsted/account/example).
 
 ## Getting started
 
