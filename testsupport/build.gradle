@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 30
     }
 
     compileOptions {
@@ -19,7 +19,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.schibsted.account.webflows.testsupport'
 }
 
 dependencies {
