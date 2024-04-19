@@ -14,6 +14,7 @@ import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
+//TODO: remove Logs and printlns after RC build is accepted.
 internal typealias StorageReadResult = Either<StorageError, StoredUserSession?>
 internal typealias StorageReadCallback = (StorageReadResult) -> Unit
 

@@ -163,6 +163,8 @@ class ObfuscatedSessionFinderTest {
 
     /*****
      * DEBUG VALUES FOR TOKENS:
+     * Use https://jwt.io/ to decode the tokens
+     *
      * private const val ACCESS_TOKEN =
      *             "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyMTMzODc3LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyMTMzODE3LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiJlZDQzYTMwNi1mOTBkLTRjYmUtYTU1ZC1lMzM3ZjM3MzhlZjEifQ.sckisjhfp-BoB379HI2cnPeDEH1XJMBghcBBRtDC4vY"
      *

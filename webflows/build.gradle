@@ -28,7 +28,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
@@ -157,5 +157,5 @@ static String base64Decode(String envVar) {
 
 signing {
     useInMemoryPgpKeys(base64Decode('SIGNING_KEY'), base64Decode('SIGNING_PASSWORD'))
-    //sign publishing.publications
+    sign publishing.publications
 }

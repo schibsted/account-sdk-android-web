@@ -13,6 +13,8 @@ import java.util.Date
 /**
  * Crawls through the obfuscated session JSON to find the access token to enable auto log-in.
  */
+
+//TODO: remove Logs and printlns after RC build is accepted.
 internal object ObfuscatedSessionFinder {
     private const val USER_TOKENS_KEY = "userTokens"
     private const val REFRESH_TOKEN_KEY = "refreshToken"
@@ -65,7 +67,7 @@ internal object ObfuscatedSessionFinder {
         try {
             Log.d("###", "getDeobfuscatedStoredUserSessionIfViable: $storedUserSessionJson")
             println("getDeobfuscatedStoredUserSessionIfViable: $storedUserSessionJson")
-
+            // based on the storedUserSessionJson, determine if the session is obfuscated
             storedUserSessionJson?.let {
                 if (isSessionObfuscated(storedUserSessionJson)) {
                     val sessionJsonObject =
@@ -73,24 +75,32 @@ internal object ObfuscatedSessionFinder {
                     var refreshToken = ""
                     var idToken = ""
                     var accessToken = ""
+                    // Iterate through the JSON to find the tokens
                     for (key in sessionJsonObject.keySet()) {
                         val value = sessionJsonObject.get(key)
+                        // If the value is a JSON object it means that we're in "userTokens object"
+                        // so we iterate through the inner keys to search tokens
                         if (value.isJsonObject) {
                             val jsonObject = value.asJsonObject
                             for (innerKey in jsonObject.keySet()) {
                                 val innerValue = jsonObject.get(innerKey)
+                                // If the inner value is a JSON primitive, check if it is a token
                                 if (innerValue.isJsonPrimitive) {
+                                    // We have 1 of 3 tokens: access, refresh or id token
                                     if (innerValue.asString.isNullOrEmpty().not()) {
                                         JWTParser.parse(innerValue.asString).let { jwtValue ->
                                             val payload = jwtValue.jwtClaimsSet.toPayload()
                                             val payloadJson =
                                                 JsonParser().parse(payload.toString()).asJsonObject
+                                            // recognize the token based on the payload
+                                            // some tokens have specific keys that can be used to recognize them
                                             val refreshTokenRecognized =
                                                 payloadJson.has(REFRESH_TOKEN_RECOGNIZE_KEY)
                                             val idTokenRecognized =
                                                 payloadJson.has(ID_TOKEN_RECOGNIZE_KEY)
                                             val accessTokenRecognized =
                                                 !refreshTokenRecognized && !idTokenRecognized
+                                            // if the token is recognized get the token value
                                             if (accessTokenRecognized) {
                                                 Log.d("###", "Found Access token $payload")
                                                 println("Found Access token $payload")
@@ -114,11 +124,13 @@ internal object ObfuscatedSessionFinder {
                             continue
                         }
                     }
+                    // Create the IdTokenClaims object based on the tokens
                     val idTokenClaims = createIdTokenClaimsBasedOnTokenJsons(
                         refreshToken,
                         accessToken,
                         idToken
                     )
+                    // Create the UserTokens object based on the idTokenClaims and rest of data
                     val userTokens = UserTokens(accessToken, refreshToken, idToken, idTokenClaims)
                     val result = StoredUserSession(clientId, userTokens, Date())
                     Log.d(
@@ -142,6 +154,14 @@ internal object ObfuscatedSessionFinder {
         return Either.Left(StorageError.UnexpectedError(Throwable("Unknown error.")))
     }
 
+    /**
+     * Creates an [IdTokenClaims] object based on the token JSONs.
+     *
+     * @param refreshToken the refresh token JSON.
+     * @param accessToken the access token JSON.
+     * @param idToken the id token JSON.
+     * @return the [IdTokenClaims] object.
+     */
     fun createIdTokenClaimsBasedOnTokenJsons(
         refreshToken: String?,
         accessToken: String?,
