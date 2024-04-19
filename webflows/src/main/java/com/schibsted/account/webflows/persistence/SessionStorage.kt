@@ -101,7 +101,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
         try {
             val editor = prefs?.edit()
             val json = gson.toJson(session)
-            Log.d("###", "Saving session: $json")
             editor?.putString(session.clientId, json)
             editor?.apply()
         } catch (e: SecurityException) {
@@ -115,7 +114,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
             val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
-            Log.d("###", "Getting session : $json")
             callback(gson.getStoredUserSession(clientId, json))
         } catch (e: SecurityException) {
             Timber.e(
@@ -153,14 +151,14 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
         editor.putString(session.clientId, gson.toJson(session))
-        Log.d("###", "OLD Savin session ${gson.toJson(session)}")
+        Log.d("###", "Saving session ${gson.toJson(session)}")
         editor.apply()
         sessionInfoManager.save()
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         val json = prefs.getString(clientId, null)
-        Log.d("###", "OLD Getting session : $json");
+        Log.d("###", "Loading session : $json");
         callback(gson.getStoredUserSession(clientId, json))
     }
 
