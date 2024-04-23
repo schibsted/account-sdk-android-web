@@ -12,14 +12,14 @@ internal class UrlBuilder(
 ) {
     private val defaultScopeValues = setOf("openid", "offline_access")
 
-    fun loginUrl(authRequest: AuthRequest): String {
-        val state = Util.randomString(10)
+    fun loginUrl(authRequest: AuthRequest, state: String? = null): String {
+        val stateValue = state?.let { state } ?: Util.randomString(10)
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
 
         stateStorage.setValue(
             authStateKey,
-            AuthState(state, nonce, codeVerifier, authRequest.mfa)
+            AuthState(stateValue, nonce, codeVerifier, authRequest.mfa)
         )
 
         val scopes = authRequest.extraScopeValues.union(defaultScopeValues)
@@ -30,7 +30,7 @@ internal class UrlBuilder(
             "client_id" to clientConfig.clientId,
             "redirect_uri" to clientConfig.redirectUri,
             "response_type" to "code",
-            "state" to state,
+            "state" to stateValue,
             "scope" to scopeString,
             "nonce" to nonce,
             "code_challenge" to codeChallenge,
