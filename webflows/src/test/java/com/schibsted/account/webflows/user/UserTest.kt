@@ -306,7 +306,7 @@ class UserTest {
         every { client.refreshTokensForUser(user) } answers {
             Thread.sleep(20) // artificial delay to simulate network request
             Right(Fixtures.userTokens.copy(accessToken = "accessToken1"))
-        } andThen {
+        } andThenAnswer  {
             Right(Fixtures.userTokens.copy(accessToken = "accessToken2"))
         }
 
@@ -381,9 +381,9 @@ class UserTest {
         }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get().logout()
+        AuthResultLiveData.get(client).logout()
         shadowOf(Looper.getMainLooper()).idle()
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
+        AuthResultLiveData.get(client).value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
 
         AuthResultLiveDataTest.resetInstance()
     }

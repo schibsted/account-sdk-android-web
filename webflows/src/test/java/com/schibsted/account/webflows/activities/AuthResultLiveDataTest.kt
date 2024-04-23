@@ -54,6 +54,13 @@ class AuthResultLiveDataTest {
     }
 
     @Test
+    fun getIfNotInitialisedReturnsNewInstance() {
+        assertNull(AuthResultLiveData.getIfInitialised())
+        assertNotNull(AuthResultLiveData.get(mockk(relaxed = true)))
+        assertNotNull(AuthResultLiveData.getIfInitialised())
+    }
+
+    @Test
     fun initResumesLoggedInUser() {
         val client = mockk<Client>(relaxed = true)
         val user = User(client, Fixtures.userTokens)
@@ -63,7 +70,7 @@ class AuthResultLiveDataTest {
         }
 
         AuthResultLiveData.create(client)
-        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
+        AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
     }
 
     @Test
@@ -75,7 +82,7 @@ class AuthResultLiveDataTest {
         }
 
         AuthResultLiveData.create(client)
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
+        AuthResultLiveData.get(client).value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
     }
 
     @Test
@@ -87,7 +94,7 @@ class AuthResultLiveDataTest {
         }
 
         AuthResultLiveData.create(client)
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
+        AuthResultLiveData.get(client).value!!.assertLeft { assertEquals(NotAuthed.NoLoggedInUser, it) }
     }
 
     @Test
@@ -100,10 +107,10 @@ class AuthResultLiveDataTest {
         }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get().update(Intent().apply {
+        AuthResultLiveData.get(client).update(Intent().apply {
             data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
         })
-        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
+        AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
     }
 
     @Test
@@ -117,10 +124,10 @@ class AuthResultLiveDataTest {
         }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get().update(Intent().apply {
+        AuthResultLiveData.get(client).update(Intent().apply {
             data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
         })
-        AuthResultLiveData.get().value!!.assertLeft {
+        AuthResultLiveData.get(client).value!!.assertLeft {
             when (it) {
                 is NotAuthed.LoginFailed -> assertEquals(errorResult, it.error)
                 else -> fail("Unexpected error: $it")
@@ -138,12 +145,12 @@ class AuthResultLiveDataTest {
         }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
+        AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
 
         user.logout()
         shadowOf(Looper.getMainLooper()).idle()
 
-        AuthResultLiveData.get().value!!.assertLeft {
+        AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.NoLoggedInUser,
                 it
