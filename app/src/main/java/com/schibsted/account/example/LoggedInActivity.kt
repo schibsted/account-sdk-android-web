@@ -43,6 +43,7 @@ class LoggedInActivity : AppCompatActivity() {
         initLogoutButton()
         initProfileDataButton()
         initExternalIdButton()
+        initGetCustomStateButton()
         initSessionExchangeButtonButton()
         initAccountPagesButtonButton()
         initMakeAuthenticatedRequestButton()
@@ -77,6 +78,14 @@ class LoggedInActivity : AppCompatActivity() {
         binding.externalIdButton.setOnClickListener {
             if (isUserLoggedIn) {
                 Timber.i("ExternalId ${client?.getExternalId("pairId", "externalParty")} ")
+            }
+        }
+    }
+
+    private fun initGetCustomStateButton() {
+        binding.customStateButton.setOnClickListener {
+            if (isUserLoggedIn) {
+                Timber.i("Custom state ${client?.getState()} ")
             }
         }
     }

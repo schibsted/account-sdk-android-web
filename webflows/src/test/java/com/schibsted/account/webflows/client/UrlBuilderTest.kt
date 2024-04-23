@@ -58,4 +58,12 @@ class UrlBuilderTest {
         assertNull(queryParams["prompt"])
         assertEquals(MfaType.OTP.value, queryParams["acr_values"])
     }
+
+    @Test
+    fun loginUrlShouldContainCustomStateSpecified() {
+        val loginUrl = getUrlBuilder().loginUrl(AuthRequest(), "customState")
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals("customState", queryParams["state"])
+    }
 }
