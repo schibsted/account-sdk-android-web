@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeButtons() {
         binding.loginButton.setOnClickListener {
-            startActivity(ExampleApp.client.getAuthenticationIntent(this))
+            startActivity(ExampleApp.client.getAuthenticationIntent(this, "customState"))
         }
         binding.manualLoginButton.setOnClickListener {
             startActivity(Intent(this, ManualLoginActivity::class.java))
