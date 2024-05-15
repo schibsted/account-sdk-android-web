@@ -39,6 +39,12 @@
             android:text="@string/fetch_external_id_button"/>
 
         <Button
+            android:id="@+id/customStateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/get_custom_state_button"/>
+
+        <Button
             android:id="@+id/sessionExchangeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

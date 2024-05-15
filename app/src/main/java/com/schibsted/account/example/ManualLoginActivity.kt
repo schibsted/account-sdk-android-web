@@ -55,7 +55,7 @@ class ManualLoginActivity : AppCompatActivity() {
 
     private fun initLoginButton() {
         binding.loginButton.setOnClickListener {
-            client.launchAuth(this)
+            client.launchAuth(this, "customState")
         }
     }
 
