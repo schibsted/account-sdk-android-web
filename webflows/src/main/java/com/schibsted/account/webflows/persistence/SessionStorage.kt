@@ -2,6 +2,7 @@ package com.schibsted.account.webflows.persistence
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
@@ -13,6 +14,7 @@ import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
+//TODO: remove Logs and printlns after RC build is accepted.
 internal typealias StorageReadResult = Either<StorageError, StoredUserSession?>
 internal typealias StorageReadCallback = (StorageReadResult) -> Unit
 
@@ -113,7 +115,7 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     override fun get(clientId: String, callback: StorageReadCallback) {
         try {
             val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
-            callback(gson.getStoredUserSession(json))
+            callback(gson.getStoredUserSession(clientId, json))
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to read from encrypted shared preferences",
@@ -150,13 +152,15 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
         editor.putString(session.clientId, gson.toJson(session))
+        Log.d("###", "Saving session ${gson.toJson(session)}")
         editor.apply()
         sessionInfoManager.save()
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         val json = prefs.getString(clientId, null)
-        callback(gson.getStoredUserSession(json))
+        Log.d("###", "Loading session : $json");
+        callback(gson.getStoredUserSession(clientId, json))
     }
 
     override fun remove(clientId: String) {
@@ -171,10 +175,17 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
     }
 }
 
-private fun Gson.getStoredUserSession(json: String?): StorageReadResult {
+
+private fun Gson.getStoredUserSession(clientId: String, json: String?): StorageReadResult {
     return try {
-        Either.Right(fromJson(json, StoredUserSession::class.java))
+        ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
+            this,
+            clientId,
+            json
+        )
+        //Either.Right(fromJson(json, StoredUserSession::class.java))
     } catch (e: JsonSyntaxException) {
+        Log.d("###", "### OBSUFUCATED ERROR ###")
         Either.Left(StorageError.UnexpectedError(e))
     }
 }

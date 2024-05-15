@@ -14,7 +14,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        resConfigs "en", "sv", "no", "nn", "nb", "fi", "dk"
+        resConfigs 'en', 'sv', 'no', 'nn', 'nb', 'fi', 'dk'
     }
 
     compileOptions {
@@ -41,6 +41,7 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            returnDefaultValues = true
         }
     }
 }
@@ -102,6 +103,7 @@ android {
             withJavadocJar()
         }
     }
+    namespace 'com.schibsted.account.webflows'
 }
 
 publishing {

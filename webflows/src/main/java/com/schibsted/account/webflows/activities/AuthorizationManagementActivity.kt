@@ -211,7 +211,6 @@ class AuthorizationManagementActivity : Activity() {
         /**
          * Creates an intent to start an authorization flow.
          * @param context the package context for the app.
-         * @param request the authorization request which is to be sent.
          * @param authIntent the intent to be used to get authorization from the user.
          * @throws IllegalStateException if {@link AuthorizationManagementActivity#setup) has not
          *  been called before this
