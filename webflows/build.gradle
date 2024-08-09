@@ -47,12 +47,12 @@ android {
 ext {
     okHttpVersion = "4.12.0"
     espressoVersion = "3.6.1"
-    mockkVersion = "1.12.7"
+    mockkVersion = "1.13.12"
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
@@ -77,7 +77,7 @@ dependencies {
     testImplementation "io.mockk:mockk:${mockkVersion}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${okHttpVersion}"
 
-    testImplementation 'org.robolectric:robolectric:4.9.1'
+    testImplementation 'org.robolectric:robolectric:4.13'
     testImplementation 'androidx.test.ext:junit:1.2.1'
     testImplementation "androidx.test.espresso:espresso-core:${espressoVersion}"
     testImplementation "androidx.test.espresso:espresso-intents:${espressoVersion}"
