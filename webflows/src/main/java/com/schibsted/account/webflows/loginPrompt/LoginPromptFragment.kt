@@ -7,22 +7,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.schibsted.account.webflows.R
-import com.schibsted.account.webflows.databinding.LoginPromptBinding
 import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
-import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent.*
+import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 import com.schibsted.account.webflows.util.Util
 import kotlinx.coroutines.launch
 
 internal class LoginPromptFragment : BottomSheetDialogFragment() {
-    private var _binding: LoginPromptBinding? = null
-    private val binding get() = _binding!!
-
+    private lateinit var view: View
     private lateinit var loginPromptConfig: LoginPromptConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,49 +41,52 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        _binding = LoginPromptBinding.inflate(inflater, container, false)
-        return binding.root
+        view = LayoutInflater.from(requireContext()).inflate(
+            R.layout.login_prompt,
+            container,
+            false
+        )
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeButtons()
-        SchibstedAccountTracker.track(LoginPromptCreated)
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptCreated)
     }
 
     override fun onStart() {
         super.onStart()
-        SchibstedAccountTracker.track(LoginPromptView)
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptView)
     }
 
     override fun onStop() {
         super.onStop()
-        SchibstedAccountTracker.track(LoginPromptLeave)
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptLeave)
     }
 
     override fun onDestroyView() {
-        _binding = null
-        SchibstedAccountTracker.track(LoginPromptDestroyed)
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptDestroyed)
         super.onDestroyView()
     }
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        SchibstedAccountTracker.track(LoginPromptClickOutside)
+        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptClickOutside)
     }
 
     private fun initializeButtons() {
-        binding.loginPromptAuth.setOnClickListener {
+        view.findViewById<Button>(R.id.loginPromptAuth).setOnClickListener {
             dismiss()
             startActivity(loginPromptConfig.authIntent)
-            SchibstedAccountTracker.track(LoginPromptClickToLogin)
+            SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptClickToLogin)
         }
-        binding.loginPromptSkip.setOnClickListener {
-            SchibstedAccountTracker.track(LoginPromptClickToContinueWithoutLogin)
-            dismiss()
-        }
-
-        binding.loginPromptPrivacy.setOnClickListener {
+        view.findViewById<Button>(R.id.loginPromptSkip)
+            .setOnClickListener {
+                SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptClickToContinueWithoutLogin)
+                dismiss()
+            }
+        view.findViewById<Button>(R.id.loginPromptPrivacy).setOnClickListener {
             var loginPromptContext = this.requireContext()
             val uri = Uri.parse(getString(R.string.login_prompt_privacy_url))
             if (Util.isCustomTabsSupported(loginPromptContext)) {
