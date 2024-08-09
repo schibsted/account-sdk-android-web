@@ -2,6 +2,7 @@ package com.schibsted.account.webflows.tracking
 
 import com.schibsted.account.webflows.BuildConfig
 
+
 const val PACKAGE_NAME = "account-sdk-android-web"
 const val PROVIDER_COMPONENT = "schibsted-account"
 

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.ConditionVariable
 import androidx.annotation.RequiresApi
+import androidx.test.filters.SdkSuppress
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.Fixtures.clientConfig
 import com.schibsted.account.testutil.Fixtures.getClient
@@ -189,7 +190,7 @@ class ClientTest {
         verify(exactly = 1) { resultCallback(Left(error)) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.N)
     @Test
     fun refreshTokensHandlesConcurrentLogout() {
         val lock = ConditionVariable(false)

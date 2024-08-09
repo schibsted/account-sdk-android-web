@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import com.schibsted.account.testutil.*
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.AuthResultLiveDataTest
@@ -298,7 +299,7 @@ class UserTest {
         assertNotEquals(authInterceptors.first(), previousAuthInterceptor)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.N)
     @Test
     fun refreshTokensOnlyRefreshesOnceWhenConcurrentCalls() {
         val client: Client = mockk(relaxed = true)

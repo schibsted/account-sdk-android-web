@@ -6,6 +6,7 @@
     <string name="logged_in_text">You\'re logged in!</string>
     <string name="fetch_profile_data_button">Fetch profile data</string>
     <string name="fetch_external_id_button">Fetch external Id for TCF</string>
+    <string name="get_custom_state_button">Get custom state</string>
     <string name="start_session_exchange_button">Start session exchange</string>
     <string name="account_pages_button">Account pages</string>
     <string name="logout_button">Logout</string>
