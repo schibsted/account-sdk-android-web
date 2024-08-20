@@ -38,6 +38,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.security.MessageDigest
+import java.security.spec.MGF1ParameterSpec.SHA256
 import java.util.Date
 import kotlin.coroutines.resume
 
@@ -102,14 +103,17 @@ class Client {
      *
      * Requires [AuthorizationManagementActivity.setup] to have been called before this.
      *
-     * @param authRequest Authentication request parameters.
+     * @param context Context.
+     * @param state Optional string that overrides [state] query item of loginURL, which is otherwise a random 10 character string.
+     * @param authRequest Optional [AuthRequest] parameter.
      */
     @JvmOverloads
     fun getAuthenticationIntent(
         context: Context,
-        authRequest: AuthRequest = AuthRequest()
+        state: String? = null,
+        authRequest: AuthRequest = AuthRequest(),
     ): Intent {
-        val loginUrl = generateLoginUrl(authRequest)
+        val loginUrl = generateLoginUrl(authRequest, state)
         val intent: Intent = if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent()
                 .apply {
@@ -124,11 +128,13 @@ class Client {
     /**
      * Start auth activity manually.
      *
-     * @param authRequest Authentication request parameters.
+     * @param context Context.
+     * @param state Optional string that overrides [state] query item of loginURL, which is otherwise a random 10 character string.
+     * @param authRequest Optional [AuthRequest] parameter.
      */
     @JvmOverloads
-    fun launchAuth(context: Context, authRequest: AuthRequest = AuthRequest()) {
-        val loginUrl = generateLoginUrl(authRequest)
+    fun launchAuth(context: Context, state: String?, authRequest: AuthRequest = AuthRequest()) {
+        val loginUrl = generateLoginUrl(authRequest, state)
         if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent().launchUrl(context, loginUrl)
         } else {
@@ -163,13 +169,28 @@ class Client {
         }
     }
 
+    /**
+     * Returns state of current login session.
+     *
+     * @return State of current login session if state is saved, if not returns null.
+     */
+    fun getState(): String? {
+        return stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)?.state
+    }
+
     private fun buildCustomTabsIntent(): CustomTabsIntent {
         return CustomTabsIntent.Builder()
             .build()
     }
 
-    private fun generateLoginUrl(authRequest: AuthRequest): Uri {
-        val loginUrl = urlBuilder.loginUrl(authRequest)
+    /**
+     * Generate login URL.
+     *
+     * @param authRequest Authentication request parameters.
+     * @param state State.
+     */
+    private fun generateLoginUrl(authRequest: AuthRequest, state: String?): Uri {
+        val loginUrl = urlBuilder.loginUrl(authRequest, state)
         Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
     }
@@ -213,7 +234,7 @@ class Client {
             return
         }
 
-        stateStorage.removeValue(AUTH_STATE_KEY)
+        //stateStorage.removeValue(AUTH_STATE_KEY)
 
         if (error != null) {
             val oauthError = OAuthError(error, errorDescription)
@@ -340,7 +361,7 @@ class Client {
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
-                    this.getAuthenticationIntent(context),
+                    this.getAuthenticationIntent(context, null),
                     isCancelable
                 )
             ).showLoginPromptIfAbsent(supportFragmentManager)
