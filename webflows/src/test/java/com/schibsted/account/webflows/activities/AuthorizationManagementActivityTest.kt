@@ -12,12 +12,12 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.schibsted.account.webflows.testsupport.TestActivity
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.assertLeft
 import com.schibsted.account.testutil.assertRight
 import com.schibsted.account.webflows.client.Client
 import com.schibsted.account.webflows.client.LoginResultHandler
+import com.schibsted.account.webflows.testsupport.TestActivity
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
@@ -27,10 +27,11 @@ import io.mockk.verify
 import org.hamcrest.Matchers
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-
+import org.robolectric.Robolectric
 
 @RunWith(AndroidJUnit4::class)
 class AuthorizationManagementActivityTest {
@@ -39,11 +40,13 @@ class AuthorizationManagementActivityTest {
         TestActivity::class.java
     )
 
+    private val client: Client = mockk(relaxed = true)
+
     @Before
     @UiThreadTest
     fun setup() {
         Intents.init()
-        setupAuthorizationManagementActivity(mockk(relaxed = true))
+        setupAuthorizationManagementActivity(client)
     }
 
     @After
@@ -71,7 +74,12 @@ class AuthorizationManagementActivityTest {
         Intents.intending(IntentMatchers.hasExtras(Matchers.equalTo(authIntent.extras)))
             .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent()))
         launch<AuthorizationManagementActivity>(intent)
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.AuthInProgress, it) }
+        AuthResultLiveData.get(client).value!!.assertLeft {
+            assertEquals(
+                NotAuthed.AuthInProgress,
+                it
+            )
+        }
     }
 
     @Test
@@ -95,7 +103,7 @@ class AuthorizationManagementActivityTest {
 
         launch<AuthorizationManagementActivity>(intent)
 
-        AuthResultLiveData.get().value!!.assertRight { assertEquals(user, it) }
+        AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
         verify(exactly = 1) {
             client.handleAuthenticationResponse(withArg { intent ->
                 assertEquals(authResponse, intent.data)
@@ -111,8 +119,59 @@ class AuthorizationManagementActivityTest {
         val intent = Intent(ctx, AuthorizationManagementActivity::class.java) // intent without data
 
         launch<AuthorizationManagementActivity>(intent)
-        AuthResultLiveData.get().value!!.assertLeft { assertEquals(NotAuthed.CancelledByUser, it) }
+        AuthResultLiveData.get(client).value!!.assertLeft {
+            assertEquals(
+                NotAuthed.CancelledByUser,
+                it
+            )
+        }
         verify(exactly = 1) { AuthorizationManagementActivity.cancelIntent?.send() }
         verify(exactly = 0) { AuthorizationManagementActivity.completionIntent?.send() }
+    }
+
+    @Test
+    fun testActivityWithStressOnResumeTest() {
+        val authIntent = Intent().apply {
+            putExtra("AUTH", true)
+        }
+        val startIntent =
+            AuthorizationManagementActivity.createStartIntent(getApplicationContext(), authIntent)
+
+        Intents.intending(IntentMatchers.hasExtras(Matchers.equalTo(authIntent.extras)))
+            .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent()))
+
+        // Stress test on resume which should result in Cancelled by user
+        Robolectric.buildActivity(AuthorizationManagementActivity::class.java, startIntent)
+            .create()
+            .start()
+            .resume()
+            .pause()
+            .resume()
+            .pause()
+            .resume()
+            .get()
+
+        // checking if AuthResultLiveData is not null
+        assertNotNull(AuthResultLiveData.get(client))
+
+        // AuthResultLiveData should be CancelledByUser since we've minimized and maximized the activity
+        AuthResultLiveData.get(client).value!!.assertLeft {
+            assertEquals(
+                NotAuthed.CancelledByUser,
+                it
+            )
+        }
+
+        // Launching the activity again should result in AuthInProgress
+        launch<AuthorizationManagementActivity>(startIntent)
+        // checking if AuthResultLiveData is not null
+        assertNotNull(AuthResultLiveData.get(client))
+        // AuthResultLiveData should be AuthInProgress since we've launched the activity again with start intent
+        AuthResultLiveData.get(client).value!!.assertLeft {
+            assertEquals(
+                NotAuthed.AuthInProgress,
+                it
+            )
+        }
     }
 }
