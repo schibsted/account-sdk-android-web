@@ -46,7 +46,7 @@ sourceSets {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(":webflows")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.20'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
@@ -54,7 +54,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
     implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
