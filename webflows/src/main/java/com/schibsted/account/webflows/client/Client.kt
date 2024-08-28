@@ -191,7 +191,6 @@ class Client {
      */
     private fun generateLoginUrl(authRequest: AuthRequest, state: String?): Uri {
         val loginUrl = urlBuilder.loginUrl(authRequest, state)
-        Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
     }
 
@@ -283,16 +282,12 @@ class Client {
 
     /** Resume any previously logged-in user session */
     fun resumeLastLoggedInUser(callback: (Either<StorageError, User?>) -> Unit) {
-        Log.d("###","Resuming last logged in user")
         sessionStorage.get(configuration.clientId) { result ->
             result
                 .onSuccess { storedUserSession: StoredUserSession? ->
-                    Log.d("###","Stored user session: $storedUserSession")
                     if (storedUserSession == null) {
-                        Log.d("###","Stored user session was null. Logging out")
                         callback(Right(null))
                     } else {
-                        Log.d("###","Stored user session was valid. Passing User info.")
                         val user = User(this, storedUserSession.userTokens)
                         callback(Right(user))
                     }
@@ -356,8 +351,6 @@ class Client {
         isCancelable: Boolean = true
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
-        Log.d("###","Found session: $internalSessionFound")
-
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
@@ -371,7 +364,6 @@ class Client {
     private suspend fun hasSessionStorage(clientId: String) =
         suspendCancellableCoroutine<Boolean> { continuation ->
             sessionStorage.get(clientId) { result ->
-                Log.d("###","hasSessionStorage: " + result)
                 result
                     .onSuccess { continuation.resume(it != null) }
                     .onFailure { continuation.resume(false) }
