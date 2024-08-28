@@ -14,7 +14,6 @@ import com.schibsted.account.webflows.util.Either
 import timber.log.Timber
 import java.security.GeneralSecurityException
 
-//TODO: remove Logs and printlns after RC build is accepted.
 internal typealias StorageReadResult = Either<StorageError, StoredUserSession?>
 internal typealias StorageReadCallback = (StorageReadResult) -> Unit
 
@@ -152,14 +151,12 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
     override fun save(session: StoredUserSession) {
         val editor = prefs.edit()
         editor.putString(session.clientId, gson.toJson(session))
-        Log.d("###", "Saving session ${gson.toJson(session)}")
         editor.apply()
         sessionInfoManager.save()
     }
 
     override fun get(clientId: String, callback: StorageReadCallback) {
         val json = prefs.getString(clientId, null)
-        Log.d("###", "Loading session : $json");
         callback(gson.getStoredUserSession(clientId, json))
     }
 
@@ -183,9 +180,7 @@ private fun Gson.getStoredUserSession(clientId: String, json: String?): StorageR
             clientId,
             json
         )
-        //Either.Right(fromJson(json, StoredUserSession::class.java))
     } catch (e: JsonSyntaxException) {
-        Log.d("###", "### OBSUFUCATED ERROR ###")
         Either.Left(StorageError.UnexpectedError(e))
     }
 }
