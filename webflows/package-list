@@ -2,7 +2,7 @@ $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:com.schibsted.account.webflows.activities////PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/index.html
 $dokka.location:com.schibsted.account.webflows.activities/AuthResultLiveData.Companion///PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-auth-result-live-data/-companion/index.html
-$dokka.location:com.schibsted.account.webflows.activities/AuthResultLiveData.Companion/get/#/PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-auth-result-live-data/-companion/get.html
+$dokka.location:com.schibsted.account.webflows.activities/AuthResultLiveData.Companion/get/#com.schibsted.account.webflows.client.Client/PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-auth-result-live-data/-companion/get.html
 $dokka.location:com.schibsted.account.webflows.activities/AuthResultLiveData///PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-auth-result-live-data/index.html
 $dokka.location:com.schibsted.account.webflows.activities/AuthorizationManagementActivity.Companion///PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-authorization-management-activity/-companion/index.html
 $dokka.location:com.schibsted.account.webflows.activities/AuthorizationManagementActivity.Companion/setup/#com.schibsted.account.webflows.client.Client#android.app.PendingIntent?#android.app.PendingIntent?/PointingToDeclaration/webflows/com.schibsted.account.webflows.activities/-authorization-management-activity/-companion/setup.html
