@@ -32,23 +32,15 @@ internal object ObfuscatedSessionFinder {
     private fun isSessionObfuscated(storedUserSessionJson: String): Boolean {
         val sessionJsonObject = JsonParser().parse(storedUserSessionJson).getAsJsonObject()
         if (sessionJsonObject.has(USER_TOKENS_KEY)) {
-            Log.d("###", "isSessionObfuscated: session HAS $USER_TOKENS_KEY")
-            println("isSessionObfuscated: session HAS $USER_TOKENS_KEY")
             val userTokenJsonObject = sessionJsonObject.getAsJsonObject(USER_TOKENS_KEY)
             // If the userTokens key and the refreshToken key is present
             // This means the session is not obfuscated
             if (userTokenJsonObject.has(REFRESH_TOKEN_KEY)) {
-                Log.d("###", "isSessionObfuscated: session HAS $REFRESH_TOKEN_KEY")
-                println("isSessionObfuscated: session HAS $REFRESH_TOKEN_KEY")
-                Log.d("###", "isSessionObfuscated: session IS NOT obfuscated")
-                println("isSessionObfuscated: session IS NOT obfuscated")
                 return false
             }
         }
         // Not able to find the userTokens key or the refreshToken key
         // This means the session is obfuscated
-        Log.d("###", "isSessionObfuscated: session IS obfuscated")
-        println("isSessionObfuscated: session IS obfuscated")
         return true
     }
 
@@ -65,8 +57,6 @@ internal object ObfuscatedSessionFinder {
         storedUserSessionJson: String?
     ): StorageReadResult {
         try {
-            Log.d("###", "getDeobfuscatedStoredUserSessionIfViable: $storedUserSessionJson")
-            println("getDeobfuscatedStoredUserSessionIfViable: $storedUserSessionJson")
             // based on the storedUserSessionJson, determine if the session is obfuscated
             storedUserSessionJson?.let {
                 if (isSessionObfuscated(storedUserSessionJson)) {
@@ -102,19 +92,10 @@ internal object ObfuscatedSessionFinder {
                                                 !refreshTokenRecognized && !idTokenRecognized
                                             // if the token is recognized get the token value
                                             if (accessTokenRecognized) {
-                                                Log.d("###", "Found Access token $payload")
-                                                println("Found Access token $payload")
-                                                println("Found Access token $innerValue")
                                                 accessToken = innerValue.asString
                                             } else if (refreshTokenRecognized) {
-                                                Log.d("###", "Found Refresh token $payload")
-                                                println("Found Refresh token $payload")
-                                                println("Found Refresh token $innerValue")
                                                 refreshToken = innerValue.asString
                                             } else if (idTokenRecognized) {
-                                                Log.d("###", "Found IdToken token $payload")
-                                                println("Found IdToken token $payload")
-                                                println("Found IdToken token $innerValue")
                                                 idToken = innerValue.asString
                                             }
                                         }
@@ -133,22 +114,14 @@ internal object ObfuscatedSessionFinder {
                     // Create the UserTokens object based on the idTokenClaims and rest of data
                     val userTokens = UserTokens(accessToken, refreshToken, idToken, idTokenClaims)
                     val result = StoredUserSession(clientId, userTokens, Date())
-                    Log.d(
-                        "###",
-                        "Returning StoredUserSession with clientID: $clientId and userTokens: $result"
-                    )
                     return Either.Right(result)
                 } else {
                     val result =
                         gson.fromJson(storedUserSessionJson, StoredUserSession::class.java)
-                    Log.d("###", "Session was not obfuscated returning pure data: $result")
-                    println("Session was not obfuscated returning pure data: $result")
                     return Either.Right(result)
                 }
             }
         } catch (e: Exception) {
-            Log.d("###", "Session was obfuscated but encountered exception $e")
-            println("Session not obfuscated but encountered exception $e")
             return Either.Left(StorageError.UnexpectedError(e))
         }
         return Either.Left(StorageError.UnexpectedError(Throwable("Unknown error.")))
