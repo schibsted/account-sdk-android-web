@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeAuthResultLiveData() {
-        AuthResultLiveData.get().observe(this, Observer { result: Either<NotAuthed, User> ->
+        AuthResultLiveData.get(ExampleApp.client).observe(this, Observer { result: Either<NotAuthed, User> ->
             result
                 .onSuccess { user: User -> startLoggedInActivity(user) }
                 .onFailure { state: NotAuthed ->
