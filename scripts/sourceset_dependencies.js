@@ -1,1 +1,1 @@
-sourceset_dependencies='{":webflows:dokkaHtml/androidTestRelease":[],":webflows:dokkaHtml/debug":[],":webflows:dokkaHtml/main":[],":webflows:dokkaHtml/release":[],":webflows:dokkaHtml/testFixtures":[],":webflows:dokkaHtml/testFixturesDebug":[],":webflows:dokkaHtml/testFixturesRelease":[]}'
+sourceset_dependencies='{":webflows:dokkaHtml/debug":[],":webflows:dokkaHtml/main":[],":webflows:dokkaHtml/release":[]}'
