@@ -3,6 +3,7 @@ package com.schibsted.account.webflows.client
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
@@ -13,6 +14,7 @@ import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
+import com.schibsted.account.webflows.persistence.ObfuscatedSessionFinder
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.SharedPrefsStorage
 import com.schibsted.account.webflows.persistence.StateStorage
@@ -189,7 +191,6 @@ class Client {
      */
     private fun generateLoginUrl(authRequest: AuthRequest, state: String?): Uri {
         val loginUrl = urlBuilder.loginUrl(authRequest, state)
-        Timber.d("Login url: $loginUrl")
         return Uri.parse(loginUrl)
     }
 
@@ -350,7 +351,6 @@ class Client {
         isCancelable: Boolean = true
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
-
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
