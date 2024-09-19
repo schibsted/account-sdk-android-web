@@ -3,7 +3,6 @@ package com.schibsted.account.webflows.client
 import android.content.Intent
 import android.os.Build
 import android.os.ConditionVariable
-import androidx.annotation.RequiresApi
 import androidx.test.filters.SdkSuppress
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.testutil.Fixtures.clientConfig
@@ -26,20 +25,24 @@ import com.schibsted.account.webflows.user.UserSession
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import io.mockk.*
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.*
+import java.util.Date
 import java.util.concurrent.CompletableFuture
 
 class ClientTest {
-
     private fun authResultIntent(authResponseParameters: String?): Intent {
         return mockk {
-            every { data } returns mockk {
-                every { query } returns authResponseParameters
-            }
+            every { data } returns
+                mockk {
+                    every { query } returns authResponseParameters
+                }
         }
     }
 
@@ -49,25 +52,28 @@ class ClientTest {
         val nonce = "testNonce"
         val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
         val authState = AuthState(state, nonce, "codeVerifier", null)
-        val stateStorageMock: StateStorage = mockk(relaxUnitFun = true) {
-            every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
-        }
+        val stateStorageMock: StateStorage =
+            mockk(relaxUnitFun = true) {
+                every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
+            }
 
         val authCode = "testAuthCode"
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(authCode, authState, any()) } answers {
-                val callback = thirdArg<(TokenRequestResult) -> Unit>()
-                val tokensResult =
-                    UserTokensResult(Fixtures.userTokens, "openid offline_access", 10)
-                callback(Right(tokensResult))
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(authCode, authState, any()) } answers {
+                    val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                    val tokensResult =
+                        UserTokensResult(Fixtures.userTokens, "openid offline_access", 10)
+                    callback(Right(tokensResult))
+                }
             }
-        }
 
-        val client = getClient(
-            sessionStorage = sessionStorageMock,
-            stateStorage = stateStorageMock,
-            tokenHandler = tokenHandler
-        )
+        val client =
+            getClient(
+                sessionStorage = sessionStorageMock,
+                stateStorage = stateStorageMock,
+                tokenHandler = tokenHandler,
+            )
 
         client.handleAuthenticationResponse(authResultIntent("code=$authCode&state=$state")) {
             it.assertRight { user ->
@@ -76,12 +82,14 @@ class ClientTest {
         }
 
         verify {
-            sessionStorageMock.save(withArg { storedSession ->
-                assertEquals(clientConfig.clientId, storedSession.clientId)
-                assertEquals(Fixtures.userTokens, storedSession.userTokens)
-                val secondsSinceSessionCreated = (Date().time - storedSession.updatedAt.time) / 1000
-                assertTrue(secondsSinceSessionCreated < 1) // created within last second
-            })
+            sessionStorageMock.save(
+                withArg { storedSession ->
+                    assertEquals(clientConfig.clientId, storedSession.clientId)
+                    assertEquals(Fixtures.userTokens, storedSession.userTokens)
+                    val secondsSinceSessionCreated = (Date().time - storedSession.updatedAt.time) / 1000
+                    assertTrue(secondsSinceSessionCreated < 1) // created within last second
+                },
+            )
         }
     }
 
@@ -96,24 +104,28 @@ class ClientTest {
 
     @Test
     fun handleAuthenticationResponseShouldParseTokenErrorResponse() {
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), any(), any()) } answers {
-                val callback = thirdArg<(TokenRequestResult) -> Unit>()
-                val errorResponse = HttpError.ErrorResponse(
-                    400,
-                    """{"error": "test", "error_description": "Something went wrong"}"""
-                )
-                callback(Left(TokenError.TokenRequestError(errorResponse)))
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(any(), any(), any()) } answers {
+                    val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                    val errorResponse =
+                        HttpError.ErrorResponse(
+                            400,
+                            """{"error": "test", "error_description": "Something went wrong"}""",
+                        )
+                    callback(Left(TokenError.TokenRequestError(errorResponse)))
+                }
             }
-        }
         val authState = AuthState("testState", "testNonce", "codeVerifier", null)
-        val stateStorageMock: StateStorage = mockk(relaxUnitFun = true) {
-            every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
-        }
-        val client = getClient(
-            tokenHandler = tokenHandler,
-            stateStorage = stateStorageMock
-        )
+        val stateStorageMock: StateStorage =
+            mockk(relaxUnitFun = true) {
+                every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
+            }
+        val client =
+            getClient(
+                tokenHandler = tokenHandler,
+                stateStorage = stateStorageMock,
+            )
 
         client.handleAuthenticationResponse(authResultIntent("code=authCode&state=${authState.state}")) {
             it.assertLeft { error ->
@@ -126,28 +138,35 @@ class ClientTest {
 
     @Test
     fun handleAuthenticationResponseCanParseHtmlErrorResponse() {
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), any(), any()) } answers {
-                val callback = thirdArg<(TokenRequestResult) -> Unit>()
-                val errorResponse = HttpError.ErrorResponse(
-                    503,
-                    """<html><body>503</body></html>"""
-                )
-                callback(Left(TokenError.TokenRequestError(errorResponse)))
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(any(), any(), any()) } answers {
+                    val callback = thirdArg<(TokenRequestResult) -> Unit>()
+                    val errorResponse =
+                        HttpError.ErrorResponse(
+                            503,
+                            """<html><body>503</body></html>""",
+                        )
+                    callback(Left(TokenError.TokenRequestError(errorResponse)))
+                }
             }
-        }
         val authState = AuthState("testState", "testNonce", "codeVerifier", null)
-        val stateStorageMock: StateStorage = mockk(relaxUnitFun = true) {
-            every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
-        }
-        val client = getClient(
-            tokenHandler = tokenHandler,
-            stateStorage = stateStorageMock
-        )
+        val stateStorageMock: StateStorage =
+            mockk(relaxUnitFun = true) {
+                every { getValue(Client.AUTH_STATE_KEY, AuthState::class) } returns authState
+            }
+        val client =
+            getClient(
+                tokenHandler = tokenHandler,
+                stateStorage = stateStorageMock,
+            )
 
         client.handleAuthenticationResponse(authResultIntent("code=authCode&state=${authState.state}")) {
             it.assertLeft { error ->
-                val expected = LoginError.UnexpectedError("TokenRequestError(cause=ErrorResponse(code=503, body=<html><body>503</body></html>))")
+                val expected =
+                    LoginError.UnexpectedError(
+                        "TokenRequestError(cause=ErrorResponse(code=503, body=<html><body>503</body></html>))",
+                    )
                 assertEquals(expected, error)
             }
         }
@@ -167,7 +186,7 @@ class ClientTest {
             result.assertRight {
                 assertEquals(
                     User(client, UserSession(Fixtures.userTokens)),
-                    it
+                    it,
                 )
             }
         }
@@ -194,12 +213,13 @@ class ClientTest {
     @Test
     fun refreshTokensHandlesConcurrentLogout() {
         val lock = ConditionVariable(false)
-        val tokenHandler = mockk<TokenHandler>(relaxed = true) {
-            every { makeTokenRequest(any(), any()) } answers {
-                lock.block(10) // wait until after logout is complete
-                Right(UserTokenResponse("", "", "", "", 0))
+        val tokenHandler =
+            mockk<TokenHandler>(relaxed = true) {
+                every { makeTokenRequest(any(), any()) } answers {
+                    lock.block(10) // wait until after logout is complete
+                    Right(UserTokenResponse("", "", "", "", 0))
+                }
             }
-        }
         val client = getClient(tokenHandler = tokenHandler)
         val user = User(client, Fixtures.userTokens)
 
@@ -207,35 +227,37 @@ class ClientTest {
          * Run token refresh operation in separate thread, manually forcing the operation to block
          * until the user has been logged out
          */
-        val refreshTask = CompletableFuture.supplyAsync {
-            val result = client.refreshTokensForUser(user)
-            result.assertLeft {
-                assertEquals(
-                    RefreshTokenError.UnexpectedError("User has logged-out during token refresh"),
-                    it
-                )
+        val refreshTask =
+            CompletableFuture.supplyAsync {
+                val result = client.refreshTokensForUser(user)
+                result.assertLeft {
+                    assertEquals(
+                        RefreshTokenError.UnexpectedError("User has logged-out during token refresh"),
+                        it,
+                    )
+                }
             }
-        }
-        val logoutTask = CompletableFuture.supplyAsync {
-            user.logout()
-            lock.open() // unblock refresh token response
-        }
+        val logoutTask =
+            CompletableFuture.supplyAsync {
+                user.logout()
+                lock.open() // unblock refresh token response
+            }
         CompletableFuture.allOf(refreshTask, logoutTask).join()
     }
 
     @Test
     fun testExternalId() {
         val client = getClient()
-        val externalIdAllParameters = client.getExternalId("pairId","externalParty","optionalSuffix")
+        val externalIdAllParameters = client.getExternalId("pairId", "externalParty", "optionalSuffix")
         // values generated via : https://emn178.github.io/online-tools/sha256.html
         // pairId:externalParty:optionalSuffix
         // e0b2b31df36848059b44ac0ee6784607b003a3688ac6bbdb196d8465bbc8b281
-        assertEquals(externalIdAllParameters, "e0b2b31df36848059b44ac0ee6784607b003a3688ac6bbdb196d8465bbc8b281" )
+        assertEquals(externalIdAllParameters, "e0b2b31df36848059b44ac0ee6784607b003a3688ac6bbdb196d8465bbc8b281")
 
         // values generated via : https://emn178.github.io/online-tools/sha256.html
         // pairId:externalParty
         // 386eb5f9c3e56843ff83e43fa3d69fc4c2b2072f8e8036332baefb04e96f28b9
-        val externalIdWithoutOptionalParameters = client.getExternalId("pairId","externalParty")
-        assertEquals(externalIdWithoutOptionalParameters, "386eb5f9c3e56843ff83e43fa3d69fc4c2b2072f8e8036332baefb04e96f28b9" )
+        val externalIdWithoutOptionalParameters = client.getExternalId("pairId", "externalParty")
+        assertEquals(externalIdWithoutOptionalParameters, "386eb5f9c3e56843ff83e43fa3d69fc4c2b2072f8e8036332baefb04e96f28b9")
     }
 }

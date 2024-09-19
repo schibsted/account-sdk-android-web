@@ -2,7 +2,6 @@ package com.schibsted.account.webflows.persistence
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
@@ -25,7 +24,12 @@ internal typealias StorageReadCallback = (StorageReadResult) -> Unit
  */
 internal interface SessionStorage {
     fun save(session: StoredUserSession)
-    fun get(clientId: String, callback: StorageReadCallback)
+
+    fun get(
+        clientId: String,
+        callback: StorageReadCallback,
+    )
+
     fun remove(clientId: String)
 }
 
@@ -33,12 +37,14 @@ internal class MigratingSessionStorage(
     private val newStorage: SharedPrefsStorage,
     private val previousStorage: EncryptedSharedPrefsStorage,
 ) : SessionStorage {
-
     override fun save(session: StoredUserSession) {
         newStorage.save(session)
     }
 
-    override fun get(clientId: String, callback: StorageReadCallback) {
+    override fun get(
+        clientId: String,
+        callback: StorageReadCallback,
+    ) {
         newStorage.get(clientId) { result ->
             result
                 .onSuccess { newSession ->
@@ -53,7 +59,10 @@ internal class MigratingSessionStorage(
         }
     }
 
-    private fun lookupPreviousStorage(clientId: String, callback: StorageReadCallback) {
+    private fun lookupPreviousStorage(
+        clientId: String,
+        callback: StorageReadCallback,
+    ) {
         previousStorage.get(clientId) { result ->
             result.onSuccess {
                 it?.let {
@@ -74,11 +83,11 @@ internal class MigratingSessionStorage(
 internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
 
-
     private val prefs: SharedPreferences? by lazy {
-        val masterKey = MasterKey.Builder(context.applicationContext)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        val masterKey =
+            MasterKey.Builder(context.applicationContext)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
 
         try {
             EncryptedSharedPreferences.create(
@@ -86,12 +95,12 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
                 PREFERENCE_FILENAME,
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
         } catch (e: GeneralSecurityException) {
             Timber.e(
                 "Error occurred while trying to build encrypted shared preferences",
-                e
+                e,
             )
             null
         }
@@ -106,19 +115,22 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to write to encrypted shared preferences",
-                e
+                e,
             )
         }
     }
 
-    override fun get(clientId: String, callback: StorageReadCallback) {
+    override fun get(
+        clientId: String,
+        callback: StorageReadCallback,
+    ) {
         try {
             val json = prefs?.getString(clientId, null) ?: return callback(Either.Right(null))
             callback(gson.getStoredUserSession(clientId, json))
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to read from encrypted shared preferences",
-                e
+                e,
             )
             callback(Either.Left(StorageError.UnexpectedError(e)))
         }
@@ -132,7 +144,7 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
         } catch (e: SecurityException) {
             Timber.e(
                 "Error occurred while trying to delete from encrypted shared preferences",
-                e
+                e,
             )
         }
     }
@@ -143,7 +155,6 @@ internal class EncryptedSharedPrefsStorage(context: Context) : SessionStorage {
 }
 
 internal class SharedPrefsStorage(context: Context, serverUrl: String) : SessionStorage {
-
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
     private val prefs = context.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
     private val sessionInfoManager = SessionInfoManager(context, serverUrl)
@@ -155,7 +166,10 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
         sessionInfoManager.save()
     }
 
-    override fun get(clientId: String, callback: StorageReadCallback) {
+    override fun get(
+        clientId: String,
+        callback: StorageReadCallback,
+    ) {
         val json = prefs.getString(clientId, null)
         callback(gson.getStoredUserSession(clientId, json))
     }
@@ -172,13 +186,15 @@ internal class SharedPrefsStorage(context: Context, serverUrl: String) : Session
     }
 }
 
-
-private fun Gson.getStoredUserSession(clientId: String, json: String?): StorageReadResult {
+private fun Gson.getStoredUserSession(
+    clientId: String,
+    json: String?,
+): StorageReadResult {
     return try {
         ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
             this,
             clientId,
-            json
+            json,
         )
     } catch (e: JsonSyntaxException) {
         Either.Left(StorageError.UnexpectedError(e))

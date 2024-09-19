@@ -9,5 +9,5 @@ interface TestRetrofitApi {
 }
 
 data class TestUser(
-    val username: String?
+    val username: String?,
 )

@@ -8,34 +8,38 @@ import java.security.MessageDigest
 internal class UrlBuilder(
     private val clientConfig: ClientConfiguration,
     private val stateStorage: StateStorage,
-    private val authStateKey: String
+    private val authStateKey: String,
 ) {
     private val defaultScopeValues = setOf("openid", "offline_access")
 
-    fun loginUrl(authRequest: AuthRequest, state: String? = null): String {
+    fun loginUrl(
+        authRequest: AuthRequest,
+        state: String? = null,
+    ): String {
         val stateValue = state?.let { state } ?: Util.randomString(10)
         val nonce = Util.randomString(10)
         val codeVerifier = Util.randomString(60)
 
         stateStorage.setValue(
             authStateKey,
-            AuthState(stateValue, nonce, codeVerifier, authRequest.mfa)
+            AuthState(stateValue, nonce, codeVerifier, authRequest.mfa),
         )
 
         val scopes = authRequest.extraScopeValues.union(defaultScopeValues)
         val scopeString = scopes.joinToString(" ")
 
         val codeChallenge = computeCodeChallenge(codeVerifier)
-        val authParams: MutableMap<String, String> = mutableMapOf(
-            "client_id" to clientConfig.clientId,
-            "redirect_uri" to clientConfig.redirectUri,
-            "response_type" to "code",
-            "state" to stateValue,
-            "scope" to scopeString,
-            "nonce" to nonce,
-            "code_challenge" to codeChallenge,
-            "code_challenge_method" to "S256"
-        )
+        val authParams: MutableMap<String, String> =
+            mutableMapOf(
+                "client_id" to clientConfig.clientId,
+                "redirect_uri" to clientConfig.redirectUri,
+                "response_type" to "code",
+                "state" to stateValue,
+                "scope" to scopeString,
+                "nonce" to nonce,
+                "code_challenge" to codeChallenge,
+                "code_challenge_method" to "S256",
+            )
 
         if (authRequest.loginHint != null) {
             authParams["login_hint"] = authRequest.loginHint

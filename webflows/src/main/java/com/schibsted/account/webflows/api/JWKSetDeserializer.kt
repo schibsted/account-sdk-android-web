@@ -12,7 +12,7 @@ internal class JWKSetDeserializer : JsonDeserializer<JWKSet> {
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type,
-        context: JsonDeserializationContext
+        context: JsonDeserializationContext,
     ): JWKSet {
         try {
             return JWKSet.parse(json.toString())

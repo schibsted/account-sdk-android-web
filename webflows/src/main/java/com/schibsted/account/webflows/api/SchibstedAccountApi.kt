@@ -19,16 +19,18 @@ private fun <T> ApiResult<SchibstedAccountApiResponse<T>>.unpack(): ApiResult<T>
 }
 
 internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient) {
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(baseUrl.toString())
-        .addConverterFactory(createGsonConverterFactory())
-        .client(apiHttpClient(okHttpClient.newBuilder()))
-        .build()
+    private val retrofit: Retrofit =
+        Retrofit.Builder()
+            .baseUrl(baseUrl.toString())
+            .addConverterFactory(createGsonConverterFactory())
+            .client(apiHttpClient(okHttpClient.newBuilder()))
+            .build()
 
     private fun createGsonConverterFactory(): GsonConverterFactory {
-        val gson = GsonBuilder()
-            .registerTypeAdapter(JWKSet::class.java, JWKSetDeserializer())
-            .create()
+        val gson =
+            GsonBuilder()
+                .registerTypeAdapter(JWKSet::class.java, JWKSetDeserializer())
+                .create()
 
         return GsonConverterFactory.create(gson)
     }
@@ -43,14 +45,15 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
 
     fun makeTokenRequest(
         tokenRequest: UserTokenRequest,
-        callback: (ApiResult<UserTokenResponse>) -> Unit
+        callback: (ApiResult<UserTokenResponse>) -> Unit,
     ) {
-        val params = mutableMapOf(
-            "client_id" to tokenRequest.clientId,
-            "grant_type" to "authorization_code",
-            "code" to tokenRequest.authCode,
-            "redirect_uri" to tokenRequest.redirectUri
-        )
+        val params =
+            mutableMapOf(
+                "client_id" to tokenRequest.clientId,
+                "grant_type" to "authorization_code",
+                "code" to tokenRequest.authCode,
+                "redirect_uri" to tokenRequest.redirectUri,
+            )
         tokenRequest.codeVerifier?.let { codeVerifier ->
             params["code_verifier"] = codeVerifier
         }
@@ -59,11 +62,12 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
     }
 
     fun makeTokenRequest(tokenRequest: RefreshTokenRequest): ApiResult<UserTokenResponse> {
-        val params = mutableMapOf(
-            "client_id" to tokenRequest.clientId,
-            "grant_type" to "refresh_token",
-            "refresh_token" to tokenRequest.refreshToken,
-        )
+        val params =
+            mutableMapOf(
+                "client_id" to tokenRequest.clientId,
+                "grant_type" to "refresh_token",
+                "refresh_token" to tokenRequest.refreshToken,
+            )
         tokenRequest.scope?.let { scope ->
             params["scope"] = scope
         }
@@ -79,7 +83,10 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         schaccService.jwks().enqueue(ApiResultCallback(callback))
     }
 
-    fun userProfile(user: User, callback: (ApiResult<UserProfileResponse>) -> Unit) {
+    fun userProfile(
+        user: User,
+        callback: (ApiResult<UserProfileResponse>) -> Unit,
+    ) {
         proctectedSchaccApi(user) { service ->
             service.userProfile(user.uuid)
                 .enqueue(ApiResultCallback { callback(it.unpack()) })
@@ -91,13 +98,14 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
         clientId: String,
         redirectUri: String,
         state: String?,
-        callback: (ApiResult<SessionExchangeResponse>) -> Unit
+        callback: (ApiResult<SessionExchangeResponse>) -> Unit,
     ) {
-        val params = mutableMapOf(
-            "type" to "session",
-            "clientId" to clientId,
-            "redirectUri" to redirectUri
-        )
+        val params =
+            mutableMapOf(
+                "type" to "session",
+                "clientId" to clientId,
+                "redirectUri" to redirectUri,
+            )
         state?.let {
             params["state"] = it
         }
@@ -111,7 +119,7 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
     fun codeExchange(
         user: User,
         clientId: String,
-        callback: (ApiResult<CodeExchangeResponse>) -> Unit
+        callback: (ApiResult<CodeExchangeResponse>) -> Unit,
     ) {
         proctectedSchaccApi(user) { service ->
             service.codeExchange(clientId)
@@ -121,16 +129,18 @@ internal class SchibstedAccountApi(baseUrl: HttpUrl, okHttpClient: OkHttpClient)
 
     private fun proctectedSchaccApi(
         user: User,
-        block: (SchibstedAccountTokenProtectedService) -> Unit
+        block: (SchibstedAccountTokenProtectedService) -> Unit,
     ) {
-        val httpClient = user.httpClient.newBuilder()
-            .addInterceptor(SDKUserAgentHeaderInterceptor())
-            .build()
+        val httpClient =
+            user.httpClient.newBuilder()
+                .addInterceptor(SDKUserAgentHeaderInterceptor())
+                .build()
 
-        val protectedSchaccService = retrofit.newBuilder()
-            .client(httpClient)
-            .build()
-            .create(SchibstedAccountTokenProtectedService::class.java)
+        val protectedSchaccService =
+            retrofit.newBuilder()
+                .client(httpClient)
+                .build()
+                .create(SchibstedAccountTokenProtectedService::class.java)
         block(protectedSchaccService)
     }
 }

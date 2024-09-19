@@ -3,7 +3,9 @@ package com.schibsted.account.webflows.client
 import com.schibsted.account.testutil.Fixtures
 import com.schibsted.account.webflows.util.Util
 import io.mockk.mockk
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.net.URL
 
@@ -23,7 +25,7 @@ class UrlBuilderTest {
         assertEquals("select_account", queryParams["prompt"])
         assertEquals(
             setOf("openid", "offline_access"),
-            queryParams.getValue("scope").split(" ").toSet()
+            queryParams.getValue("scope").split(" ").toSet(),
         )
         assertNotNull(queryParams["state"])
         assertNotNull(queryParams["nonce"])
@@ -46,7 +48,7 @@ class UrlBuilderTest {
 
         assertEquals(
             setOf("openid", "offline_access", "scope1", "scope2"),
-            queryParams.getValue("scope").split(" ").toSet()
+            queryParams.getValue("scope").split(" ").toSet(),
         )
     }
 

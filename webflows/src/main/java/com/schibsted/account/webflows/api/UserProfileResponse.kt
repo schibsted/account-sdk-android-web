@@ -36,7 +36,7 @@ data class UserProfileResponse(
     val locale: String? = null,
     val utcOffset: String? = null,
     val pairId: String? = null,
-    val sdrn: String? = null
+    val sdrn: String? = null,
 )
 
 interface Identifier {
@@ -52,7 +52,7 @@ data class Email(
     override val type: String? = null,
     override val primary: Boolean? = null,
     override val verified: Boolean? = null,
-    override val verifiedTime: String? = null
+    override val verifiedTime: String? = null,
 ) : Identifier
 
 data class PhoneNumber(
@@ -60,20 +60,20 @@ data class PhoneNumber(
     override val type: String? = null,
     override val primary: Boolean? = null,
     override val verified: Boolean? = null,
-    override val verifiedTime: String? = null
+    override val verifiedTime: String? = null,
 ) : Identifier
 
 data class Name(
     val givenName: String? = null,
     val familyName: String? = null,
-    val formatted: String? = null
+    val formatted: String? = null,
 )
 
 data class Account(
     val id: String? = null,
     val accountName: String? = null,
     val domain: String? = null,
-    val connected: String? = null
+    val connected: String? = null,
 )
 
 data class Address(
@@ -83,9 +83,8 @@ data class Address(
     val locality: String? = null,
     val region: String? = null,
     val country: String? = null,
-    val type: AddressType? = null
+    val type: AddressType? = null,
 ) {
-
     enum class AddressType {
         @SerializedName("home")
         HOME,
@@ -94,14 +93,19 @@ data class Address(
         DELIVERY,
 
         @SerializedName("invoice")
-        INVOICE;
+        INVOICE,
+
+        ;
 
         override fun toString(): String = super.toString().lowercase(Locale.ROOT)
     }
 }
 
 private class BirthdayTypeAdapter : TypeAdapter<String>() {
-    override fun write(out: JsonWriter, value: String?) {
+    override fun write(
+        out: JsonWriter,
+        value: String?,
+    ) {
         if (value != null) {
             out.value(value)
         }
@@ -119,7 +123,10 @@ private class BirthdayTypeAdapter : TypeAdapter<String>() {
 }
 
 private class StringOrIgnoreTypeAdapter : TypeAdapter<String>() {
-    override fun write(out: JsonWriter, value: String?) {
+    override fun write(
+        out: JsonWriter,
+        value: String?,
+    ) {
         if (value != null) {
             out.value(value)
         }

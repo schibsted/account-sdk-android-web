@@ -9,6 +9,7 @@ package com.schibsted.account.webflows.util
 
 sealed class Either<out L, out R> {
     data class Right<R>(val value: R) : Either<Nothing, R>()
+
     data class Left<L>(val value: L) : Either<L, Nothing>()
 
     fun onSuccess(fn: (success: R) -> Unit): Either<L, R> {

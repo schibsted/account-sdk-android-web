@@ -1,7 +1,10 @@
 package com.schibsted.account.webflows.util
 
-import com.schibsted.account.webflows.util.Either.*
-import org.junit.Assert.*
+import com.schibsted.account.webflows.util.Either.Left
+import com.schibsted.account.webflows.util.Either.Right
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EitherTest {
@@ -45,7 +48,7 @@ class EitherTest {
     fun onFailureShouldNotApplyToRightValue() {
         var called = false
         val value = Right(1)
-        assertEquals(value, value.onFailure  { called = true })
+        assertEquals(value, value.onFailure { called = true })
         assertFalse(called)
     }
 }

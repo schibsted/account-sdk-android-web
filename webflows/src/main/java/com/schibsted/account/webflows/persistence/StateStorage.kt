@@ -17,14 +17,20 @@ internal class StateStorage(context: Context) {
         context.applicationContext.getSharedPreferences(PREFERENCE_FILENAME, Context.MODE_PRIVATE)
     }
 
-    fun <T> setValue(key: String, value: T) {
+    fun <T> setValue(
+        key: String,
+        value: T,
+    ) {
         val editor = prefs.edit()
         val json = gson.toJson(value)
         editor.putString(key, json)
         editor.apply()
     }
 
-    fun <T : Any> getValue(key: String, c: KClass<T>): T? {
+    fun <T : Any> getValue(
+        key: String,
+        c: KClass<T>,
+    ): T? {
         val json = prefs.getString(key, null) ?: return null
         return gson.fromJson(json, c.java)
     }

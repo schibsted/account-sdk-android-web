@@ -12,5 +12,5 @@ internal data class StoredUserSession(
     @SerializedName("userTokens")
     val userTokens: UserTokens,
     @SerializedName("updatedAt")
-    val updatedAt: Date
+    val updatedAt: Date,
 )

@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 internal class BestEffortRunOnceTask<T>(
     private val timeoutMilliSeconds: Long = 1000,
-    private val block: () -> T
+    private val block: () -> T,
 ) {
     private val lock = ConditionVariable()
     private val inProgress = AtomicBoolean(false)

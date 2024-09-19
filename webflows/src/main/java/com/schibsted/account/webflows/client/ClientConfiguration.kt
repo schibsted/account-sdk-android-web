@@ -8,6 +8,6 @@ data class ClientConfiguration(val serverUrl: URL, val clientId: String, val red
     constructor(env: Environment, clientId: String, redirectUri: String) : this(
         env.url,
         clientId,
-        redirectUri
+        redirectUri,
     )
 }

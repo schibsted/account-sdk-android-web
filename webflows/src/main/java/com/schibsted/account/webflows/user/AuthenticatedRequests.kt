@@ -11,9 +11,10 @@ import timber.log.Timber
  */
 internal class AuthenticatedRequestInterceptor(private val user: User) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val requestWithToken = chain.request().newBuilder()
-            .withBearerToken(user.tokens?.accessToken)
-            .build()
+        val requestWithToken =
+            chain.request().newBuilder()
+                .withBearerToken(user.tokens?.accessToken)
+                .build()
         return chain.proceed(requestWithToken)
     }
 }
@@ -26,7 +27,10 @@ internal class AuthenticatedRequestInterceptor(private val user: User) : Interce
  * token is still not accepted by the server.
  */
 internal class AccessTokenAuthenticator(private val user: User) : Authenticator {
-    override fun authenticate(route: Route?, response: Response): Request? {
+    override fun authenticate(
+        route: Route?,
+        response: Response,
+    ): Request? {
         if (response.code != 401 || response.retryCount >= 1) {
             return null
         }
@@ -34,9 +38,10 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
         return when (val tokenRefreshResult = user.refreshTokens()) {
             is Right -> {
                 // retry request with fresh access token
-                val request = response.request.newBuilder()
-                    .withBearerToken(user.tokens?.accessToken)
-                    .build()
+                val request =
+                    response.request.newBuilder()
+                        .withBearerToken(user.tokens?.accessToken)
+                        .build()
                 request
             }
             is Left -> {
@@ -47,13 +52,14 @@ internal class AccessTokenAuthenticator(private val user: User) : Authenticator 
     }
 }
 
-private fun Request.Builder.withBearerToken(token: String?): Request.Builder = apply {
-    if (token != null) {
-        header("Authorization", "Bearer $token")
-    } else {
-        Timber.e("No access token to include in request")
+private fun Request.Builder.withBearerToken(token: String?): Request.Builder =
+    apply {
+        if (token != null) {
+            header("Authorization", "Bearer $token")
+        } else {
+            Timber.e("No access token to include in request")
+        }
     }
-}
 
 private val Response.retryCount: Int
     get() {

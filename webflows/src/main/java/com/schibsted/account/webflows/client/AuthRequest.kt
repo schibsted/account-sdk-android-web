@@ -9,8 +9,10 @@ package com.schibsted.account.webflows.client
  * @property mfa Optional MFA verification to prompt the user with.
  * @property loginHint User identifier to be prefilled in the login flow.
  */
-data class AuthRequest @JvmOverloads constructor(
-    val extraScopeValues: Set<String> = setOf(),
-    val mfa: MfaType? = null,
-    val loginHint: String? = null
-)
+data class AuthRequest
+    @JvmOverloads
+    constructor(
+        val extraScopeValues: Set<String> = setOf(),
+        val mfa: MfaType? = null,
+        val loginHint: String? = null,
+    )

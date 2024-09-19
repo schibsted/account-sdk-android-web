@@ -18,7 +18,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 @RunWith(AndroidJUnit4::class)
 class RedirectUriReceiverActivityTest {
     @Test
@@ -32,8 +31,8 @@ class RedirectUriReceiverActivityTest {
         intending(
             Matchers.allOf(
                 IntentMatchers.hasComponent(AuthorizationManagementActivity::class.java.name),
-                IntentMatchers.hasData(redirectUri)
-            )
+                IntentMatchers.hasData(redirectUri),
+            ),
         ).respondWith(ActivityResult(Activity.RESULT_OK, Intent()))
 
         val scenario = launch<RedirectUriReceiverActivity>(redirectIntent)

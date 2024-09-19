@@ -7,5 +7,5 @@ enum class Environment(val url: URL) {
     PRO_NO(URL("https://payment.schibsted.no")),
     PRO_FI(URL("https://login.schibsted.fi")),
     PRO_DK(URL("https://login.schibsted.dk")),
-    PRE(URL("https://identity-pre.schibsted.com"))
+    PRE(URL("https://identity-pre.schibsted.com")),
 }

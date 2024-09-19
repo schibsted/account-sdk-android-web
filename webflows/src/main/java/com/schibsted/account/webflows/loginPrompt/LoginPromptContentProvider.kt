@@ -11,7 +11,6 @@ import com.schibsted.account.webflows.tracking.SchibstedAccountTracker
 import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingEvent
 
 internal class LoginPromptContentProvider : ContentProvider() {
-
     private lateinit var uriMatcher: UriMatcher
     private lateinit var db: SessionInfoDatabase
     private lateinit var contentURI: Uri
@@ -33,7 +32,9 @@ internal class LoginPromptContentProvider : ContentProvider() {
         contentURI = Uri.parse(providerUrl)
         uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
         uriMatcher.addURI(
-            providerName, "sessions", uriCode
+            providerName,
+            "sessions",
+            uriCode,
         )
 
         return db != null
@@ -44,7 +45,7 @@ internal class LoginPromptContentProvider : ContentProvider() {
         projection: Array<String>?,
         selection: String?,
         selectionArgs: Array<String>?,
-        sortOrder: String?
+        sortOrder: String?,
     ): Cursor? {
         if (uriMatcher.match(uri) != uriCode) {
             throw IllegalArgumentException("Unknown URI $uri")
@@ -52,7 +53,10 @@ internal class LoginPromptContentProvider : ContentProvider() {
         return db?.getSessions(selectionArgs?.first() as String)
     }
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri {
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?,
+    ): Uri {
         val rowId = db?.saveSessionTimestamp(values?.get("packageName") as String, values?.get("serverUrl") as String)
         if (rowId != null) {
             val uri: Uri = ContentUris.withAppendedId(contentURI, rowId)
@@ -64,13 +68,18 @@ internal class LoginPromptContentProvider : ContentProvider() {
     }
 
     override fun update(
-        uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<String>?
+        uri: Uri,
+        values: ContentValues?,
+        selection: String?,
+        selectionArgs: Array<String>?,
     ): Int {
         return 0
     }
 
     override fun delete(
-        uri: Uri, selection: String?, selectionArgs: Array<String>?
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<String>?,
     ): Int {
         val rowsAffected = db?.clearSessionsForPackage(selectionArgs?.first() as String)
         SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptContentProviderDelete)

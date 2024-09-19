@@ -19,6 +19,7 @@ internal sealed class IdTokenValidationError {
     abstract val message: String
 
     data class FailedValidation(override val message: String) : IdTokenValidationError()
+
     data class UnexpectedError(override val message: String) : IdTokenValidationError()
 }
 
@@ -27,7 +28,7 @@ internal object IdTokenValidator {
         idToken: String,
         jwks: AsyncJwks,
         validationContext: IdTokenValidationContext,
-        callback: (Either<IdTokenValidationError, IdTokenClaims>) -> Unit
+        callback: (Either<IdTokenValidationError, IdTokenClaims>) -> Unit,
     ) {
         // https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation
         jwks.fetch { fetchedJwks ->
@@ -42,13 +43,14 @@ internal object IdTokenValidator {
     private fun validate(
         idToken: String,
         jwks: JWKSet,
-        validationContext: IdTokenValidationContext
+        validationContext: IdTokenValidationContext,
     ): Either<IdTokenValidationError, IdTokenClaims> {
         val jwtProcessor = DefaultJWTProcessor<IdTokenValidationContext>()
-        val keySelector = JWSVerificationKeySelector<IdTokenValidationContext>(
-            JWSAlgorithm.RS256,
-            ImmutableJWKSet(jwks)
-        )
+        val keySelector =
+            JWSVerificationKeySelector<IdTokenValidationContext>(
+                JWSAlgorithm.RS256,
+                ImmutableJWKSet(jwks),
+            )
         jwtProcessor.jwsKeySelector = keySelector
 
         val expectedClaims = JWTClaimsSet.Builder()
@@ -56,18 +58,19 @@ internal object IdTokenValidator {
             expectedClaims.claim("nonce", validationContext.nonce)
         }
 
-        jwtProcessor.jwtClaimsSetVerifier = IdTokenClaimsVerifier(
-            validationContext.clientId,
-            expectedClaims.build(),
-            setOf("sub", "exp")
-        )
+        jwtProcessor.jwtClaimsSetVerifier =
+            IdTokenClaimsVerifier(
+                validationContext.clientId,
+                expectedClaims.build(),
+                setOf("sub", "exp"),
+            )
 
         val claims: JWTClaimsSet
         try {
             claims = jwtProcessor.process(idToken, validationContext)
         } catch (e: BadJWTException) {
             return Left(
-                IdTokenValidationError.FailedValidation(e.message ?: "Failed to verify ID Token")
+                IdTokenValidationError.FailedValidation(e.message ?: "Failed to verify ID Token"),
             )
         }
 
@@ -79,8 +82,8 @@ internal object IdTokenValidator {
                 claims.audience,
                 (claims.expirationTime.time / 1000),
                 claims.getStringClaim("nonce"),
-                claims.getStringListClaim("amr")
-            )
+                claims.getStringListClaim("amr"),
+            ),
         )
     }
 }
@@ -88,9 +91,12 @@ internal object IdTokenValidator {
 internal class IdTokenClaimsVerifier(
     clientId: String,
     exactMatchClaims: JWTClaimsSet,
-    requiredClaims: Set<String>
+    requiredClaims: Set<String>,
 ) : DefaultJWTClaimsVerifier<IdTokenValidationContext>(clientId, exactMatchClaims, requiredClaims) {
-    override fun verify(claims: JWTClaimsSet?, context: IdTokenValidationContext?) {
+    override fun verify(
+        claims: JWTClaimsSet?,
+        context: IdTokenValidationContext?,
+    ) {
         super.verify(claims, context)
 
         // verify issuer, allowing trailing slash
@@ -104,7 +110,10 @@ internal class IdTokenClaimsVerifier(
         }
     }
 
-    private fun contains(values: List<String>?, value: String?): Boolean {
+    private fun contains(
+        values: List<String>?,
+        value: String?,
+    ): Boolean {
         var needle = value ?: return true // no value to search for
         val haystack = values ?: return false // no values to search among
 
@@ -123,5 +132,5 @@ internal data class IdTokenValidationContext(
     val issuer: String,
     val clientId: String,
     val nonce: String?,
-    val expectedAmr: String?
+    val expectedAmr: String?,
 ) : SecurityContext

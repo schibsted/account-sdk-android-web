@@ -94,10 +94,9 @@ class LoggedInActivity : AppCompatActivity() {
         binding.sessionExchangeButton.setOnClickListener {
             if (isUserLoggedIn) {
                 user?.webSessionUrl(
-                    clientId = ClientConfig.webClientId,
-                    redirectUri = ClientConfig.webClientRedirectUri,
-                )
-                { result: Either<HttpError?, URL> ->
+                    clientId = ClientConfig.WEB_CLIENT_ID,
+                    redirectUri = ClientConfig.WEB_CLIENT_REDIRECT_URI,
+                ) { result: Either<HttpError?, URL> ->
                     result
                         .onSuccess { value: URL ->
                             Timber.i("Session exchange URL: $value")
@@ -121,11 +120,12 @@ class LoggedInActivity : AppCompatActivity() {
     }
 
     private fun evaluateAndUpdateUserSession() {
-        client = when (intent.getSerializableExtra(FLOW_EXTRA)) {
-            Flow.AUTOMATIC -> ExampleApp.client
-            Flow.MANUAL -> ExampleApp.manualClient
-            else -> throw RuntimeException("Must provide a flow enum")
-        }
+        client =
+            when (intent.getSerializableExtra(FLOW_EXTRA)) {
+                Flow.AUTOMATIC -> ExampleApp.client
+                Flow.MANUAL -> ExampleApp.manualClient
+                else -> throw RuntimeException("Must provide a flow enum")
+            }
 
         val userSession: UserSession? = intent.getParcelableExtra(USER_SESSION_EXTRA)
         client?.let { client ->
@@ -136,14 +136,15 @@ class LoggedInActivity : AppCompatActivity() {
 
     private fun initMakeAuthenticatedRequestButton() {
         binding.testRetrofitAuthenticatedRequest.setOnClickListener {
-            val myService: SimpleService = HttpClient.instance.newBuilder().let {
-                user?.bind(it)
-                Retrofit.Builder()
-                    .baseUrl(ClientConfig.environment.url)
-                    .client(it.build())
-                    .build()
-                    .create(SimpleService::class.java)
-            }
+            val myService: SimpleService =
+                HttpClient.instance.newBuilder().let {
+                    user?.bind(it)
+                    Retrofit.Builder()
+                        .baseUrl(ClientConfig.environment.url)
+                        .client(it.build())
+                        .build()
+                        .create(SimpleService::class.java)
+                }
 
             CoroutineScope(Dispatchers.IO).launch {
                 val profileData = myService.userProfile(user?.userId.toString()).await()
@@ -164,10 +165,15 @@ class LoggedInActivity : AppCompatActivity() {
         private const val FLOW_EXTRA = "com.schibsted.account.FLOW"
 
         enum class Flow {
-            AUTOMATIC, MANUAL
+            AUTOMATIC,
+            MANUAL,
         }
 
-        fun intentWithUser(context: Context?, user: User, flow: Flow): Intent {
+        fun intentWithUser(
+            context: Context?,
+            user: User,
+            flow: Flow,
+        ): Intent {
             val intent = Intent(context, LoggedInActivity::class.java)
             intent.putExtra(USER_SESSION_EXTRA, user.session)
             intent.putExtra(FLOW_EXTRA, flow)

@@ -17,7 +17,6 @@ import com.schibsted.account.webflows.tracking.SchibstedAccountTrackingListener
 import timber.log.Timber
 
 class ExampleApp : Application() {
-
     override fun onCreate() {
         super.onCreate()
 
@@ -29,11 +28,12 @@ class ExampleApp : Application() {
     }
 
     private fun initTracking() {
-        val listener = object : SchibstedAccountTrackingListener {
-            override fun onEvent(event: SchibstedAccountTrackingEvent) {
-                Timber.d("Tracked event ${event::class.simpleName.toString()}")
+        val listener =
+            object : SchibstedAccountTrackingListener {
+                override fun onEvent(event: SchibstedAccountTrackingEvent) {
+                    Timber.d("Tracked event ${event::class.simpleName}")
+                }
             }
-        }
 
         SchibstedAccountTrackerStore.addTrackingListener(listener)
     }
@@ -45,31 +45,36 @@ class ExampleApp : Application() {
     }
 
     private fun initClient() {
-        val clientConfig = ClientConfiguration(
-            env = environment,
-            clientId = ClientConfig.clientId,
-            redirectUri = ClientConfig.loginRedirectUri
-        )
-        client = Client(
-            context = applicationContext,
-            configuration = clientConfig,
-            httpClient = instance
-        )
+        val clientConfig =
+            ClientConfiguration(
+                env = environment,
+                clientId = ClientConfig.CLIENT_ID,
+                redirectUri = ClientConfig.LOGIN_REDIRECT_URI,
+            )
+        client =
+            Client(
+                context = applicationContext,
+                configuration = clientConfig,
+                httpClient = instance,
+            )
     }
 
     private fun initManualClient() {
-        val clientConfig = ClientConfiguration(
-            env = environment,
-            clientId = ClientConfig.clientId,
-            redirectUri = ClientConfig.manualLoginRedirectUri
-        )
-        manualClient = Client(
-            context = applicationContext,
-            configuration = clientConfig,
-            httpClient = instance,
-            logoutCallback = {
-                Timber.i("Received a logout event from client")
-            })
+        val clientConfig =
+            ClientConfiguration(
+                env = environment,
+                clientId = ClientConfig.CLIENT_ID,
+                redirectUri = ClientConfig.MANUAL_LOGIN_REDIRECT_URI,
+            )
+        manualClient =
+            Client(
+                context = applicationContext,
+                configuration = clientConfig,
+                httpClient = instance,
+                logoutCallback = {
+                    Timber.i("Received a logout event from client")
+                },
+            )
     }
 
     private fun initAuthorizationManagement() {
@@ -79,18 +84,20 @@ class ExampleApp : Application() {
         cancelIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         AuthorizationManagementActivity.setup(
             client = client,
-            completionIntent = PendingIntent.getActivity(
-                this,
-                0,
-                completionIntent,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
-            ),
-            cancelIntent = PendingIntent.getActivity(
-                this,
-                1,
-                cancelIntent,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
-            )
+            completionIntent =
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    completionIntent,
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0,
+                ),
+            cancelIntent =
+                PendingIntent.getActivity(
+                    this,
+                    1,
+                    cancelIntent,
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0,
+                ),
         )
     }
 

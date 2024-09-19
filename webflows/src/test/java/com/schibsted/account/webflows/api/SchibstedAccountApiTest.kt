@@ -1,7 +1,11 @@
 package com.schibsted.account.webflows.api
 
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
-import com.schibsted.account.testutil.*
+import com.schibsted.account.testutil.Fixtures
+import com.schibsted.account.testutil.assertLeft
+import com.schibsted.account.testutil.assertRight
+import com.schibsted.account.testutil.await
+import com.schibsted.account.testutil.withServer
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -11,64 +15,67 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-
 class SchibstedAccountApiTest {
-    private val tokenRequest = UserTokenRequest(
-        "authCode",
-        "12345",
-        "client1",
-        "redirectUri"
-    )
+    private val tokenRequest =
+        UserTokenRequest(
+            "authCode",
+            "12345",
+            "client1",
+            "redirectUri",
+        )
 
     private fun assertAuthCodeTokenRequest(
         expectedTokenRequest: UserTokenRequest,
-        actualRequest: RecordedRequest
+        actualRequest: RecordedRequest,
     ) {
         assertEquals("/oauth/token", actualRequest.path)
 
         val tokenRequestParams = Util.parseQueryParameters(actualRequest.body.readUtf8())
-        val expectTokenRequest = mapOf(
-            "grant_type" to "authorization_code",
-            "code" to expectedTokenRequest.authCode,
-            "code_verifier" to expectedTokenRequest.codeVerifier,
-            "client_id" to expectedTokenRequest.clientId,
-            "redirect_uri" to expectedTokenRequest.redirectUri
-        )
+        val expectTokenRequest =
+            mapOf(
+                "grant_type" to "authorization_code",
+                "code" to expectedTokenRequest.authCode,
+                "code_verifier" to expectedTokenRequest.codeVerifier,
+                "client_id" to expectedTokenRequest.clientId,
+                "redirect_uri" to expectedTokenRequest.redirectUri,
+            )
         assertEquals(expectTokenRequest, tokenRequestParams)
     }
 
     private fun withApiResponseWrapper(responseData: String): String {
         return """
-        {
-            "name": "SPP Container",
-            "version": "0.2",
-            "api": 2,
-            "code": 200,
-            "data": $responseData
-        }
-        """.trimIndent()
+            {
+                "name": "SPP Container",
+                "version": "0.2",
+                "api": 2,
+                "code": 200,
+                "data": $responseData
+            }
+            """.trimIndent()
     }
 
     @Test
     fun makeAuthCodeTokenRequestSuccess() {
-        val tokenResponse = UserTokenResponse(
-            "accessToken1",
-            "refreshToken1",
-            "idToken1",
-            "openid offline_access",
-            3600
-        )
-        val httpResponse = MockResponse().setBody(
-            """
-            {
-                "access_token": "${tokenResponse.access_token}",
-                "refresh_token": "${tokenResponse.refresh_token}",
-                "id_token": "${tokenResponse.id_token}",
-                "scope": "${tokenResponse.scope}",
-                "expires_in": "${tokenResponse.expires_in}"
-            }
-            """.trimIndent()
-        )
+        val tokenResponse =
+            UserTokenResponse(
+                "accessToken1",
+                "refreshToken1",
+                "idToken1",
+                "openid offline_access",
+                3600,
+            )
+        val httpResponse =
+            MockResponse().setBody(
+                """
+                {
+                    "access_token": "${tokenResponse.access_token}",
+                    "refresh_token": "${tokenResponse.refresh_token}",
+                    "id_token": "${tokenResponse.id_token}",
+                    "scope": "${tokenResponse.scope}",
+                    "expires_in": "${tokenResponse.expires_in}"
+                }
+                """.trimIndent(),
+            )
 
         withServer(httpResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
@@ -84,28 +91,31 @@ class SchibstedAccountApiTest {
 
     @Test
     fun makeRefreshTokenRequestSuccess() {
-        val tokenResponse = UserTokenResponse(
-            "accessToken1",
-            "refreshToken1",
-            null,
-            null,
-            3600
-        )
-        val httpResponse = MockResponse().setBody(
-            """
-            {
-                "access_token": "${tokenResponse.access_token}",
-                "refresh_token": "${tokenResponse.refresh_token}",
-                "expires_in": "${tokenResponse.expires_in}"
-            }
-            """.trimIndent()
-        )
+        val tokenResponse =
+            UserTokenResponse(
+                "accessToken1",
+                "refreshToken1",
+                null,
+                null,
+                3600,
+            )
+        val httpResponse =
+            MockResponse().setBody(
+                """
+                {
+                    "access_token": "${tokenResponse.access_token}",
+                    "refresh_token": "${tokenResponse.refresh_token}",
+                    "expires_in": "${tokenResponse.expires_in}"
+                }
+                """.trimIndent(),
+            )
 
-        val tokenRequest = RefreshTokenRequest(
-            "refreshToken",
-            null,
-            Fixtures.clientConfig.clientId
-        )
+        val tokenRequest =
+            RefreshTokenRequest(
+                "refreshToken",
+                null,
+                Fixtures.clientConfig.clientId,
+            )
         withServer(httpResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
@@ -114,11 +124,12 @@ class SchibstedAccountApiTest {
 
                 val tokenRequestParams =
                     Util.parseQueryParameters(server.takeRequest().body.readUtf8())
-                val expectedParams = mapOf(
-                    "client_id" to Fixtures.clientConfig.clientId,
-                    "grant_type" to "refresh_token",
-                    "refresh_token" to tokenRequest.refreshToken
-                )
+                val expectedParams =
+                    mapOf(
+                        "client_id" to Fixtures.clientConfig.clientId,
+                        "grant_type" to "refresh_token",
+                        "refresh_token" to tokenRequest.refreshToken,
+                    )
                 assertEquals(expectedParams, tokenRequestParams)
                 done()
             }
@@ -159,13 +170,14 @@ class SchibstedAccountApiTest {
     @Test
     fun jwksSuccess() {
         val jwk = RSAKeyGenerator(2048).generate().toPublicJWK()
-        val jwksResponse = MockResponse().setBody(
-            """
-            {
-                "keys": [$jwk]
-            }
-            """.trimIndent()
-        )
+        val jwksResponse =
+            MockResponse().setBody(
+                """
+                {
+                    "keys": [$jwk]
+                }
+                """.trimIndent(),
+            )
         withServer(jwksResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
@@ -225,24 +237,26 @@ class SchibstedAccountApiTest {
 
     @Test
     fun userProfileSuccess() {
-        val userProfileResponse = MockResponse().setBody(
-            withApiResponseWrapper(
-                """
-                {
-                    "uuid": "96085e85-349b-4dbf-9809-fa721e7bae46"
-                }
-                """.trimIndent()
+        val userProfileResponse =
+            MockResponse().setBody(
+                withApiResponseWrapper(
+                    """
+                    {
+                        "uuid": "96085e85-349b-4dbf-9809-fa721e7bae46"
+                    }
+                    """.trimIndent(),
+                ),
             )
-        )
         withServer(userProfileResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
                 val user = User(Fixtures.getClient(), Fixtures.userTokens)
                 schaccApi.userProfile(user) { result ->
                     result.assertRight {
-                        val expectedProfileResponse = UserProfileResponse(
-                            uuid = "96085e85-349b-4dbf-9809-fa721e7bae46",
-                        )
+                        val expectedProfileResponse =
+                            UserProfileResponse(
+                                uuid = "96085e85-349b-4dbf-9809-fa721e7bae46",
+                            )
                         assertEquals(expectedProfileResponse, it)
                     }
 
@@ -260,11 +274,12 @@ class SchibstedAccountApiTest {
 
     @Test
     fun sessionExchangeSuccess() {
-        val sessionExchangeResponse = MockResponse().setBody(
-            withApiResponseWrapper(
-                """{"code": "12345"}"""
+        val sessionExchangeResponse =
+            MockResponse().setBody(
+                withApiResponseWrapper(
+                    """{"code": "12345"}""",
+                ),
             )
-        )
         withServer(sessionExchangeResponse) { server ->
             val schaccApi = SchibstedAccountApi(server.url("/"), Fixtures.httpClient)
             await { done ->
@@ -276,13 +291,12 @@ class SchibstedAccountApiTest {
                     user = user,
                     state = state,
                     clientId = clientId,
-                    redirectUri = redirectUri
+                    redirectUri = redirectUri,
                 ) { result ->
                     result.assertRight {
                         val expectedSessionExchangeResponse = SessionExchangeResponse("12345")
                         assertEquals(expectedSessionExchangeResponse, it)
                     }
-
 
                     val request = server.takeRequest()
                     // request should contain user access token
@@ -295,8 +309,9 @@ class SchibstedAccountApiTest {
                             "clientId" to clientId,
                             "redirectUri" to redirectUri,
                             "type" to "session",
-                            "state" to state
-                        ), requestParams
+                            "state" to state,
+                        ),
+                        requestParams,
                     )
                     done()
                 }

@@ -54,7 +54,7 @@ class RedirectUriReceiverActivity : Activity() {
         // ensures that we can remove the browser tab from the back stack. See the documentation
         // on AuthorizationManagementActivity for more details.
         startActivity(
-            AuthorizationManagementActivity.createResponseHandlingIntent(this, intent.data)
+            AuthorizationManagementActivity.createResponseHandlingIntent(this, intent.data),
         )
         finish()
     }

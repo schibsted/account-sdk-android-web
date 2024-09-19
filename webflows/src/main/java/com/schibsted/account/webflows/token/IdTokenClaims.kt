@@ -21,5 +21,5 @@ internal data class IdTokenClaims(
     @SerializedName("nonce")
     val nonce: String?,
     @SerializedName("amr")
-    val amr: List<String>?
+    val amr: List<String>?,
 ) : Parcelable
