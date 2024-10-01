@@ -3,7 +3,8 @@ package com.schibsted.account.webflows.util
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Ignore
 import org.junit.Test
 import kotlin.concurrent.thread
@@ -13,14 +14,18 @@ private interface TestOperation<T> {
 }
 
 class BestEffortRunOnceTaskTest {
-    private fun <T> runInParallel(numThreads: Int, task: BestEffortRunOnceTask<T>): Map<Int, T?> {
+    private fun <T> runInParallel(
+        numThreads: Int,
+        task: BestEffortRunOnceTask<T>,
+    ): Map<Int, T?> {
         val results = mutableMapOf<Int, T?>()
 
-        val threads = (0 until numThreads).map { i ->
-            thread {
-                results[i] = task.run()
+        val threads =
+            (0 until numThreads).map { i ->
+                thread {
+                    results[i] = task.run()
+                }
             }
-        }
 
         for (t in threads) {
             t.join()
@@ -32,38 +37,49 @@ class BestEffortRunOnceTaskTest {
     @Test
     @Ignore("This test is flaky")
     fun runOnlyExecutesOperationOnce() {
-        val opMock = mockk<TestOperation<String>> {
-            every { doWork() } returnsMany listOf("First result", "Second result")
-        }
+        val opMock =
+            mockk<TestOperation<String>> {
+                every { doWork() } returnsMany listOf("First result", "Second result")
+            }
 
-        val results = runInParallel(3, BestEffortRunOnceTask {
-            Thread.sleep(20) // artificial delay to force subsequent threads to wait for the first one
-            opMock.doWork()
-        })
+        val results =
+            runInParallel(
+                3,
+                BestEffortRunOnceTask {
+                    Thread.sleep(20) // artificial delay to force subsequent threads to wait for the first one
+                    opMock.doWork()
+                },
+            )
 
         verify(exactly = 1) { opMock.doWork() }
         // All three threads got the same result
         assertEquals(
             results.values.toList(),
-            listOf("First result", "First result", "First result")
+            listOf("First result", "First result", "First result"),
         )
     }
 
     @Test
     @Ignore("This test is flaky")
     fun runDoesNotRepeatOperationIfLockTimesOut() {
-        val results = listOf(
-            "First result",
-            "Second result",
-            "Third result"
-        )
-        val opMock = mockk<TestOperation<String>> {
-            every { doWork() } returnsMany results
-        }
-        val actualResults = runInParallel(3, BestEffortRunOnceTask(10) {
-            Thread.sleep(20)
-            opMock.doWork()
-        })
+        val results =
+            listOf(
+                "First result",
+                "Second result",
+                "Third result",
+            )
+        val opMock =
+            mockk<TestOperation<String>> {
+                every { doWork() } returnsMany results
+            }
+        val actualResults =
+            runInParallel(
+                3,
+                BestEffortRunOnceTask(10) {
+                    Thread.sleep(20)
+                    opMock.doWork()
+                },
+            )
 
         verify(exactly = 1) { opMock.doWork() }
         assertEquals(results[0], actualResults[0]) // first thread should always get first result

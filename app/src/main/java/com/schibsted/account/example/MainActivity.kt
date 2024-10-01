@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun initializeButtons() {
         binding.loginButton.setOnClickListener {
             startActivity(ExampleApp.client.getAuthenticationIntent(this, "customState"))
@@ -51,13 +50,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeAuthResultLiveData() {
-        AuthResultLiveData.get(ExampleApp.client).observe(this, Observer { result: Either<NotAuthed, User> ->
-            result
-                .onSuccess { user: User -> startLoggedInActivity(user) }
-                .onFailure { state: NotAuthed ->
-                    handleNotAuthedState(state)
-                }
-        } as Observer<Either<NotAuthed, User>>)
+        AuthResultLiveData.get(ExampleApp.client).observe(
+            this,
+            Observer { result: Either<NotAuthed, User> ->
+                result
+                    .onSuccess { user: User -> startLoggedInActivity(user) }
+                    .onFailure { state: NotAuthed ->
+                        handleNotAuthedState(state)
+                    }
+            } as Observer<Either<NotAuthed, User>>,
+        )
     }
 
     private fun handleNotAuthedState(state: NotAuthed) {
@@ -86,12 +88,12 @@ class MainActivity : AppCompatActivity() {
             LoggedInActivity.intentWithUser(
                 this,
                 user,
-                LoggedInActivity.Companion.Flow.AUTOMATIC
-            )
+                LoggedInActivity.Companion.Flow.AUTOMATIC,
+            ),
         )
     }
 
     companion object {
-        var LOGIN_FAILED_EXTRA = "com.schibsted.account.LOGIN_FAILED"
+        const val LOGIN_FAILED_EXTRA = "com.schibsted.account.LOGIN_FAILED"
     }
 }

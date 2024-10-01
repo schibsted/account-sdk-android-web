@@ -2,10 +2,13 @@ package com.schibsted.account.webflows.user
 
 import android.os.Build
 import android.os.Looper
-import androidx.annotation.RequiresApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
-import com.schibsted.account.testutil.*
+import com.schibsted.account.testutil.Fixtures
+import com.schibsted.account.testutil.assertLeft
+import com.schibsted.account.testutil.assertRight
+import com.schibsted.account.testutil.await
+import com.schibsted.account.testutil.withServer
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.AuthResultLiveDataTest
 import com.schibsted.account.webflows.activities.NotAuthed
@@ -27,17 +30,22 @@ import io.mockk.verify
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import java.net.ConnectException
-import java.util.*
+import java.util.Date
 import java.util.concurrent.CompletableFuture
 
 @RunWith(AndroidJUnit4::class)
 class UserTest {
-
     @Test
     fun `Equals fun should return true if token content is the same`() {
         val userTokens1 =
@@ -89,7 +97,7 @@ class UserTest {
                     result.assertRight { assertEquals(responseData, it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
                     done()
                 }
@@ -113,35 +121,40 @@ class UserTest {
 
     @Test
     fun makeAuthenticatedRequestRefreshesTokenWhen401Response() {
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
-                val tokensResult = UserTokenResponse(
-                    "newAccessToken",
-                    "newRefreshToken",
-                    null,
-                    "openid offline_access",
-                    10
-                )
-                Right(tokensResult)
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(any(), null) } returns
+                    run {
+                        val tokensResult =
+                            UserTokenResponse(
+                                "newAccessToken",
+                                "newRefreshToken",
+                                null,
+                                "openid offline_access",
+                                10,
+                            )
+                        Right(tokensResult)
+                    }
             }
-        }
-        val sessionStorageMock: SessionStorage = mockk(relaxed = true) {
-            every { save(any()) } returns Unit
-        }
+        val sessionStorageMock: SessionStorage =
+            mockk(relaxed = true) {
+                every { save(any()) } returns Unit
+            }
         val user =
             User(
                 Fixtures.getClient(
                     tokenHandler = tokenHandler,
-                    sessionStorage = sessionStorageMock
+                    sessionStorage = sessionStorageMock,
                 ),
-                Fixtures.userTokens
+                Fixtures.userTokens,
             )
 
         val responseData = "Test data"
-        val responses = arrayOf(
-            MockResponse().setResponseCode(401).setBody("Unauthorized"),
-            MockResponse().setResponseCode(200).setBody(responseData)
-        )
+        val responses =
+            arrayOf(
+                MockResponse().setResponseCode(401).setBody("Unauthorized"),
+                MockResponse().setResponseCode(200).setBody(responseData),
+            )
         withServer(*responses) { server ->
             val request = Request.Builder().url(server.url("/")).build()
 
@@ -151,26 +164,29 @@ class UserTest {
 
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
                     assertEquals(
                         "Bearer newAccessToken",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
 
                     verify {
-                        sessionStorageMock.save(withArg { storedSession ->
-                            assertEquals(Fixtures.clientConfig.clientId, storedSession.clientId)
-                            assertEquals(
-                                Fixtures.userTokens.copy(
-                                    accessToken = "newAccessToken",
-                                    "newRefreshToken"
-                                ), storedSession.userTokens
-                            )
-                            val secondsSinceSessionCreated =
-                                (Date().time - storedSession.updatedAt.time) / 1000
-                            assertTrue(secondsSinceSessionCreated < 1) // created within last second
-                        })
+                        sessionStorageMock.save(
+                            withArg { storedSession ->
+                                assertEquals(Fixtures.clientConfig.clientId, storedSession.clientId)
+                                assertEquals(
+                                    Fixtures.userTokens.copy(
+                                        accessToken = "newAccessToken",
+                                        "newRefreshToken",
+                                    ),
+                                    storedSession.userTokens,
+                                )
+                                val secondsSinceSessionCreated =
+                                    (Date().time - storedSession.updatedAt.time) / 1000
+                                assertTrue(secondsSinceSessionCreated < 1) // created within last second
+                            },
+                        )
                     }
                     done()
                 }
@@ -178,27 +194,30 @@ class UserTest {
         }
     }
 
-
     @Test
     fun makeAuthenticatedRequestDoesntRefreshOnRepeated401() {
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
-                val tokensResult = UserTokenResponse(
-                    "newAccessToken",
-                    "newRefreshToken",
-                    null,
-                    "openid offline_access",
-                    10
-                )
-                Right(tokensResult)
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(any(), null) } returns
+                    run {
+                        val tokensResult =
+                            UserTokenResponse(
+                                "newAccessToken",
+                                "newRefreshToken",
+                                null,
+                                "openid offline_access",
+                                10,
+                            )
+                        Right(tokensResult)
+                    }
             }
-        }
         val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
 
-        val responses = arrayOf(
-            MockResponse().setResponseCode(401).setBody("Unauthorized"),
-            MockResponse().setResponseCode(401).setBody("Still unauthorized"),
-        )
+        val responses =
+            arrayOf(
+                MockResponse().setResponseCode(401).setBody("Unauthorized"),
+                MockResponse().setResponseCode(401).setBody("Still unauthorized"),
+            )
         withServer(*responses) { server ->
             val request = Request.Builder().url(server.url("/")).build()
 
@@ -208,18 +227,18 @@ class UserTest {
 
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
                     assertEquals(
                         "Bearer newAccessToken",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
 
                     // only tries to refresh once
                     verify(exactly = 1) {
                         tokenHandler.makeTokenRequest(
                             Fixtures.userTokens.refreshToken!!,
-                            null
+                            null,
                         )
                     }
                     done()
@@ -240,7 +259,7 @@ class UserTest {
                     result.assertRight { assertEquals("Unauthorized", it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
 
                     done()
@@ -249,16 +268,17 @@ class UserTest {
         }
     }
 
-
     @Test
     fun makeAuthenticatedRequestForwardsOriginalResponseWhenTokenRefreshFails() {
-        val tokenHandler: TokenHandler = mockk(relaxed = true) {
-            every { makeTokenRequest(any(), null) } returns run {
-                val error =
-                    TokenError.TokenRequestError(HttpError.UnexpectedError(Error("Refresh token request failed")))
-                Left(error)
+        val tokenHandler: TokenHandler =
+            mockk(relaxed = true) {
+                every { makeTokenRequest(any(), null) } returns
+                    run {
+                        val error =
+                            TokenError.TokenRequestError(HttpError.UnexpectedError(Error("Refresh token request failed")))
+                        Left(error)
+                    }
             }
-        }
         val user = User(Fixtures.getClient(tokenHandler = tokenHandler), Fixtures.userTokens)
 
         withServer(MockResponse().setResponseCode(401).setBody("Unauthorized")) { server ->
@@ -269,7 +289,7 @@ class UserTest {
                     result.assertRight { assertEquals("Unauthorized", it.body!!.string()) }
                     assertEquals(
                         "Bearer ${Fixtures.userTokens.accessToken}",
-                        server.takeRequest().getHeader("Authorization")
+                        server.takeRequest().getHeader("Authorization"),
                     )
 
                     verify(exactly = 1) {
@@ -307,7 +327,7 @@ class UserTest {
         every { client.refreshTokensForUser(user) } answers {
             Thread.sleep(20) // artificial delay to simulate network request
             Right(Fixtures.userTokens.copy(accessToken = "accessToken1"))
-        } andThenAnswer  {
+        } andThenAnswer {
             Right(Fixtures.userTokens.copy(accessToken = "accessToken2"))
         }
 
@@ -326,14 +346,15 @@ class UserTest {
     fun refreshTokensLogsOutOnInvalidGrantResponse() {
         val client: Client = mockk(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        val tokenRefreshResponse = Left(
-            RefreshTokenError.RefreshRequestFailed(
-                HttpError.ErrorResponse(
-                    400,
-                    """{"error": "invalid_grant", "error_description": "Invalid refresh token"}"""
-                )
+        val tokenRefreshResponse =
+            Left(
+                RefreshTokenError.RefreshRequestFailed(
+                    HttpError.ErrorResponse(
+                        400,
+                        """{"error": "invalid_grant", "error_description": "Invalid refresh token"}""",
+                    ),
+                ),
             )
-        )
         every { client.refreshTokensForUser(user) } returns tokenRefreshResponse
 
         assertEquals(Left(RefreshTokenError.UserWasLoggedOut), user.refreshTokens())
@@ -344,14 +365,15 @@ class UserTest {
     fun refreshTokensDoesNotCauseLogoutOn500Response() {
         val client: Client = mockk(relaxed = true)
         val user = User(client, Fixtures.userTokens)
-        val tokenRefreshResponse = Left(
-            RefreshTokenError.RefreshRequestFailed(
-                HttpError.ErrorResponse(
-                    500,
-                    """<html>Error</html>"""
-                )
+        val tokenRefreshResponse =
+            Left(
+                RefreshTokenError.RefreshRequestFailed(
+                    HttpError.ErrorResponse(
+                        500,
+                        """<html>Error</html>""",
+                    ),
+                ),
             )
-        )
         every { client.refreshTokensForUser(user) } returns tokenRefreshResponse
 
         assertEquals(tokenRefreshResponse, user.refreshTokens())
@@ -394,7 +416,7 @@ class UserTest {
         val user = User(Fixtures.getClient(), Fixtures.userTokens)
         assertEquals(
             "${Fixtures.clientConfig.serverUrl}/profile-pages",
-            user.accountPagesUrl().toString()
+            user.accountPagesUrl().toString(),
         )
     }
 }

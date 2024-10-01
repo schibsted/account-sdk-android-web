@@ -1,6 +1,5 @@
 package com.schibsted.account.webflows.persistence
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import com.nimbusds.jwt.JWTParser
@@ -14,14 +13,12 @@ import java.util.Date
  * Crawls through the obfuscated session JSON to find the access token to enable auto log-in.
  */
 
-//TODO: remove Logs and printlns after RC build is accepted.
 internal object ObfuscatedSessionFinder {
     private const val USER_TOKENS_KEY = "userTokens"
     private const val REFRESH_TOKEN_KEY = "refreshToken"
 
     private const val REFRESH_TOKEN_RECOGNIZE_KEY = "sid"
     private const val ID_TOKEN_RECOGNIZE_KEY = "nonce"
-
 
     /**
      * Determines if the session is obfuscated.
@@ -30,7 +27,7 @@ internal object ObfuscatedSessionFinder {
      * @return true if the session is obfuscated, false otherwise.
      */
     private fun isSessionObfuscated(storedUserSessionJson: String): Boolean {
-        val sessionJsonObject = JsonParser().parse(storedUserSessionJson).getAsJsonObject()
+        val sessionJsonObject = JsonParser.parseString(storedUserSessionJson).getAsJsonObject()
         if (sessionJsonObject.has(USER_TOKENS_KEY)) {
             val userTokenJsonObject = sessionJsonObject.getAsJsonObject(USER_TOKENS_KEY)
             // If the userTokens key and the refreshToken key is present
@@ -54,14 +51,14 @@ internal object ObfuscatedSessionFinder {
     fun getDeobfuscatedStoredUserSessionIfViable(
         gson: Gson,
         clientId: String,
-        storedUserSessionJson: String?
+        storedUserSessionJson: String?,
     ): StorageReadResult {
         try {
             // based on the storedUserSessionJson, determine if the session is obfuscated
             storedUserSessionJson?.let {
                 if (isSessionObfuscated(storedUserSessionJson)) {
                     val sessionJsonObject =
-                        JsonParser().parse(storedUserSessionJson).asJsonObject
+                        JsonParser.parseString(storedUserSessionJson).asJsonObject
                     var refreshToken = ""
                     var idToken = ""
                     var accessToken = ""
@@ -81,7 +78,7 @@ internal object ObfuscatedSessionFinder {
                                         JWTParser.parse(innerValue.asString).let { jwtValue ->
                                             val payload = jwtValue.jwtClaimsSet.toPayload()
                                             val payloadJson =
-                                                JsonParser().parse(payload.toString()).asJsonObject
+                                                JsonParser.parseString(payload.toString()).asJsonObject
                                             // recognize the token based on the payload
                                             // some tokens have specific keys that can be used to recognize them
                                             val refreshTokenRecognized =
@@ -95,7 +92,7 @@ internal object ObfuscatedSessionFinder {
                                                 accessToken = innerValue.asString
                                             } else if (refreshTokenRecognized) {
                                                 refreshToken = innerValue.asString
-                                            } else if (idTokenRecognized) {
+                                            } else {
                                                 idToken = innerValue.asString
                                             }
                                         }
@@ -106,11 +103,12 @@ internal object ObfuscatedSessionFinder {
                         }
                     }
                     // Create the IdTokenClaims object based on the tokens
-                    val idTokenClaims = createIdTokenClaimsBasedOnTokenJsons(
-                        refreshToken,
-                        accessToken,
-                        idToken
-                    )
+                    val idTokenClaims =
+                        createIdTokenClaimsBasedOnTokenJsons(
+                            refreshToken,
+                            accessToken,
+                            idToken,
+                        )
                     // Create the UserTokens object based on the idTokenClaims and rest of data
                     val userTokens = UserTokens(accessToken, refreshToken, idToken, idTokenClaims)
                     val result = StoredUserSession(clientId, userTokens, Date())
@@ -138,25 +136,32 @@ internal object ObfuscatedSessionFinder {
     fun createIdTokenClaimsBasedOnTokenJsons(
         refreshToken: String?,
         accessToken: String?,
-        idToken: String?
+        idToken: String?,
     ): IdTokenClaims {
         val refreshTokenClaims =
             refreshToken.let {
                 if (refreshToken.isNullOrEmpty().not()) {
                     JWTParser.parse(refreshToken).jwtClaimsSet
-                } else null
+                } else {
+                    null
+                }
             }
         val accessTokenClaims =
             accessToken.let {
                 if (accessToken.isNullOrEmpty().not()) {
                     JWTParser.parse(accessToken).jwtClaimsSet
-                } else null
+                } else {
+                    null
+                }
             }
-        val idTokenClaims = idToken.let {
-            if (idToken.isNullOrEmpty().not()) {
-                JWTParser.parse(idToken).jwtClaimsSet
-            } else null
-        }
+        val idTokenClaims =
+            idToken.let {
+                if (idToken.isNullOrEmpty().not()) {
+                    JWTParser.parse(idToken).jwtClaimsSet
+                } else {
+                    null
+                }
+            }
         return IdTokenClaims(
             idTokenClaims?.getStringClaim("iss") ?: "",
             idTokenClaims?.getStringClaim("sub") ?: "",
@@ -164,7 +169,7 @@ internal object ObfuscatedSessionFinder {
             idTokenClaims?.getStringListClaim("aud") ?: emptyList(),
             idTokenClaims?.getDateClaim("exp")?.time?.div(1000) ?: 0L,
             idTokenClaims?.getStringClaim("nonce"),
-            idTokenClaims?.getStringListClaim("amr")
+            idTokenClaims?.getStringListClaim("amr"),
         )
     }
 }

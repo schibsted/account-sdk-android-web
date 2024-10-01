@@ -8,28 +8,27 @@ import com.schibsted.account.webflows.persistence.StateStorage
 import com.schibsted.account.webflows.token.IdTokenClaims
 import com.schibsted.account.webflows.token.TokenHandler
 import com.schibsted.account.webflows.token.UserTokens
-import com.schibsted.account.webflows.util.TestRetrofitApi
 import io.mockk.mockk
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
 
 internal object Fixtures {
-    val clientConfig = ClientConfiguration(
-        URL("https://issuer.example.com"),
-        "client1",
-        "com.example.client://login"
-    )
-    val idTokenClaims = IdTokenClaims(
-        clientConfig.issuer,
-        "userUuid",
-        "12345",
-        listOf(clientConfig.clientId),
-        10,
-        "testNonce",
-        null
-    )
+    val clientConfig =
+        ClientConfiguration(
+            URL("https://issuer.example.com"),
+            "client1",
+            "com.example.client://login",
+        )
+    val idTokenClaims =
+        IdTokenClaims(
+            clientConfig.issuer,
+            "userUuid",
+            "12345",
+            listOf(clientConfig.clientId),
+            10,
+            "testNonce",
+            null,
+        )
     val userTokens = UserTokens("accessToken", "refreshToken", "idToken", idTokenClaims)
 
     fun getClient(
@@ -38,7 +37,7 @@ internal object Fixtures {
         sessionStorage: SessionStorage = mockk(relaxed = true),
         httpClient: OkHttpClient = Fixtures.httpClient,
         tokenHandler: TokenHandler = mockk(relaxed = true),
-        schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true)
+        schibstedAccountApi: SchibstedAccountApi = mockk(relaxed = true),
     ): Client {
         return Client(
             clientConfiguration,
@@ -46,7 +45,7 @@ internal object Fixtures {
             sessionStorage,
             httpClient,
             tokenHandler,
-            schibstedAccountApi
+            schibstedAccountApi,
         )
     }
 

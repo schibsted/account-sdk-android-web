@@ -14,7 +14,11 @@ import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
 import kotlinx.parcelize.Parcelize
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import timber.log.Timber
 import java.io.IOException
 import java.net.URL
@@ -31,42 +35,48 @@ class User {
     private val tokenRefreshTask: BestEffortRunOnceTask<TokenRefreshResult>
 
     val session: UserSession
-        get() = onlyIfLoggedIn { tokens ->
-            UserSession(tokens)
-        }
+        get() =
+            onlyIfLoggedIn { tokens ->
+                UserSession(tokens)
+            }
 
     /** User integer id (as string) */
     val userId: String
-        get() = onlyIfLoggedIn { tokens ->
-            tokens.idTokenClaims.userId
-        }
+        get() =
+            onlyIfLoggedIn { tokens ->
+                tokens.idTokenClaims.userId
+            }
 
     /** User UUID */
     val uuid: String
-        get() = onlyIfLoggedIn { tokens ->
-            tokens.idTokenClaims.sub
-        }
+        get() =
+            onlyIfLoggedIn { tokens ->
+                tokens.idTokenClaims.sub
+            }
 
     /**
      * ID Token
      */
     val idToken: String
-        get() = onlyIfLoggedIn { tokens ->
-            tokens.idToken
-        }
+        get() =
+            onlyIfLoggedIn { tokens ->
+                tokens.idToken
+            }
 
     constructor(client: Client, session: UserSession) : this(client, session.tokens)
 
     internal constructor(client: Client, tokens: UserTokens) {
         this.client = client
         this.tokens = tokens
-        this.httpClient = client.httpClient.newBuilder()
-            .addInterceptor(AuthenticatedRequestInterceptor(this))
-            .authenticator(AccessTokenAuthenticator(this))
-            .build()
-        this.tokenRefreshTask = BestEffortRunOnceTask(5000) {
-            client.refreshTokensForUser(this)
-        }
+        this.httpClient =
+            client.httpClient.newBuilder()
+                .addInterceptor(AuthenticatedRequestInterceptor(this))
+                .authenticator(AccessTokenAuthenticator(this))
+                .build()
+        this.tokenRefreshTask =
+            BestEffortRunOnceTask(5000) {
+                client.refreshTokensForUser(this)
+            }
     }
 
     /**
@@ -90,9 +100,10 @@ class User {
     fun isLoggedIn(): Boolean = tokens != null
 
     /** Fetch user profile data. */
-    fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) = onlyIfLoggedIn {
-        client.schibstedAccountApi.userProfile(this, callback)
-    }
+    fun fetchProfileData(callback: (ApiResult<UserProfileResponse>) -> Unit) =
+        onlyIfLoggedIn {
+            client.schibstedAccountApi.userProfile(this, callback)
+        }
 
     /**
      * Generate URL with embedded one-time code for creating a web session for the current user.
@@ -106,19 +117,18 @@ class User {
         clientId: String,
         redirectUri: String,
         state: String? = null,
-        callback: (ApiResult<URL>) -> Unit
-    ) =
-        onlyIfLoggedIn {
-            client.schibstedAccountApi.sessionExchange(
-                user = this,
-                clientId = clientId,
-                redirectUri = redirectUri,
-                state = state
-            ) {
-                val result = it.map { schibstedAccountUrl("/session/${it.code}") }
-                callback(result)
-            }
+        callback: (ApiResult<URL>) -> Unit,
+    ) = onlyIfLoggedIn {
+        client.schibstedAccountApi.sessionExchange(
+            user = this,
+            clientId = clientId,
+            redirectUri = redirectUri,
+            state = state,
+        ) {
+            val result = it.map { schibstedAccountUrl("/session/${it.code}") }
+            callback(result)
         }
+    }
 
     /**
      * Requests a OAuth authorization code for the current user.
@@ -127,19 +137,22 @@ class User {
      * @param clientId which client to get the code on behalf of, e.g. client id for associated web application
      * @param callback callback that receives the one time code
      */
-    fun oneTimeCode(clientId: String, callback: (ApiResult<String>) -> Unit) =
-        onlyIfLoggedIn {
-            client.schibstedAccountApi.codeExchange(this, clientId) {
-                callback(it.map { it.code })
-            }
+    fun oneTimeCode(
+        clientId: String,
+        callback: (ApiResult<String>) -> Unit,
+    ) = onlyIfLoggedIn {
+        client.schibstedAccountApi.codeExchange(this, clientId) {
+            callback(it.map { it.code })
         }
+    }
 
     /**
      * Generate URL for Schibsted account pages.
      */
-    fun accountPagesUrl(): URL = onlyIfLoggedIn {
-        schibstedAccountUrl("/profile-pages")
-    }
+    fun accountPagesUrl(): URL =
+        onlyIfLoggedIn {
+            schibstedAccountUrl("/profile-pages")
+        }
 
     /**
      * Perform the given [request] with user access token as Bearer token in Authorization header.
@@ -156,17 +169,25 @@ class User {
      */
     fun makeAuthenticatedRequest(
         request: Request,
-        callback: (Either<Throwable, Response>) -> Unit
+        callback: (Either<Throwable, Response>) -> Unit,
     ) = onlyIfLoggedIn {
-        httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                callback(Left(e))
-            }
+        httpClient.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(
+                    call: Call,
+                    e: IOException,
+                ) {
+                    callback(Left(e))
+                }
 
-            override fun onResponse(call: Call, response: Response) {
-                callback(Right(response))
-            }
-        })
+                override fun onResponse(
+                    call: Call,
+                    response: Response,
+                ) {
+                    callback(Right(response))
+                }
+            },
+        )
     }
 
     /**
@@ -192,12 +213,13 @@ class User {
 
     internal fun refreshTokens(): TokenRefreshResult {
         val result = tokenRefreshTask.run()
+
         fun shouldLogout(result: TokenRefreshResult?): Boolean {
             return result is Left &&
-                    result.value is RefreshTokenError.RefreshRequestFailed &&
-                    result.value.error is HttpError.ErrorResponse &&
-                    result.value.error.body != null &&
-                    OAuthError.fromJson(result.value.error.body)?.error == "invalid_grant"
+                result.value is RefreshTokenError.RefreshRequestFailed &&
+                result.value.error is HttpError.ErrorResponse &&
+                result.value.error.body != null &&
+                OAuthError.fromJson(result.value.error.body)?.error == "invalid_grant"
         }
 
         if (shouldLogout(result)) {
@@ -222,8 +244,9 @@ class User {
     }
 
     private fun <T> onlyIfLoggedIn(block: (UserTokens) -> T): T {
-        val currentTokens = tokens
-            ?: throw IllegalStateException("Can not use tokens of logged-out user!")
+        val currentTokens =
+            tokens
+                ?: throw IllegalStateException("Can not use tokens of logged-out user!")
 
         return block(currentTokens)
     }
@@ -238,7 +261,7 @@ class User {
 
 @Parcelize
 data class UserSession internal constructor(
-    internal val tokens: UserTokens
+    internal val tokens: UserTokens,
 ) : Parcelable
 
 private typealias TokenRefreshResult = Either<RefreshTokenError, UserTokens>

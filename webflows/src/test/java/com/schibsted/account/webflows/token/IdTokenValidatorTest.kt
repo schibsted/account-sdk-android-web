@@ -12,7 +12,7 @@ import com.schibsted.account.webflows.jose.AsyncJwks
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.*
+import java.util.Date
 
 private class TestJwks(private val jwks: JWKSet?) : AsyncJwks {
     override fun fetch(callback: (JWKSet?) -> Unit) {
@@ -25,24 +25,25 @@ class IdTokenValidatorTest {
     private val jwks: JWKSet
 
     init {
-        jwk = RSAKeyGenerator(2048)
-            .keyID(idTokenKeyId)
-            .generate()
+        jwk =
+            RSAKeyGenerator(2048)
+                .keyID(ID_TOKEN_KEY_ID)
+                .generate()
         jwks = JWKSet(jwk)
     }
 
     private fun defaultIdTokenClaims(): JWTClaimsSet.Builder {
         return JWTClaimsSet.Builder()
-            .issuer(issuer)
-            .audience(clientId)
+            .issuer(ISSUER)
+            .audience(CLIENT_ID)
             .expirationTime(Date(System.currentTimeMillis() + 5000))
-            .subject(userUuid)
-            .claim("legacy_user_id", userId)
-            .claim("nonce", nonce)
+            .subject(USER_UUID)
+            .claim("legacy_user_id", USER_ID)
+            .claim("nonce", NONCE)
     }
 
     private fun createIdToken(claims: JWTClaimsSet): String {
-        return createJws(jwk.toRSAKey(), idTokenKeyId, Payload(claims.toJSONObject()))
+        return createJws(jwk.toRSAKey(), ID_TOKEN_KEY_ID, Payload(claims.toJSONObject()))
     }
 
     private fun idTokenClaims(claims: JWTClaimsSet): IdTokenClaims {
@@ -53,20 +54,23 @@ class IdTokenValidatorTest {
             claims.audience,
             (claims.expirationTime.time / 1000),
             claims.getStringClaim("nonce"),
-            claims.getStringListClaim("amr")
+            claims.getStringListClaim("amr"),
         )
     }
 
-    private fun assertErrorMessage(expectedSubstring: String, actualMessage: String) {
+    private fun assertErrorMessage(
+        expectedSubstring: String,
+        actualMessage: String,
+    ) {
         assertTrue(
-            "'${expectedSubstring}' not in '${actualMessage}'",
-            actualMessage.contains(expectedSubstring)
+            "'$expectedSubstring' not in '$actualMessage'",
+            actualMessage.contains(expectedSubstring),
         )
     }
 
     @Test
     fun testAcceptsValidWithoutAMR() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, null)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, null)
         val claims = defaultIdTokenClaims().build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
@@ -77,10 +81,11 @@ class IdTokenValidatorTest {
     @Test
     fun testAcceptsValidWithExpectedAMR() {
         val expectedAmrValue = "testValue"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
-        val claims = defaultIdTokenClaims()
-            .claim("amr", listOf(expectedAmrValue, "otherValue"))
-            .build()
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
+        val claims =
+            defaultIdTokenClaims()
+                .claim("amr", listOf(expectedAmrValue, "otherValue"))
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertRight { assertEquals(idTokenClaims(claims), it) }
@@ -90,10 +95,11 @@ class IdTokenValidatorTest {
     @Test
     fun testAcceptsEidAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-se"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
-        val claims = defaultIdTokenClaims()
-            .claim("amr", listOf("eid", "otherValue"))
-            .build()
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
+        val claims =
+            defaultIdTokenClaims()
+                .claim("amr", listOf("eid", "otherValue"))
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertRight { assertEquals(idTokenClaims(claims), it) }
@@ -103,10 +109,11 @@ class IdTokenValidatorTest {
     @Test
     fun testAcceptsEidDKAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-dk"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
-        val claims = defaultIdTokenClaims()
-            .claim("amr", listOf("eid", "otherValue"))
-            .build()
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
+        val claims =
+            defaultIdTokenClaims()
+                .claim("amr", listOf("eid", "otherValue"))
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertRight { assertEquals(idTokenClaims(claims), it) }
@@ -116,7 +123,7 @@ class IdTokenValidatorTest {
     @Test
     fun testRejectsWrongEidAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-wrong"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
         val claims =
             defaultIdTokenClaims()
                 .claim("amr", listOf("eid", "otherValue"))
@@ -126,7 +133,7 @@ class IdTokenValidatorTest {
             result.assertLeft {
                 assertErrorMessage(
                     "Missing expected AMR value: $expectedAmrValue",
-                    it.message
+                    it.message,
                 )
             }
         }
@@ -134,12 +141,13 @@ class IdTokenValidatorTest {
 
     @Test
     fun testRejectMissingExpectedAMRInIdTokenWithoutAMR() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, "testValue")
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, "testValue")
 
         for (amr in listOf(null, emptyList(), listOf("otherValue1", "otherValue2"))) {
-            val claims = defaultIdTokenClaims()
-                .claim("amr", amr)
-                .build()
+            val claims =
+                defaultIdTokenClaims()
+                    .claim("amr", amr)
+                    .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
                 result.assertLeft { assertErrorMessage("Missing expected AMR value", it.message) }
@@ -149,12 +157,13 @@ class IdTokenValidatorTest {
 
     @Test
     fun testRejectsMismatchingNonce() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, null)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, null)
 
         for (nonce in listOf(null, "otherNonce")) {
-            val claims = defaultIdTokenClaims()
-                .claim("nonce", nonce)
-                .build()
+            val claims =
+                defaultIdTokenClaims()
+                    .claim("nonce", nonce)
+                    .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
                 result.assertLeft { assertErrorMessage("nonce", it.message) }
@@ -164,11 +173,12 @@ class IdTokenValidatorTest {
 
     @Test
     fun testRejectsMismatchingIssuer() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, null)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, null)
 
-        val claims = defaultIdTokenClaims()
-            .issuer("https://other.example.com")
-            .build()
+        val claims =
+            defaultIdTokenClaims()
+                .issuer("https://other.example.com")
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertLeft { assertErrorMessage("Invalid issuer", it.message) }
@@ -177,19 +187,21 @@ class IdTokenValidatorTest {
 
     @Test
     fun testAcceptsIssuerWithTrailingSlash() {
-        val issuerWithSlash = "$issuer/"
-        val testData = listOf(
-            issuer to issuer,
-            issuer to issuerWithSlash,
-            issuerWithSlash to issuer,
-            issuerWithSlash to issuerWithSlash
-        )
+        val issuerWithSlash = "$ISSUER/"
+        val testData =
+            listOf(
+                ISSUER to ISSUER,
+                ISSUER to issuerWithSlash,
+                issuerWithSlash to ISSUER,
+                issuerWithSlash to issuerWithSlash,
+            )
 
         for ((idTokenIssuer, expectedIssuer) in testData) {
-            val context = IdTokenValidationContext(expectedIssuer, clientId, nonce, null)
-            val claims = defaultIdTokenClaims()
-                .issuer(idTokenIssuer)
-                .build()
+            val context = IdTokenValidationContext(expectedIssuer, CLIENT_ID, NONCE, null)
+            val claims =
+                defaultIdTokenClaims()
+                    .issuer(idTokenIssuer)
+                    .build()
             val idToken = createIdToken(claims)
             IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
                 result.assertRight { assertEquals(idTokenClaims(claims), it) }
@@ -199,11 +211,12 @@ class IdTokenValidatorTest {
 
     @Test
     fun testRejectsAudienceClaimWithoutExpectedClientId() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, null)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, null)
 
-        val claims = defaultIdTokenClaims()
-            .audience("otherClient")
-            .build()
+        val claims =
+            defaultIdTokenClaims()
+                .audience("otherClient")
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertLeft { assertErrorMessage("audience", it.message) }
@@ -212,12 +225,13 @@ class IdTokenValidatorTest {
 
     @Test
     fun testRejectsExpiredIdToken() {
-        val context = IdTokenValidationContext(issuer, clientId, nonce, null)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, null)
 
         val hourAgo = System.currentTimeMillis() - (60 * 60) * 1000
-        val claims = defaultIdTokenClaims()
-            .expirationTime(Date(hourAgo))
-            .build()
+        val claims =
+            defaultIdTokenClaims()
+                .expirationTime(Date(hourAgo))
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertLeft { assertErrorMessage("Expired JWT", it.message) }
@@ -225,11 +239,11 @@ class IdTokenValidatorTest {
     }
 
     companion object {
-        const val idTokenKeyId = "testKey"
-        const val issuer = "https://issuer.example.com"
-        const val clientId = "client1"
-        const val userUuid = "userUuid"
-        const val userId = "12345"
-        const val nonce = "nonce1234"
+        const val ID_TOKEN_KEY_ID = "testKey"
+        const val ISSUER = "https://issuer.example.com"
+        const val CLIENT_ID = "client1"
+        const val USER_UUID = "userUuid"
+        const val USER_ID = "12345"
+        const val NONCE = "nonce1234"
     }
 }

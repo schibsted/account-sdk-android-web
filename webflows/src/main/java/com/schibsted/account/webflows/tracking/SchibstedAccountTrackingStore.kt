@@ -2,6 +2,7 @@ package com.schibsted.account.webflows.tracking
 
 interface SchibstedAccountTrackerStore {
     fun addTrackingListener(trackingListener: SchibstedAccountTrackingListener)
+
     fun removeTrackingListener(trackingListener: SchibstedAccountTrackingListener)
 
     companion object : SchibstedAccountTrackerStore {

@@ -77,7 +77,7 @@ class ManualLoginActivity : AppCompatActivity() {
                                 Toast.makeText(
                                     this,
                                     "User could not be resumed, error: ${it.cause.message} ",
-                                    Toast.LENGTH_SHORT
+                                    Toast.LENGTH_SHORT,
                                 )
                                     .show()
                         }

@@ -3,7 +3,6 @@ package com.schibsted.account.webflows.client
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.FragmentManager
 import com.schibsted.account.webflows.activities.AuthorizationManagementActivity
@@ -14,7 +13,6 @@ import com.schibsted.account.webflows.loginPrompt.LoginPromptManager
 import com.schibsted.account.webflows.loginPrompt.SessionInfoManager
 import com.schibsted.account.webflows.persistence.EncryptedSharedPrefsStorage
 import com.schibsted.account.webflows.persistence.MigratingSessionStorage
-import com.schibsted.account.webflows.persistence.ObfuscatedSessionFinder
 import com.schibsted.account.webflows.persistence.SessionStorage
 import com.schibsted.account.webflows.persistence.SharedPrefsStorage
 import com.schibsted.account.webflows.persistence.StateStorage
@@ -59,7 +57,7 @@ class Client {
         context: Context,
         configuration: ClientConfiguration,
         httpClient: OkHttpClient,
-        logoutCallback: (() -> Unit)? = null
+        logoutCallback: (() -> Unit)? = null,
     ) {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
@@ -68,10 +66,11 @@ class Client {
         val sharedPrefsStorage =
             SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
-        sessionStorage = MigratingSessionStorage(
-            newStorage = sharedPrefsStorage,
-            previousStorage = encryptedStorage
-        )
+        sessionStorage =
+            MigratingSessionStorage(
+                newStorage = sharedPrefsStorage,
+                previousStorage = encryptedStorage,
+            )
 
         schibstedAccountApi =
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
@@ -87,7 +86,7 @@ class Client {
         sessionStorage: SessionStorage,
         httpClient: OkHttpClient,
         tokenHandler: TokenHandler,
-        schibstedAccountApi: SchibstedAccountApi
+        schibstedAccountApi: SchibstedAccountApi,
     ) {
         this.configuration = configuration
         this.stateStorage = stateStorage
@@ -114,14 +113,15 @@ class Client {
         authRequest: AuthRequest = AuthRequest(),
     ): Intent {
         val loginUrl = generateLoginUrl(authRequest, state)
-        val intent: Intent = if (isCustomTabsSupported(context)) {
-            buildCustomTabsIntent()
-                .apply {
-                    intent.data = loginUrl
-                }.intent
-        } else {
-            Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
-        }
+        val intent: Intent =
+            if (isCustomTabsSupported(context)) {
+                buildCustomTabsIntent()
+                    .apply {
+                        intent.data = loginUrl
+                    }.intent
+            } else {
+                Intent(Intent.ACTION_VIEW, loginUrl).addCategory(Intent.CATEGORY_BROWSABLE)
+            }
         return AuthorizationManagementActivity.createStartIntent(context, intent)
     }
 
@@ -133,7 +133,11 @@ class Client {
      * @param authRequest Optional [AuthRequest] parameter.
      */
     @JvmOverloads
-    fun launchAuth(context: Context, state: String?, authRequest: AuthRequest = AuthRequest()) {
+    fun launchAuth(
+        context: Context,
+        state: String?,
+        authRequest: AuthRequest = AuthRequest(),
+    ) {
         val loginUrl = generateLoginUrl(authRequest, state)
         if (isCustomTabsSupported(context)) {
             buildCustomTabsIntent().launchUrl(context, loginUrl)
@@ -152,13 +156,18 @@ class Client {
      * @return External id.
      */
     @JvmOverloads
-    fun getExternalId(pairId: String, externalParty: String, optionalSuffix: String = ""): String? {
+    fun getExternalId(
+        pairId: String,
+        externalParty: String,
+        optionalSuffix: String = "",
+    ): String? {
         return try {
             val stringToHash =
-                if (optionalSuffix.isEmpty())
+                if (optionalSuffix.isEmpty()) {
                     "$pairId:$externalParty"
-                else
+                } else {
                     "$pairId:$externalParty:$optionalSuffix"
+                }
             MessageDigest
                 .getInstance(SHA256)
                 .digest(stringToHash.toByteArray())
@@ -189,7 +198,10 @@ class Client {
      * @param authRequest Authentication request parameters.
      * @param state State.
      */
-    private fun generateLoginUrl(authRequest: AuthRequest, state: String?): Uri {
+    private fun generateLoginUrl(
+        authRequest: AuthRequest,
+        state: String?,
+    ): Uri {
         val loginUrl = urlBuilder.loginUrl(authRequest, state)
         return Uri.parse(loginUrl)
     }
@@ -200,25 +212,31 @@ class Client {
      * This only needs to be used if manually starting the login flow using [launchAuth].
      * If using [getAuthenticationIntent] this step will be handled for you.
      */
-    fun handleAuthenticationResponse(intent: Intent, callback: LoginResultHandler) {
-        val authResponse = intent.data?.query ?: return callback(
-            Left(LoginError.UnexpectedError("No authentication response"))
-        )
+    fun handleAuthenticationResponse(
+        intent: Intent,
+        callback: LoginResultHandler,
+    ) {
+        val authResponse =
+            intent.data?.query ?: return callback(
+                Left(LoginError.UnexpectedError("No authentication response")),
+            )
         handleAuthenticationResponse(authResponse, callback)
     }
 
     private fun handleAuthenticationResponse(
         authResponseParameters: String,
-        callback: LoginResultHandler
+        callback: LoginResultHandler,
     ) {
         val authResponse = Util.parseQueryParameters(authResponseParameters)
-        val stored = stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
-            ?: return callback(Left(LoginError.AuthStateReadError))
+        val stored =
+            stateStorage.getValue(AUTH_STATE_KEY, AuthState::class)
+                ?: return callback(Left(LoginError.AuthStateReadError))
 
-        val eidUserCancelError = mapOf(
-            "error" to "access_denied",
-            "error_description" to "EID authentication was canceled by the user"
-        )
+        val eidUserCancelError =
+            mapOf(
+                "error" to "access_denied",
+                "error_description" to "EID authentication was canceled by the user",
+            )
         val error = authResponse["error"]
         val errorDescription = authResponse["error_description"]
         if (error != null && error == eidUserCancelError["error"] && errorDescription == eidUserCancelError["error_description"]) {
@@ -233,7 +251,7 @@ class Client {
             return
         }
 
-        //stateStorage.removeValue(AUTH_STATE_KEY)
+        // stateStorage.removeValue(AUTH_STATE_KEY)
 
         if (error != null) {
             val oauthError = OAuthError(error, errorDescription)
@@ -241,8 +259,9 @@ class Client {
             return
         }
 
-        val authCode = authResponse["code"]
-            ?: return callback(Left(LoginError.UnexpectedError("Missing authorization code in authentication response")))
+        val authCode =
+            authResponse["code"]
+                ?: return callback(Left(LoginError.UnexpectedError("Missing authorization code in authentication response")))
         makeTokenRequest(authCode, stored) { storedUserSession ->
             storedUserSession
                 .onSuccess { session ->
@@ -266,16 +285,17 @@ class Client {
     internal fun makeTokenRequest(
         authCode: String,
         authState: AuthState?,
-        callback: (Either<TokenError, StoredUserSession>) -> Unit
+        callback: (Either<TokenError, StoredUserSession>) -> Unit,
     ) {
         tokenHandler.makeTokenRequest(authCode, authState) { result ->
-            val session: Either<TokenError, StoredUserSession> = result.map { tokenResponse ->
-                StoredUserSession(
-                    configuration.clientId,
-                    tokenResponse.userTokens,
-                    Date()
-                )
-            }
+            val session: Either<TokenError, StoredUserSession> =
+                result.map { tokenResponse ->
+                    StoredUserSession(
+                        configuration.clientId,
+                        tokenResponse.userTokens,
+                        Date(),
+                    )
+                }
             callback(session)
         }
     }
@@ -314,10 +334,11 @@ class Client {
                 if (tokens != null) {
                     val newAccessToken = result.value.access_token
                     val newRefreshToken = result.value.refresh_token ?: refreshToken
-                    val userTokens = tokens.copy(
-                        accessToken = newAccessToken,
-                        refreshToken = newRefreshToken
-                    )
+                    val userTokens =
+                        tokens.copy(
+                            accessToken = newAccessToken,
+                            refreshToken = newRefreshToken,
+                        )
                     user.tokens = userTokens
                     val userSession =
                         StoredUserSession(configuration.clientId, userTokens, Date())
@@ -348,17 +369,19 @@ class Client {
     suspend fun requestLoginPrompt(
         context: Context,
         supportFragmentManager: FragmentManager,
-        isCancelable: Boolean = true
+        isCancelable: Boolean = true,
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
                     this.getAuthenticationIntent(context, null),
-                    isCancelable
-                )
+                    isCancelable,
+                ),
             ).showLoginPromptIfAbsent(supportFragmentManager)
-        } else false
+        } else {
+            false
+        }
     }
 
     private suspend fun hasSessionStorage(clientId: String) =
@@ -373,7 +396,7 @@ class Client {
     private suspend fun userHasSessionOnDevice(context: Context): Boolean {
         return SessionInfoManager(
             context,
-            configuration.serverUrl.toString()
+            configuration.serverUrl.toString(),
         ).isUserLoggedInOnTheDevice()
     }
 
@@ -390,7 +413,7 @@ data class OAuthError(val error: String, val errorDescription: String?) {
                 val parsed = JSONObject(json)
                 OAuthError(
                     parsed.getString("error"),
-                    parsed.optString("error_description")
+                    parsed.optString("error_description"),
                 )
             } catch (e: JSONException) {
                 null
@@ -438,9 +461,13 @@ sealed class LoginError {
 
 sealed class RefreshTokenError {
     object NoRefreshToken : RefreshTokenError()
+
     object ConcurrentRefreshFailure : RefreshTokenError()
+
     object UserWasLoggedOut : RefreshTokenError()
+
     data class RefreshRequestFailed(val error: HttpError) : RefreshTokenError()
+
     data class UnexpectedError(val message: String) : RefreshTokenError()
 }
 

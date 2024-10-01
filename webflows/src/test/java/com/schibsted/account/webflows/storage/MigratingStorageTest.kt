@@ -11,9 +11,9 @@ import com.schibsted.account.webflows.util.Either
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import junit.framework.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.util.*
+import java.util.Date
 
 class MigratingStorageTest {
     private val userSession =
@@ -21,17 +21,17 @@ class MigratingStorageTest {
 
     @Test
     fun testMigratingStorageReadsEncryptedStorage() {
-        val encryptedStorage: EncryptedSharedPrefsStorage = mockk {
-            every {
-                get(any(), any())
-            } answers {
-                val callback = secondArg<StorageReadCallback>()
-                callback(Either.Right(userSession))
+        val encryptedStorage: EncryptedSharedPrefsStorage =
+            mockk {
+                every {
+                    get(any(), any())
+                } answers {
+                    val callback = secondArg<StorageReadCallback>()
+                    callback(Either.Right(userSession))
+                }
             }
-        }
         val sharedPrefsStorage: SharedPrefsStorage = mockk(relaxed = true)
         val migratingStorage = MigratingSessionStorage(sharedPrefsStorage, encryptedStorage)
-
 
         migratingStorage.get(Fixtures.clientConfig.clientId) {
             it.assertRight { storedUserSession ->
@@ -50,7 +50,7 @@ class MigratingStorageTest {
             it.assertRight { storedUserSession ->
                 assertEquals(
                     userSession.userTokens.idToken,
-                    storedUserSession?.userTokens?.idToken
+                    storedUserSession?.userTokens?.idToken,
                 )
             }
             verify(exactly = 0) {

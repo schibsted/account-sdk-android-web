@@ -41,15 +41,19 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?,
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        view = LayoutInflater.from(requireContext()).inflate(
-            R.layout.login_prompt,
-            container,
-            false
-        )
+        view =
+            LayoutInflater.from(requireContext()).inflate(
+                R.layout.login_prompt,
+                container,
+                false,
+            )
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         initializeButtons()
         SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptCreated)
@@ -95,8 +99,8 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
                 startActivity(
                     Intent(
                         Intent.ACTION_VIEW,
-                        uri
-                    ).addCategory(Intent.CATEGORY_BROWSABLE)
+                        uri,
+                    ).addCategory(Intent.CATEGORY_BROWSABLE),
                 )
             }
         }
@@ -105,5 +109,4 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
     companion object {
         const val ARG_CONFIG = "LOGIN_PROMPT_CONFIG_ARG"
     }
-
 }

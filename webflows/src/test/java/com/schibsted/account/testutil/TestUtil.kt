@@ -5,9 +5,7 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.RSAKey
-import com.schibsted.account.webflows.token.IdTokenValidatorTest
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
@@ -17,7 +15,10 @@ import org.junit.Assert
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-fun await(timeoutSeconds: Long = 1, func: (() -> Unit) -> Unit) {
+fun await(
+    timeoutSeconds: Long = 1,
+    func: (() -> Unit) -> Unit,
+) {
     val latch = CountDownLatch(1)
 
     try {
@@ -40,7 +41,10 @@ fun <L, R> Either<L, R>.assertLeft(func: (L) -> Unit) {
     func((this as Left).value)
 }
 
-fun withServer(vararg responses: MockResponse, func: (MockWebServer) -> Unit) {
+fun withServer(
+    vararg responses: MockResponse,
+    func: (MockWebServer) -> Unit,
+) {
     val server = MockWebServer()
 
     for (r in responses) {
@@ -55,10 +59,15 @@ fun withServer(vararg responses: MockResponse, func: (MockWebServer) -> Unit) {
     }
 }
 
-fun createJws(key: RSAKey, keyId: String, payload: Payload): String {
-    val header = JWSHeader.Builder(JWSAlgorithm.RS256)
-        .keyID(keyId)
-        .build()
+fun createJws(
+    key: RSAKey,
+    keyId: String,
+    payload: Payload,
+): String {
+    val header =
+        JWSHeader.Builder(JWSAlgorithm.RS256)
+            .keyID(keyId)
+            .build()
     val jwsObject = JWSObject(header, payload)
 
     jwsObject.sign(RSASSASigner(key))

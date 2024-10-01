@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 
 class ObfuscatedSessionFinderTest {
-
     // Gson is used to serialize and deserialize objects
     // We mimick the Gson object used in the SessionStorage class
     private val gson = GsonBuilder().setDateFormat("MM dd, yyyy HH:mm:ss").create()
@@ -32,7 +31,7 @@ class ObfuscatedSessionFinderTest {
             ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
                 gson,
                 clientId,
-                userSessionJson
+                userSessionJson,
             )
 
         // then
@@ -54,7 +53,7 @@ class ObfuscatedSessionFinderTest {
             ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
                 gson,
                 clientId,
-                userSessionJson
+                userSessionJson,
             )
 
         // then
@@ -67,7 +66,7 @@ class ObfuscatedSessionFinderTest {
 
     @Test
     fun `given obfuscated user session return deobfuscated user session object`() {
-        //given
+        // given
         val clientId = CLIENT_ID
         val userSessionJson = OBFUSCATED_USER_SESSION_JSON
 
@@ -76,7 +75,7 @@ class ObfuscatedSessionFinderTest {
             ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
                 gson,
                 clientId,
-                userSessionJson
+                userSessionJson,
             )
 
         // then
@@ -102,7 +101,7 @@ class ObfuscatedSessionFinderTest {
             ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
                 gson,
                 clientId,
-                userSessionJson
+                userSessionJson,
             )
 
         // then
@@ -124,11 +123,12 @@ class ObfuscatedSessionFinderTest {
         val userSessionJson = MALFORMED_NOT_OBFUSCATED_USER_SESSION_JSON
 
         // when
-        val storedUserSession = ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
-            gson,
-            clientId,
-            userSessionJson
-        )
+        val storedUserSession =
+            ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
+                gson,
+                clientId,
+                userSessionJson,
+            )
 
         // then
         storedUserSession.onSuccess {
@@ -145,11 +145,12 @@ class ObfuscatedSessionFinderTest {
         val userSessionJson = MALFORMED_OBFUSCATED_USER_SESSION_JSON
 
         // when
-        val storedUserSession = ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
-            gson,
-            clientId,
-            userSessionJson
-        )
+        val storedUserSession =
+            ObfuscatedSessionFinder.getDeobfuscatedStoredUserSessionIfViable(
+                gson,
+                clientId,
+                userSessionJson,
+            )
 
         // then
         storedUserSession.onSuccess {
@@ -158,8 +159,6 @@ class ObfuscatedSessionFinderTest {
             Assert.assertNull(it)
         }
     }
-
-
 
     /*****
      * DEBUG VALUES FOR TOKENS:
@@ -238,17 +237,24 @@ class ObfuscatedSessionFinderTest {
         assertEquals("pwd", idTokenClaims.amr?.get(0) ?: "")
     }
 
-
     companion object {
         private const val CLIENT_ID = "123"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val ACCESS_TOKEN_OBFUSCATED =
             "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyMTMzODc3LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyMTMzODE3LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiJlZDQzYTMwNi1mOTBkLTRjYmUtYTU1ZC1lMzM3ZjM3MzhlZjEifQ.sckisjhfp-BoB379HI2cnPeDEH1XJMBghcBBRtDC4vY"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val ID_TOKEN_OBFUSCATED =
             "eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJwd2QiXSwiYXV0aF90aW1lIjoxNzEyMTMzODA4LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjEzNzQxNywiaWF0IjoxNzEyMTMzODE3LCJub25jZSI6IjRlTEhtWG81RVQifQ.NXIQw4lWp3FXc8MzQNmE5frV-KsmOG9JeKQBt9bCYcrBAHMvhw2bQQwm9bpjM-y36GGxtFanZGz6hyitZl_YGwU_FuM2XXWG1r5L1J2v2rFCfMnZdYfj-to28lK4JiYDU2-rc_eywdbzSbmQtps7qRxHWYTjf3gbkU5kEguYNMopncpk77pzRT3jjaBuzIPGoLBjLFG54FTKCFeeVZf-H8lSEz8-8x-p7WczLjroDHrOYdGznm9MytllN5sO1hR5d4_j6AiWfV_cyo2DadCoVcyeuI7lOoZMsP5B_HTiemj6c_C5Zl6ePKoc_8dvKGnmG6ArbQNdx1bcUbZ5m5KHwg"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val REFRESH_TOKEN_OBFUSCATED =
             "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyNzM4NjE3LCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcxMjEzMzgxNywiY2xpZW50X2lkIjoiNjAyNTI1ZjJiNDFmYTMxNzg5YTk1YWE4IiwianRpIjoiYWNkNWNkNmUtMTNkNS00NTYxLTg5NjYtMzhlYTY3NjNmNGQ3Iiwic2lkIjoiYnA4bWsifQ.N1nyl_9C0-ClPb_eSytXxi_cOrRVZEWjYKU6kz8klVU"
 
-        private const val OBFUSCATED_USER_SESSION_JSON = "{\n" +
+        @Suppress("ktlint:standard:max-line-length")
+        private const val OBFUSCATED_USER_SESSION_JSON =
+            "{\n" +
                 "   \"a\":\"123\",\n" +
                 "   \"b\":\"04 03, 2024 10:43:37\",\n" +
                 "   \"d\":{\n" +
@@ -271,14 +277,21 @@ class ObfuscatedSessionFinderTest {
                 "   }\n" +
                 "}"
 
+        @Suppress("ktlint:standard:max-line-length")
         private const val ACCESS_TOKEN_NOT_OBFUSCATED =
             "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyMTMzODc3LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyMTMzODE3LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiJlZDQzYTMwNi1mOTBkLTRjYmUtYTU1ZC1lMzM3ZjM3MzhlZjEifQ.sckisjhfp-BoB379HI2cnPeDEH1XJMBghcBBRtDC4vY"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val ID_TOKEN_NOT_OBFUSCATED =
             "eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJwd2QiXSwiYXV0aF90aW1lIjoxNzEyMTMzODA4LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjEzNzQxNywiaWF0IjoxNzEyMTMzODE3LCJub25jZSI6IjRlTEhtWG81RVQifQ.NXIQw4lWp3FXc8MzQNmE5frV-KsmOG9JeKQBt9bCYcrBAHMvhw2bQQwm9bpjM-y36GGxtFanZGz6hyitZl_YGwU_FuM2XXWG1r5L1J2v2rFCfMnZdYfj-to28lK4JiYDU2-rc_eywdbzSbmQtps7qRxHWYTjf3gbkU5kEguYNMopncpk77pzRT3jjaBuzIPGoLBjLFG54FTKCFeeVZf-H8lSEz8-8x-p7WczLjroDHrOYdGznm9MytllN5sO1hR5d4_j6AiWfV_cyo2DadCoVcyeuI7lOoZMsP5B_HTiemj6c_C5Zl6ePKoc_8dvKGnmG6ArbQNdx1bcUbZ5m5KHwg"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val REFRESH_TOKEN_NOT_OBFUSCATED =
             "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyNzM4NjE3LCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcxMjEzMzgxNywiY2xpZW50X2lkIjoiNjAyNTI1ZjJiNDFmYTMxNzg5YTk1YWE4IiwianRpIjoiYWNkNWNkNmUtMTNkNS00NTYxLTg5NjYtMzhlYTY3NjNmNGQ3Iiwic2lkIjoiYnA4bWsifQ.N1nyl_9C0-ClPb_eSytXxi_cOrRVZEWjYKU6kz8klVU"
 
-        private const val NOT_OBFUSCATED_USER_SESSION_JSON = "{\n" +
+        @Suppress("ktlint:standard:max-line-length")
+        private const val NOT_OBFUSCATED_USER_SESSION_JSON =
+            "{\n" +
                 "   \"clientId\":\"123\",\n" +
                 "   \"updatedAt\":\"04 03, 2024 10:43:37\",\n" +
                 "   \"userTokens\":{\n" +
@@ -302,12 +315,14 @@ class ObfuscatedSessionFinderTest {
                 "}"
 
         // Simply comment any line to check the test case
-        private const val MALFORMED_NOT_OBFUSCATED_USER_SESSION_JSON = "{\n" +
+        @Suppress("ktlint:standard:max-line-length")
+        private const val MALFORMED_NOT_OBFUSCATED_USER_SESSION_JSON =
+            "{\n" +
                 "   \"a\":\"123\",\n" +
                 "   \"b\":\"04 03, 2024 10:43:37\",\n" +
                 "   \"d\":{\n" +
                 "      \"e\":\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyMTMzODc3LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyMTMzODE3LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiJlZDQzYTMwNi1mOTBkLTRjYmUtYTU1ZC1lMzM3ZjM3MzhlZjEifQ.sckisjhfp-BoB379HI2cnPeDEH1XJMBghcBBRtDC4vY\",\n" +
-               // "      \"f\":\"eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJwd2QiXSwiYXV0aF90aW1lIjoxNzEyMTMzODA4LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjEzNzQxNywiaWF0IjoxNzEyMTMzODE3LCJub25jZSI6IjRlTEhtWG81RVQifQ.NXIQw4lWp3FXc8MzQNmE5frV-KsmOG9JeKQBt9bCYcrBAHMvhw2bQQwm9bpjM-y36GGxtFanZGz6hyitZl_YGwU_FuM2XXWG1r5L1J2v2rFCfMnZdYfj-to28lK4JiYDU2-rc_eywdbzSbmQtps7qRxHWYTjf3gbkU5kEguYNMopncpk77pzRT3jjaBuzIPGoLBjLFG54FTKCFeeVZf-H8lSEz8-8x-p7WczLjroDHrOYdGznm9MytllN5sO1hR5d4_j6AiWfV_cyo2DadCoVcyeuI7lOoZMsP5B_HTiemj6c_C5Zl6ePKoc_8dvKGnmG6ArbQNdx1bcUbZ5m5KHwg\",\n" +
+                // "      \"f\":\"eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJwd2QiXSwiYXV0aF90aW1lIjoxNzEyMTMzODA4LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjEzNzQxNywiaWF0IjoxNzEyMTMzODE3LCJub25jZSI6IjRlTEhtWG81RVQifQ.NXIQw4lWp3FXc8MzQNmE5frV-KsmOG9JeKQBt9bCYcrBAHMvhw2bQQwm9bpjM-y36GGxtFanZGz6hyitZl_YGwU_FuM2XXWG1r5L1J2v2rFCfMnZdYfj-to28lK4JiYDU2-rc_eywdbzSbmQtps7qRxHWYTjf3gbkU5kEguYNMopncpk77pzRT3jjaBuzIPGoLBjLFG54FTKCFeeVZf-H8lSEz8-8x-p7WczLjroDHrOYdGznm9MytllN5sO1hR5d4_j6AiWfV_cyo2DadCoVcyeuI7lOoZMsP5B_HTiemj6c_C5Zl6ePKoc_8dvKGnmG6ArbQNdx1bcUbZ5m5KHwg\",\n" +
                 "      \"g\":{\n" +
                 "         \"h\":[\n" +
                 "            \"pwd\"\n" +
@@ -326,10 +341,12 @@ class ObfuscatedSessionFinderTest {
                 "}"
 
         // Simply comment any line to check the test case
-        private const val MALFORMED_OBFUSCATED_USER_SESSION_JSON = "{\n" +
+        @Suppress("ktlint:standard:max-line-length")
+        private const val MALFORMED_OBFUSCATED_USER_SESSION_JSON =
+            "{\n" +
                 "   \"a\":\"123\",\n" +
                 "   \"b\":{\n" +
-               // "      \"d\":\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyNTYyMDc5LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyNTYyMDE5LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiI2NjYwNzA0NS0xMzQwLTQ1OTktOTM2My1jM2M0MjdjMWRiMWIifQ.ABPt3TbnD2v_5zDaPK5X5djnV_sXqDkq9u802Q2BN-c\",\n" +
+                // "      \"d\":\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyNTYyMDc5LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyNTYyMDE5LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiI2NjYwNzA0NS0xMzQwLTQ1OTktOTM2My1jM2M0MjdjMWRiMWIifQ.ABPt3TbnD2v_5zDaPK5X5djnV_sXqDkq9u802Q2BN-c\",\n" +
                 "      \"e\":\"eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEzMTY2ODE5LCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcxMjU2MjAxOSwiY2xpZW50X2lkIjoiNjAyNTI1ZjJiNDFmYTMxNzg5YTk1YWE4IiwianRpIjoiMTYyYzkwMmQtMjdhYi00MGYwLWJjMjktM2U2NjczZWRiMTExIiwic2lkIjoiUms2bGsifQ.ym_eEVNrPgfb10wP1O8-tuJlUzwhjgMz2JgposKHzL8\",\n" +
                 "      \"f\":\"eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJja2UiXSwiYXV0aF90aW1lIjoxNzEyNTYyMDE5LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjU2NTYxOSwiaWF0IjoxNzEyNTYyMDE5LCJub25jZSI6IlBCNXVyME1HbG4ifQ.m_cZBMtj7SlXmaAfVZNWK_wv8WQufpVRUX6a8pNtBppVZ8sQ0J0KswWjIC7uPsPoaP6jBQTfyy7w3JL9SCs00DK3AAX7spYDssGLac-YO_5sEzeX4bGsPwY5xH5oRgL1JspCTSxPqk-oArduzZYffHVq4g50_MweU6vNZ_6qRtFaDQ8DzTtM6qS3lr03zy1ckptn3eemL5PbZix-ZSVinKFIOsTeQaS9b7xVMbgupP6FRtRTuwU2248OW2b_2lxWlv2mX51tiFy1oyYcbbOu_TY94p0QHDrD85CclpMwDBNG4bc2rJ9hBcm4QiLLi6TMdeYdb-7KfTdvH6_xWVxdLQ\",\n" +
                 "      \"g\":{\n" +
@@ -349,8 +366,13 @@ class ObfuscatedSessionFinderTest {
                 "   \"c\":\"04 08, 2024 09:40:19\"\n" +
                 "}"
 
+        @Suppress("ktlint:standard:max-line-length")
         private const val REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyNzM4NjE3LCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTcxMjEzMzgxNywiY2xpZW50X2lkIjoiNjAyNTI1ZjJiNDFmYTMxNzg5YTk1YWE4IiwianRpIjoiYWNkNWNkNmUtMTNkNS00NTYxLTg5NjYtMzhlYTY3NjNmNGQ3Iiwic2lkIjoiYnA4bWsifQ.N1nyl_9C0-ClPb_eSytXxi_cOrRVZEWjYKU6kz8klVU"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJ1c2VyX2lkIjoiMTIwMDcxMDciLCJzY29wZSI6Im9wZW5pZCBvZmZsaW5lX2FjY2VzcyIsImlzcyI6Imh0dHBzOlwvXC9pZGVudGl0eS1wcmUuc2NoaWJzdGVkLmNvbVwvIiwiZXhwIjoxNzEyMTMzODc3LCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzEyMTMzODE3LCJjbGllbnRfaWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJqdGkiOiJlZDQzYTMwNi1mOTBkLTRjYmUtYTU1ZC1lMzM3ZjM3MzhlZjEifQ.sckisjhfp-BoB379HI2cnPeDEH1XJMBghcBBRtDC4vY"
+
+        @Suppress("ktlint:standard:max-line-length")
         private const val ID_TOKEN = "eyJraWQiOiJjN2Y2MDM2OS04MDMyLTQ1MWEtODcxZC1iNDhkMzA0YTJiMzUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiY2Q2MmY2OS1hYWViLTUxNzktYjgxYS0zZTI0NWNkNzc5YWYiLCJhdWQiOiI2MDI1MjVmMmI0MWZhMzE3ODlhOTVhYTgiLCJhY3IiOiIwIiwibGVnYWN5X3VzZXJfaWQiOiIxMjAwNzEwNyIsImFtciI6WyJwd2QiXSwiYXV0aF90aW1lIjoxNzEyMTMzODA4LCJpc3MiOiJodHRwczpcL1wvaWRlbnRpdHktcHJlLnNjaGlic3RlZC5jb21cLyIsImV4cCI6MTcxMjEzNzQxNywiaWF0IjoxNzEyMTMzODE3LCJub25jZSI6IjRlTEhtWG81RVQifQ.NXIQw4lWp3FXc8MzQNmE5frV-KsmOG9JeKQBt9bCYcrBAHMvhw2bQQwm9bpjM-y36GGxtFanZGz6hyitZl_YGwU_FuM2XXWG1r5L1J2v2rFCfMnZdYfj-to28lK4JiYDU2-rc_eywdbzSbmQtps7qRxHWYTjf3gbkU5kEguYNMopncpk77pzRT3jjaBuzIPGoLBjLFG54FTKCFeeVZf-H8lSEz8-8x-p7WczLjroDHrOYdGznm9MytllN5sO1hR5d4_j6AiWfV_cyo2DadCoVcyeuI7lOoZMsP5B_HTiemj6c_C5Zl6ePKoc_8dvKGnmG6ArbQNdx1bcUbZ5m5KHwg"
     }
 }

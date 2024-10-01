@@ -18,7 +18,10 @@ import com.schibsted.account.webflows.util.Either.Right
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
@@ -107,26 +110,31 @@ class AuthResultLiveDataTest {
         }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get(client).update(Intent().apply {
-            data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
-        })
+        AuthResultLiveData.get(client).update(
+            Intent().apply {
+                data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
+            },
+        )
         AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
     }
 
     @Test
     fun updateHandlesFailureResult() {
         val errorResult = LoginError.UnexpectedError("Test error")
-        val client = mockk<Client>(relaxed = true) {
-            every { handleAuthenticationResponse(any(), any()) } answers {
-                val callback = secondArg<LoginResultHandler>()
-                callback(Left(errorResult))
+        val client =
+            mockk<Client>(relaxed = true) {
+                every { handleAuthenticationResponse(any(), any()) } answers {
+                    val callback = secondArg<LoginResultHandler>()
+                    callback(Left(errorResult))
+                }
             }
-        }
         AuthResultLiveData.create(client)
 
-        AuthResultLiveData.get(client).update(Intent().apply {
-            data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
-        })
+        AuthResultLiveData.get(client).update(
+            Intent().apply {
+                data = Uri.parse("https://client.example.com/redirect?code=12345&state=test")
+            },
+        )
         AuthResultLiveData.get(client).value!!.assertLeft {
             when (it) {
                 is NotAuthed.LoginFailed -> assertEquals(errorResult, it.error)
@@ -153,7 +161,7 @@ class AuthResultLiveDataTest {
         AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.NoLoggedInUser,
-                it
+                it,
             )
         }
     }

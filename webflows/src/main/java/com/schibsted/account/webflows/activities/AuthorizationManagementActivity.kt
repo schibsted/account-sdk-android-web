@@ -10,9 +10,7 @@
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/*
+ *
  * From: https://github.com/openid/AppAuth-Android
  * Notable changes:
  *  * Rewritten from Java to Kotlin.
@@ -23,7 +21,6 @@
  *  * Updated variable names and code comments.
  *  * Removal of usage of custom types for compatibility.
  */
-
 
 package com.schibsted.account.webflows.activities
 
@@ -202,7 +199,7 @@ class AuthorizationManagementActivity : Activity() {
         fun setup(
             client: Client,
             completionIntent: PendingIntent? = null,
-            cancelIntent: PendingIntent? = null
+            cancelIntent: PendingIntent? = null,
         ) {
             Companion.client = client
             AuthResultLiveData.create(client)
@@ -217,7 +214,10 @@ class AuthorizationManagementActivity : Activity() {
          * @throws IllegalStateException if {@link AuthorizationManagementActivity#setup) has not
          *  been called before this
          */
-        internal fun createStartIntent(context: Context, authIntent: Intent): Intent {
+        internal fun createStartIntent(
+            context: Context,
+            authIntent: Intent,
+        ): Intent {
             if (AuthResultLiveData.getIfInitialised() == null) {
                 throw IllegalStateException("AuthorizationManagementActivity.setup must be called before this")
             }
@@ -232,7 +232,10 @@ class AuthorizationManagementActivity : Activity() {
          * @param context the package context for the app.
          * @param responseUri the response URI, which carries the parameters describing the response.
          */
-        internal fun createResponseHandlingIntent(context: Context, responseUri: Uri?): Intent {
+        internal fun createResponseHandlingIntent(
+            context: Context,
+            responseUri: Uri?,
+        ): Intent {
             return createBaseIntent(context).apply {
                 data = responseUri
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)

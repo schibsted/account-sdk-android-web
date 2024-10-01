@@ -7,12 +7,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.util.Date
 
-
 internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
     context,
     DATABASE_NAME,
     null,
-    DATABASE_VERSION
+    DATABASE_VERSION,
 ) {
     companion object {
         const val DATABASE_NAME = "SessionInfoDB"
@@ -33,18 +32,22 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
     override fun onUpgrade(
         db: SQLiteDatabase,
         oldVersion: Int,
-        newVersion: Int
+        newVersion: Int,
     ) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
         onCreate(db)
     }
 
-    fun saveSessionTimestamp(packageName: String, serverUrl: String): Long {
-        val values = ContentValues().apply {
-            put("packageName", packageName)
-            put("timestamp", Date().time)
-            put("serverUrl", serverUrl)
-        }
+    fun saveSessionTimestamp(
+        packageName: String,
+        serverUrl: String,
+    ): Long {
+        val values =
+            ContentValues().apply {
+                put("packageName", packageName)
+                put("timestamp", Date().time)
+                put("serverUrl", serverUrl)
+            }
         return this.writableDatabase.insertWithOnConflict(
             TABLE_NAME,
             null,
@@ -56,9 +59,9 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
     fun getSessions(serverUrl: String): Cursor? {
         val projection = arrayOf("packageName", "timestamp", "serverUrl")
         val selection = "timestamp > ? AND serverUrl = ?"
-        //get sessions the last year period
+        // get sessions the last year period
         val oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000
-        val arguments = arrayOf("${Date().time - (oneYearInMilliseconds)}", "${serverUrl}")
+        val arguments = arrayOf("${Date().time - (oneYearInMilliseconds)}", "$serverUrl")
         val sortOrder = "timestamp DESC"
         return this.readableDatabase.query(
             TABLE_NAME,
@@ -67,7 +70,7 @@ internal class SessionInfoDatabase(context: Context) : SQLiteOpenHelper(
             arguments,
             null,
             null,
-            sortOrder
+            sortOrder,
         )
     }
 

@@ -14,11 +14,13 @@ import com.schibsted.account.webflows.util.Either.Right
 
 sealed class NotAuthed {
     object CancelledByUser : NotAuthed()
+
     object NoLoggedInUser : NotAuthed()
+
     object AuthInProgress : NotAuthed()
+
     data class LoginFailed(val error: LoginError) : NotAuthed()
 }
-
 
 typealias AuthResult = Either<NotAuthed, User>
 
@@ -35,79 +37,79 @@ typealias AuthResult = Either<NotAuthed, User>
  */
 class AuthResultLiveData private constructor(private val client: Client) :
     LiveData<AuthResult>() {
-
-    internal fun update(result: AuthResult) {
-        value = result
-    }
-
-    init {
-        client.resumeLastLoggedInUser { result ->
-            result
-                .onSuccess { resumedUser ->
-                    value = if (resumedUser != null) {
-                        Right(resumedUser)
-                    } else {
-                        Left(NotAuthed.NoLoggedInUser)
-                    }
-                }
-                .onFailure {
-                    value = Left(NotAuthed.NoLoggedInUser)
-                }
+        internal fun update(result: AuthResult) {
+            value = result
         }
-    }
 
-    internal fun update(intent: Intent) {
-        client.handleAuthenticationResponse(intent) { result ->
-            when (result) {
-                is Right -> update(result)
-                is Left -> update(
-                    Left(
-                        when (result.value) {
-                            is LoginError.CancelledByUser -> {
-                                SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
-                                NotAuthed.CancelledByUser
+        init {
+            client.resumeLastLoggedInUser { result ->
+                result
+                    .onSuccess { resumedUser ->
+                        value =
+                            if (resumedUser != null) {
+                                Right(resumedUser)
+                            } else {
+                                Left(NotAuthed.NoLoggedInUser)
                             }
+                    }
+                    .onFailure {
+                        value = Left(NotAuthed.NoLoggedInUser)
+                    }
+            }
+        }
 
-                            else -> NotAuthed.LoginFailed(result.value)
-                        }
-                    )
-                )
+        internal fun update(intent: Intent) {
+            client.handleAuthenticationResponse(intent) { result ->
+                when (result) {
+                    is Right -> update(result)
+                    is Left ->
+                        update(
+                            Left(
+                                when (result.value) {
+                                    is LoginError.CancelledByUser -> {
+                                        SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.UserLoginCanceled)
+                                        NotAuthed.CancelledByUser
+                                    }
+
+                                    else -> NotAuthed.LoginFailed(result.value)
+                                },
+                            ),
+                        )
+                }
+            }
+        }
+
+        /**
+         * Change state to [NotAuthed.NoLoggedInUser].
+         *
+         * Internally uses [LiveData.postValue] so can safely be called from background threads.
+         */
+        internal fun logout() {
+            postValue(Left(NotAuthed.NoLoggedInUser))
+        }
+
+        companion object {
+            private lateinit var instance: AuthResultLiveData
+
+            internal fun getIfInitialised(): AuthResultLiveData? = if (::instance.isInitialized) instance else null
+
+            @JvmStatic
+            fun get(client: Client): AuthResultLiveData {
+                if (!::instance.isInitialized) {
+                    instance = create(client)
+                }
+                return instance
+            }
+
+            @JvmStatic
+            @MainThread
+            internal fun create(client: Client): AuthResultLiveData {
+                if (::instance.isInitialized) {
+                    throw IllegalStateException("Already initialized")
+                }
+
+                instance = AuthResultLiveData(client)
+                return instance
             }
         }
     }
-
-    /**
-     * Change state to [NotAuthed.NoLoggedInUser].
-     *
-     * Internally uses [LiveData.postValue] so can safely be called from background threads.
-     */
-    internal fun logout() {
-        postValue(Left(NotAuthed.NoLoggedInUser))
-    }
-
-    companion object {
-        private lateinit var instance: AuthResultLiveData
-
-        internal fun getIfInitialised(): AuthResultLiveData? =
-            if (::instance.isInitialized) instance else null
-
-        @JvmStatic
-        fun get(client: Client): AuthResultLiveData {
-            if (!::instance.isInitialized) {
-                instance = create(client)
-            }
-            return instance
-        }
-
-        @JvmStatic
-        @MainThread
-        internal fun create(client: Client): AuthResultLiveData {
-            if (::instance.isInitialized) {
-                throw IllegalStateException("Already initialized")
-            }
-
-            instance = AuthResultLiveData(client)
-            return instance
-        }
-    }
-}

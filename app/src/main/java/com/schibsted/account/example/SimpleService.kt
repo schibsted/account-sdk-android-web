@@ -7,5 +7,7 @@ import retrofit2.http.Path
 
 interface SimpleService {
     @GET("/api/2/user/{userId}")
-    fun userProfile(@Path("userId") userId: String): Call<ResponseBody>
+    fun userProfile(
+        @Path("userId") userId: String,
+    ): Call<ResponseBody>
 }

@@ -1,3 +1,4 @@
+package com.schibsted.account.webflows.activities
 /*
  * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
  *
@@ -10,16 +11,12 @@
  * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing permissions and
  * limitations under the License.
- */
-
-/*
+ *
  * From: https://github.com/openid/AppAuth-Android
  * Notable changes:
  *  * Rewritten from Java to Kotlin.
  *  * Updated code comments.
  */
-
-package com.schibsted.account.webflows.activities
 
 import android.app.Activity
 import android.os.Bundle
@@ -54,7 +51,7 @@ class RedirectUriReceiverActivity : Activity() {
         // ensures that we can remove the browser tab from the back stack. See the documentation
         // on AuthorizationManagementActivity for more details.
         startActivity(
-            AuthorizationManagementActivity.createResponseHandlingIntent(this, intent.data)
+            AuthorizationManagementActivity.createResponseHandlingIntent(this, intent.data),
         )
         finish()
     }

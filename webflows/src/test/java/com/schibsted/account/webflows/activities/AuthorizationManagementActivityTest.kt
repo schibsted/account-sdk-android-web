@@ -35,10 +35,11 @@ import org.robolectric.Robolectric
 
 @RunWith(AndroidJUnit4::class)
 class AuthorizationManagementActivityTest {
-    private val testActivityIntent = Intent(
-        getApplicationContext(),
-        TestActivity::class.java
-    )
+    private val testActivityIntent =
+        Intent(
+            getApplicationContext(),
+            TestActivity::class.java,
+        )
 
     private val client: Client = mockk(relaxed = true)
 
@@ -65,9 +66,10 @@ class AuthorizationManagementActivityTest {
 
     @Test
     fun testShouldStartAuthIfNotStarted() {
-        val authIntent = Intent().apply {
-            putExtra("AUTH", true)
-        }
+        val authIntent =
+            Intent().apply {
+                putExtra("AUTH", true)
+            }
         val intent =
             AuthorizationManagementActivity.createStartIntent(getApplicationContext(), authIntent)
 
@@ -77,7 +79,7 @@ class AuthorizationManagementActivityTest {
         AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.AuthInProgress,
-                it
+                it,
             )
         }
     }
@@ -88,9 +90,10 @@ class AuthorizationManagementActivityTest {
             Uri.parse("https://client.example.com/redirect?code=12345&state=test")
 
         val ctx = getApplicationContext<Context>()
-        val intent = Intent(ctx, AuthorizationManagementActivity::class.java).apply {
-            data = authResponse
-        }
+        val intent =
+            Intent(ctx, AuthorizationManagementActivity::class.java).apply {
+                data = authResponse
+            }
 
         AuthResultLiveDataTest.resetInstance()
         val client = mockk<Client>(relaxed = true)
@@ -105,9 +108,12 @@ class AuthorizationManagementActivityTest {
 
         AuthResultLiveData.get(client).value!!.assertRight { assertEquals(user, it) }
         verify(exactly = 1) {
-            client.handleAuthenticationResponse(withArg { intent ->
-                assertEquals(authResponse, intent.data)
-            }, any())
+            client.handleAuthenticationResponse(
+                withArg { intent ->
+                    assertEquals(authResponse, intent.data)
+                },
+                any(),
+            )
         }
         verify(exactly = 1) { AuthorizationManagementActivity.completionIntent?.send() }
         verify(exactly = 0) { AuthorizationManagementActivity.cancelIntent?.send() }
@@ -122,7 +128,7 @@ class AuthorizationManagementActivityTest {
         AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.CancelledByUser,
-                it
+                it,
             )
         }
         verify(exactly = 1) { AuthorizationManagementActivity.cancelIntent?.send() }
@@ -131,9 +137,10 @@ class AuthorizationManagementActivityTest {
 
     @Test
     fun testActivityWithStressOnResumeTest() {
-        val authIntent = Intent().apply {
-            putExtra("AUTH", true)
-        }
+        val authIntent =
+            Intent().apply {
+                putExtra("AUTH", true)
+            }
         val startIntent =
             AuthorizationManagementActivity.createStartIntent(getApplicationContext(), authIntent)
 
@@ -158,7 +165,7 @@ class AuthorizationManagementActivityTest {
         AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.CancelledByUser,
-                it
+                it,
             )
         }
 
@@ -170,7 +177,7 @@ class AuthorizationManagementActivityTest {
         AuthResultLiveData.get(client).value!!.assertLeft {
             assertEquals(
                 NotAuthed.AuthInProgress,
-                it
+                it,
             )
         }
     }

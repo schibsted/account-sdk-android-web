@@ -16,13 +16,13 @@ internal data class UserTokens(
     @SerializedName("idToken")
     val idToken: String,
     @SerializedName("idTokenClaims")
-    val idTokenClaims: IdTokenClaims
+    val idTokenClaims: IdTokenClaims,
 ) : Parcelable {
     override fun toString(): String {
         return "UserTokens(\n" +
-                "accessToken: ${Util.removeJwtSignature(accessToken)},\n" +
-                "refreshToken: ${Util.removeJwtSignature(refreshToken)}, \n" +
-                "idToken: ${Util.removeJwtSignature(idToken)},\n" +
-                "idTokenClaims: ${idTokenClaims})"
+            "accessToken: ${Util.removeJwtSignature(accessToken)},\n" +
+            "refreshToken: ${Util.removeJwtSignature(refreshToken)}, \n" +
+            "idToken: ${Util.removeJwtSignature(idToken)},\n" +
+            "idTokenClaims: $idTokenClaims)"
     }
 }
