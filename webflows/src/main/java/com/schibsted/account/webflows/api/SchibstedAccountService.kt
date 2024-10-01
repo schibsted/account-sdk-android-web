@@ -2,7 +2,13 @@ package com.schibsted.account.webflows.api
 
 import com.nimbusds.jose.jwk.JWKSet
 import retrofit2.Call
-import retrofit2.http.*
+import retrofit2.http.Field
+import retrofit2.http.FieldMap
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Headers
+import retrofit2.http.POST
+import retrofit2.http.Path
 
 internal interface SchibstedAccountService {
     @Headers("X-OIDC: v1")

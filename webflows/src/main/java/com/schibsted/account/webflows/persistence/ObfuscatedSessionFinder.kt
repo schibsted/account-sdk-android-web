@@ -13,7 +13,6 @@ import java.util.Date
  * Crawls through the obfuscated session JSON to find the access token to enable auto log-in.
  */
 
-// TODO: remove Logs and printlns after RC build is accepted.
 internal object ObfuscatedSessionFinder {
     private const val USER_TOKENS_KEY = "userTokens"
     private const val REFRESH_TOKEN_KEY = "refreshToken"

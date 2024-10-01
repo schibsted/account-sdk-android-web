@@ -1,11 +1,14 @@
 package com.schibsted.account.webflows.token
 
-import com.schibsted.account.webflows.api.*
+import com.schibsted.account.webflows.api.HttpError
+import com.schibsted.account.webflows.api.RefreshTokenRequest
+import com.schibsted.account.webflows.api.SchibstedAccountApi
+import com.schibsted.account.webflows.api.UserTokenRequest
+import com.schibsted.account.webflows.api.UserTokenResponse
 import com.schibsted.account.webflows.client.AuthState
 import com.schibsted.account.webflows.client.ClientConfiguration
 import com.schibsted.account.webflows.jose.AsyncJwks
 import com.schibsted.account.webflows.jose.RemoteJwks
-import com.schibsted.account.webflows.token.TokenError.*
 import com.schibsted.account.webflows.util.Either
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
@@ -61,7 +64,7 @@ internal class TokenHandler(
                 .onSuccess { handleTokenResponse(it, authState, callback) }
                 .onFailure { err ->
                     Timber.d("Token request error response: $err")
-                    callback(Left(TokenRequestError(err)))
+                    callback(Left(TokenError.TokenRequestError(err)))
                 }
         }
     }
@@ -69,7 +72,7 @@ internal class TokenHandler(
     fun makeTokenRequest(
         refreshToken: String,
         scope: String? = null,
-    ): Either<TokenRequestError, UserTokenResponse> {
+    ): Either<TokenError.TokenRequestError, UserTokenResponse> {
         val tokenRequest =
             RefreshTokenRequest(
                 refreshToken,
@@ -80,7 +83,7 @@ internal class TokenHandler(
             is Right -> result
             is Left -> {
                 Timber.d("Token request error response: ${result.value}")
-                Left(TokenRequestError(result.value))
+                Left(TokenError.TokenRequestError(result.value))
             }
         }
     }
@@ -93,7 +96,7 @@ internal class TokenHandler(
         val idToken = tokenResponse.id_token
         if (idToken == null) {
             Timber.e("Missing ID Token")
-            callback(Left(NoIdTokenReceived))
+            callback(Left(TokenError.NoIdTokenReceived))
             return
         }
 
@@ -125,7 +128,7 @@ internal class TokenHandler(
                         ),
                     )
                 }
-                .onFailure { callback(Left(IdTokenNotValid(it))) }
+                .onFailure { callback(Left(TokenError.IdTokenNotValid(it))) }
         }
     }
 }

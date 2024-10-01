@@ -2,7 +2,11 @@ package com.schibsted.account.webflows.user
 
 import com.schibsted.account.webflows.util.Either.Left
 import com.schibsted.account.webflows.util.Either.Right
-import okhttp3.*
+import okhttp3.Authenticator
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.Route
 import timber.log.Timber
 
 /**
