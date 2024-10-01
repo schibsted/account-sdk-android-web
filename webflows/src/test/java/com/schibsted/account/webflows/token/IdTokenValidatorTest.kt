@@ -110,9 +110,10 @@ class IdTokenValidatorTest {
     fun testAcceptsEidDKAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-dk"
         val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
-        val claims = defaultIdTokenClaims()
-            .claim("amr", listOf("eid", "otherValue"))
-            .build()
+        val claims =
+            defaultIdTokenClaims()
+                .claim("amr", listOf("eid", "otherValue"))
+                .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
             result.assertRight { assertEquals(idTokenClaims(claims), it) }
@@ -132,7 +133,7 @@ class IdTokenValidatorTest {
             result.assertLeft {
                 assertErrorMessage(
                     "Missing expected AMR value: $expectedAmrValue",
-                    it.message
+                    it.message,
                 )
             }
         }
