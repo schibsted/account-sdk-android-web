@@ -109,7 +109,7 @@ class IdTokenValidatorTest {
     @Test
     fun testAcceptsEidDKAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-dk"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
         val claims =
             defaultIdTokenClaims()
                 .claim("amr", listOf("eid", "otherValue"))
@@ -123,7 +123,7 @@ class IdTokenValidatorTest {
     @Test
     fun testRejectsWrongEidAMRWithoutCountryPrefix() {
         val expectedAmrValue = "eid-wrong"
-        val context = IdTokenValidationContext(issuer, clientId, nonce, expectedAmrValue)
+        val context = IdTokenValidationContext(ISSUER, CLIENT_ID, NONCE, expectedAmrValue)
         val claims =
             defaultIdTokenClaims()
                 .claim("amr", listOf("eid", "otherValue"))
