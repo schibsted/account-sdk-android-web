@@ -120,7 +120,8 @@ internal class IdTokenClaimsVerifier(
         // Regardless of country, AMR will only contain EID value
         if (needle == MfaType.EID_NO.value ||
             needle == MfaType.EID_SE.value ||
-            needle == MfaType.EID_FI.value
+            needle == MfaType.EID_FI.value ||
+            needle == MfaType.EID_DK.value
         ) {
             needle = MfaType.EID.value
         }

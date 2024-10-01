@@ -17,8 +17,9 @@ enum class MfaType(val value: String) {
     PASSWORD("password"),
     OTP("otp"),
     SMS("sms"),
-    EID_NO("eid-no"), // Only used for PRE environment
-    EID_SE("eid-se"), // Only used for PRE environment
-    EID_FI("eid-fi"), // Only used for PRE environment
+    EID_NO("eid-no"), //Only used for PRE environment
+    EID_SE("eid-se"), //Only used for PRE environment
+    EID_FI("eid-fi"), //Only used for PRE environment
+    EID_DK("eid-dk"), //Only used for PRE environment
     EID("eid"), // For Production
 }
