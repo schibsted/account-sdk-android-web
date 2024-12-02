@@ -118,11 +118,10 @@ internal object ObfuscatedSessionFinder {
                         gson.fromJson(storedUserSessionJson, StoredUserSession::class.java)
                     return Either.Right(result)
                 }
-            }
+            } ?: return Either.Left(StorageError.UnexpectedError(Throwable("No session found.")))
         } catch (e: Exception) {
             return Either.Left(StorageError.UnexpectedError(e))
         }
-        return Either.Left(StorageError.UnexpectedError(Throwable("Unknown error.")))
     }
 
     /**
