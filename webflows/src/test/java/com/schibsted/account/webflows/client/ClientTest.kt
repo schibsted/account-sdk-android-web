@@ -37,14 +37,13 @@ import java.util.Date
 import java.util.concurrent.CompletableFuture
 
 class ClientTest {
-    private fun authResultIntent(authResponseParameters: String?): Intent {
-        return mockk {
+    private fun authResultIntent(authResponseParameters: String?): Intent =
+        mockk {
             every { data } returns
                 mockk {
                     every { query } returns authResponseParameters
                 }
         }
-    }
 
     @Test
     fun handleAuthenticationResponseShouldReturnUserToCallback() {
@@ -188,6 +187,23 @@ class ClientTest {
                     User(client, UserSession(Fixtures.userTokens)),
                     it,
                 )
+            }
+        }
+    }
+
+    @Test
+    fun existingSessionIsNotResumeableIfNoSessionFound() {
+        val sessionStorageMock: SessionStorage = mockk(relaxUnitFun = true)
+        val error = StorageError.UnexpectedError(Exception("No session found."))
+        every { sessionStorageMock.get(clientConfig.clientId, any()) } answers {
+            val callback = secondArg<StorageReadCallback>()
+            callback(Left(error))
+        }
+        val client = getClient(sessionStorage = sessionStorageMock)
+
+        client.resumeLastLoggedInUser { result ->
+            result.assertLeft {
+                assertEquals(error, it)
             }
         }
     }
