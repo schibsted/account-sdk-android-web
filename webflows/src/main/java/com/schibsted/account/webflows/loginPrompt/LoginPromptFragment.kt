@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -80,17 +79,18 @@ internal class LoginPromptFragment : BottomSheetDialogFragment() {
     }
 
     private fun initializeButtons() {
-        view.findViewById<Button>(R.id.loginPromptAuth).setOnClickListener {
+        view.findViewById<View>(R.id.loginPromptAuth).setOnClickListener {
             dismiss()
             startActivity(loginPromptConfig.authIntent)
             SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptClickToLogin)
         }
-        view.findViewById<Button>(R.id.loginPromptSkip)
+        view
+            .findViewById<View>(R.id.loginPromptSkip)
             .setOnClickListener {
                 SchibstedAccountTracker.track(SchibstedAccountTrackingEvent.LoginPromptClickToContinueWithoutLogin)
                 dismiss()
             }
-        view.findViewById<Button>(R.id.loginPromptPrivacy).setOnClickListener {
+        view.findViewById<View>(R.id.loginPromptPrivacy).setOnClickListener {
             var loginPromptContext = this.requireContext()
             val uri = Uri.parse(getString(R.string.login_prompt_privacy_url))
             if (Util.isCustomTabsSupported(loginPromptContext)) {
