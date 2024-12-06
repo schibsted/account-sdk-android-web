@@ -272,5 +272,5 @@ and `[SchibstedAccountTrackingEvent].deployTag` to `deploy_tag` before pushing t
 This is a temporary solution and will be subject to changes in the future, but in the meanwhile
 you can use the provided example from ExampleApp to connect your Pulse event transmitter, which
 will be then used internally to track login-prompt flows and also send events if the login was
-successful or not.
+successful or not..
 
