@@ -32,6 +32,7 @@
 # Data classes for HTTP JSON responses
 # https://r8.googlesource.com/r8/+/refs/heads/main/compatibility-faq.md#troubleshooting-gson
 -keepclassmembers class com.schibsted.account.webflows.api.* {
+ <init>(...);
  !transient <fields>;
 }
 
