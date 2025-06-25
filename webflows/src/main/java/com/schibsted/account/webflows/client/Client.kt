@@ -62,15 +62,18 @@ class Client {
         this.configuration = configuration
         stateStorage = StateStorage(context.applicationContext)
 
-        val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
         val sharedPrefsStorage =
             SharedPrefsStorage(context.applicationContext, configuration.serverUrl.toString())
 
-        sessionStorage =
+        sessionStorage = if (configuration.skipLegacySessionMigration) {
+            sharedPrefsStorage
+        } else {
+            val encryptedStorage = EncryptedSharedPrefsStorage(context.applicationContext)
             MigratingSessionStorage(
                 newStorage = sharedPrefsStorage,
                 previousStorage = encryptedStorage,
             )
+        }
 
         schibstedAccountApi =
             SchibstedAccountApi(configuration.serverUrl.toString().toHttpUrl(), httpClient)
