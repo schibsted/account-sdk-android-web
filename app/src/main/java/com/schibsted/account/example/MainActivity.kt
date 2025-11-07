@@ -9,10 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
+import com.schibsted.account.webflows.client.AuthRequest
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -36,13 +38,13 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         lifecycleScope.launch {
-            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true)
+            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true, UUID.randomUUID())
         }
     }
 
     private fun initializeButtons() {
         binding.loginButton.setOnClickListener {
-            startActivity(ExampleApp.client.getAuthenticationIntent(this, "customState"))
+            startActivity(ExampleApp.client.getAuthenticationIntent(this, "customState", authRequest = AuthRequest(xDomainId = UUID.randomUUID())))
         }
         binding.manualLoginButton.setOnClickListener {
             startActivity(Intent(this, ManualLoginActivity::class.java))

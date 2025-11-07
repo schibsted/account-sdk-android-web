@@ -45,6 +45,10 @@ internal class UrlBuilder(
             authParams["login_hint"] = authRequest.loginHint
         }
 
+        if (authRequest.xDomainId != null) {
+            authParams["x_domain_id"] = authRequest.xDomainId.toString()
+        }
+
         if (authRequest.mfa != null) {
             authParams["acr_values"] = authRequest.mfa.value
         } else {

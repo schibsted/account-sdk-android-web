@@ -38,6 +38,7 @@ import timber.log.Timber
 import java.security.MessageDigest
 import java.security.spec.MGF1ParameterSpec.SHA256
 import java.util.Date
+import java.util.UUID
 import kotlin.coroutines.resume
 
 /**  Represents a client registered with Schibsted account. */
@@ -374,12 +375,13 @@ class Client {
         context: Context,
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true,
+        xDomainId: UUID?,
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
-                    this.getAuthenticationIntent(context, null),
+                    this.getAuthenticationIntent(context, null, AuthRequest(xDomainId = xDomainId)),
                     isCancelable,
                 ),
             ).showLoginPromptIfAbsent(supportFragmentManager)
