@@ -8,6 +8,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import java.net.URL
+import java.util.UUID
 
 class UrlBuilderTest {
     private fun getUrlBuilder(): UrlBuilder {
@@ -67,5 +68,14 @@ class UrlBuilderTest {
         val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
 
         assertEquals("customState", queryParams["state"])
+    }
+
+    @Test
+    fun loginUrlShouldContainXDomainId() {
+        val uuid = UUID.fromString("03142019-c75d-4130-8ce4-aea8314ce949")
+        val loginUrl = getUrlBuilder().loginUrl(AuthRequest(xDomainId = uuid), "customState")
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals("03142019-c75d-4130-8ce4-aea8314ce949", queryParams["x_domain_id"])
     }
 }

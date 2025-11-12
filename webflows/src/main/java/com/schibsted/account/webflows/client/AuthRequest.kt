@@ -1,5 +1,7 @@
 package com.schibsted.account.webflows.client
 
+import java.util.UUID
+
 /**
  * Authentication request parameters. For more information about possible values, see
  *  <a href="https://docs.schibsted.io/schibsted-account/guides/authentication/#required-parameters">here</a>
@@ -15,4 +17,5 @@ data class AuthRequest
         val extraScopeValues: Set<String> = setOf(),
         val mfa: MfaType? = null,
         val loginHint: String? = null,
+        val xDomainId: UUID? = null,
     )
