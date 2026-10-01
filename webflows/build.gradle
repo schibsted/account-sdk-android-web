@@ -1,3 +1,5 @@
+import com.android.build.api.variant.BuildConfigField
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
@@ -6,20 +8,20 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 android {
-    compileSdkVersion 34
+    compileSdk = 34
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdk = 21
+        targetSdk = 34
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         resourceConfigurations += ['en', 'sv', 'no', 'nn', 'nb', 'fi', 'dk']
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = '17'
@@ -27,13 +29,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
 
         debug {
-            buildConfigField('String', 'VERSION_NAME', "\"${project.version}\"")
         }
     }
 
@@ -45,6 +45,15 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.buildConfigFields.put(
+                "VERSION_NAME",
+                new BuildConfigField("String", "\"${project.version}\"", null)
+        )
+    }
+}
+
 ext {
     okHttpVersion = "4.12.0"
     espressoVersion = "3.6.1"
@@ -53,7 +62,8 @@ ext {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.20'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-parcelize-runtime:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
@@ -102,10 +112,10 @@ android {
             withJavadocJar()
         }
     }
-    namespace 'com.schibsted.account.webflows'
+    namespace = 'com.schibsted.account.webflows'
 
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 }
 
