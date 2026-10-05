@@ -70,20 +70,20 @@ internal class UrlBuilder(
         return Base64.encodeToString(digest, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
     }
 
-    private fun getConsentsQueryParameter(consents: SchibstedConsents?): String? {
+    private fun getConsentsQueryParameter(consents: SchibstedAccountConsents?): String? {
         if (consents == null) return null
 
         val params = mutableListOf<String>()
-        if (consents.advertising == SchibstedConsents.Status.ACCEPTED) {
+        if (consents.advertising == SchibstedAccountConsents.Status.ACCEPTED) {
             params.add("advertising")
         }
-        if (consents.analytics == SchibstedConsents.Status.ACCEPTED) {
+        if (consents.analytics == SchibstedAccountConsents.Status.ACCEPTED) {
             params.add("analytics")
         }
-        if (consents.marketing == SchibstedConsents.Status.ACCEPTED) {
+        if (consents.marketing == SchibstedAccountConsents.Status.ACCEPTED) {
             params.add("marketing")
         }
-        if (consents.personalization == SchibstedConsents.Status.ACCEPTED) {
+        if (consents.personalization == SchibstedAccountConsents.Status.ACCEPTED) {
             params.add("personalization")
         }
 

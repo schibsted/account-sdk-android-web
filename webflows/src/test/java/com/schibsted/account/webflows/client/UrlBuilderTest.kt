@@ -83,11 +83,11 @@ class UrlBuilderTest {
     fun loginUrlShouldContainConsents() {
         val loginUrl = getUrlBuilder().loginUrl(
             AuthRequest(
-                consents = SchibstedConsents(
-                    advertising = SchibstedConsents.Status.ACCEPTED,
-                    analytics = SchibstedConsents.Status.ACCEPTED,
-                    marketing = SchibstedConsents.Status.ACCEPTED,
-                    personalization = SchibstedConsents.Status.ACCEPTED,
+                consents = SchibstedAccountConsents(
+                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                    marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                    personalization = SchibstedAccountConsents.Status.ACCEPTED,
                 ),
             ),
             "customState"
@@ -102,11 +102,11 @@ class UrlBuilderTest {
     fun loginUrlShouldContainPartialConsents() {
         val loginUrl = getUrlBuilder().loginUrl(
             AuthRequest(
-                consents = SchibstedConsents(
-                    advertising = SchibstedConsents.Status.ACCEPTED,
-                    analytics = SchibstedConsents.Status.ACCEPTED,
-                    marketing = SchibstedConsents.Status.REJECTED,
-                    personalization = SchibstedConsents.Status.UNKNOWN,
+                consents = SchibstedAccountConsents(
+                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                    marketing = SchibstedAccountConsents.Status.REJECTED,
+                    personalization = SchibstedAccountConsents.Status.UNKNOWN,
                 ),
             ),
             "customState"
@@ -120,11 +120,11 @@ class UrlBuilderTest {
     fun loginUrlShouldContainRejectedConsents() {
         val loginUrl = getUrlBuilder().loginUrl(
             AuthRequest(
-                consents = SchibstedConsents(
-                    advertising = SchibstedConsents.Status.REJECTED,
-                    analytics = SchibstedConsents.Status.REJECTED,
-                    marketing = SchibstedConsents.Status.REJECTED,
-                    personalization = SchibstedConsents.Status.REJECTED,
+                consents = SchibstedAccountConsents(
+                    advertising = SchibstedAccountConsents.Status.REJECTED,
+                    analytics = SchibstedAccountConsents.Status.REJECTED,
+                    marketing = SchibstedAccountConsents.Status.REJECTED,
+                    personalization = SchibstedAccountConsents.Status.REJECTED,
                 ),
             ),
             "customState"

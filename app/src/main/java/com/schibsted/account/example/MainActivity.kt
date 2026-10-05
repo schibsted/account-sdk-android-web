@@ -10,7 +10,7 @@ import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.client.AuthRequest
-import com.schibsted.account.webflows.client.SchibstedConsents
+import com.schibsted.account.webflows.client.SchibstedAccountConsents
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
@@ -44,11 +44,11 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager,
                 true,
                 UUID.randomUUID(),
-                SchibstedConsents(
-                    advertising = SchibstedConsents.Status.ACCEPTED,
-                    analytics = SchibstedConsents.Status.ACCEPTED,
-                    marketing = SchibstedConsents.Status.ACCEPTED,
-                    personalization = SchibstedConsents.Status.ACCEPTED,
+                SchibstedAccountConsents(
+                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                    marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                    personalization = SchibstedAccountConsents.Status.ACCEPTED,
                 )
             )
         }
@@ -62,11 +62,11 @@ class MainActivity : AppCompatActivity() {
                     "customState",
                     authRequest = AuthRequest(
                         xDomainId = UUID.randomUUID(),
-                        consents = SchibstedConsents(
-                            advertising = SchibstedConsents.Status.ACCEPTED,
-                            analytics = SchibstedConsents.Status.ACCEPTED,
-                            marketing = SchibstedConsents.Status.ACCEPTED,
-                            personalization = SchibstedConsents.Status.ACCEPTED,
+                        consents = SchibstedAccountConsents(
+                            advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                            analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                            marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                            personalization = SchibstedAccountConsents.Status.ACCEPTED,
                         )
                     ),
                 ),

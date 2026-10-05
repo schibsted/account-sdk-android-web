@@ -36,7 +36,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.security.MessageDigest
-import java.security.spec.MGF1ParameterSpec.SHA256
 import java.util.Date
 import java.util.UUID
 import kotlin.coroutines.resume
@@ -376,7 +375,7 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true,
         xDomainId: UUID?,
-        consents: SchibstedConsents?,
+        consents: SchibstedAccountConsents?,
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
