@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '2.2.10'
+    ext.kotlin_version = '2.4.20'
     ext.timber_version = '5.0.1'
     repositories {
         google()
@@ -18,8 +18,8 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.kotlin.android" version '2.2.10' apply false
-    id("org.jetbrains.dokka") version "1.9.20"
+    id "org.jetbrains.kotlin.android" version '2.4.20' apply false
+    id("org.jetbrains.dokka") version "2.2.0"
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
@@ -35,10 +35,6 @@ allprojects {
 
     group "com.schibsted.account"
     version = gitVersion
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }
 
 version = gitVersion

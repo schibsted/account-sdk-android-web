@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.schibsted.account"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
