@@ -376,12 +376,17 @@ class Client {
         supportFragmentManager: FragmentManager,
         isCancelable: Boolean = true,
         xDomainId: UUID?,
+        consents: SchibstedConsents?,
     ): Boolean {
         val internalSessionFound = hasSessionStorage(configuration.clientId)
         return if (!internalSessionFound && userHasSessionOnDevice(context.applicationContext)) {
             LoginPromptManager(
                 LoginPromptConfig(
-                    this.getAuthenticationIntent(context, null, AuthRequest(xDomainId = xDomainId)),
+                    this.getAuthenticationIntent(
+                        context,
+                        null,
+                        AuthRequest(xDomainId = xDomainId, consents = consents),
+                    ),
                     isCancelable,
                 ),
             ).showLoginPromptIfAbsent(supportFragmentManager)
