@@ -8,6 +8,8 @@ data class SchibstedAccountConsents(
     val source: String = "cmp",
 ) {
     enum class Status {
-        ACCEPTED, REJECTED, UNKNOWN,
+        ACCEPTED,
+        REJECTED,
+        UNKNOWN,
     }
 }

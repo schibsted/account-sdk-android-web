@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                     analytics = SchibstedAccountConsents.Status.ACCEPTED,
                     marketing = SchibstedAccountConsents.Status.ACCEPTED,
                     personalization = SchibstedAccountConsents.Status.ACCEPTED,
-                )
+                ),
             )
         }
     }
@@ -58,17 +58,19 @@ class MainActivity : AppCompatActivity() {
         binding.loginButton.setOnClickListener {
             startActivity(
                 ExampleApp.client.getAuthenticationIntent(
-                    this,
-                    "customState",
-                    authRequest = AuthRequest(
-                        xDomainId = UUID.randomUUID(),
-                        consents = SchibstedAccountConsents(
-                            advertising = SchibstedAccountConsents.Status.ACCEPTED,
-                            analytics = SchibstedAccountConsents.Status.ACCEPTED,
-                            marketing = SchibstedAccountConsents.Status.ACCEPTED,
-                            personalization = SchibstedAccountConsents.Status.ACCEPTED,
-                        )
-                    ),
+                    context = this,
+                    state = "customState",
+                    authRequest =
+                        AuthRequest(
+                            xDomainId = UUID.randomUUID(),
+                            consents =
+                                SchibstedAccountConsents(
+                                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                                    marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                                    personalization = SchibstedAccountConsents.Status.ACCEPTED,
+                                ),
+                        ),
                 ),
             )
         }
