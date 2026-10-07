@@ -78,4 +78,79 @@ class UrlBuilderTest {
 
         assertEquals("03142019-c75d-4130-8ce4-aea8314ce949", queryParams["x_domain_id"])
     }
+
+    @Test
+    fun loginUrlShouldContainConsents() {
+        val loginUrl =
+            getUrlBuilder().loginUrl(
+                AuthRequest(
+                    consents =
+                        SchibstedAccountConsents(
+                            advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                            analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                            marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                            personalization = SchibstedAccountConsents.Status.ACCEPTED,
+                        ),
+                ),
+                "customState",
+            )
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals("advertising,analytics,marketing,personalization", queryParams["consents"])
+        assertEquals("v1", queryParams["consent_version"])
+    }
+
+    @Test
+    fun loginUrlShouldContainPartialConsents() {
+        val loginUrl =
+            getUrlBuilder().loginUrl(
+                AuthRequest(
+                    consents =
+                        SchibstedAccountConsents(
+                            advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                            analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                            marketing = SchibstedAccountConsents.Status.REJECTED,
+                            personalization = SchibstedAccountConsents.Status.UNKNOWN,
+                        ),
+                ),
+                "customState",
+            )
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals("advertising,analytics", queryParams["consents"])
+    }
+
+    @Test
+    fun loginUrlShouldContainRejectedConsents() {
+        val loginUrl =
+            getUrlBuilder().loginUrl(
+                AuthRequest(
+                    consents =
+                        SchibstedAccountConsents(
+                            advertising = SchibstedAccountConsents.Status.REJECTED,
+                            analytics = SchibstedAccountConsents.Status.REJECTED,
+                            marketing = SchibstedAccountConsents.Status.REJECTED,
+                            personalization = SchibstedAccountConsents.Status.REJECTED,
+                        ),
+                ),
+                "customState",
+            )
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals("rejected", queryParams["consents"])
+    }
+
+    @Test
+    fun loginUrlShouldNotContainEmptyConsents() {
+        val loginUrl =
+            getUrlBuilder().loginUrl(
+                AuthRequest(
+                    consents = null,
+                ),
+                "customState",
+            )
+        val queryParams = Util.parseQueryParameters(URL(loginUrl).query)
+
+        assertEquals(null, queryParams["consents"])
+    }
 }

@@ -18,4 +18,5 @@ data class AuthRequest
         val mfa: MfaType? = null,
         val loginHint: String? = null,
         val xDomainId: UUID? = null,
+        val consents: SchibstedAccountConsents? = null,
     )
