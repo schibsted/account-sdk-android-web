@@ -10,6 +10,7 @@ import com.schibsted.account.databinding.ActivityMainBinding
 import com.schibsted.account.webflows.activities.AuthResultLiveData
 import com.schibsted.account.webflows.activities.NotAuthed
 import com.schibsted.account.webflows.client.AuthRequest
+import com.schibsted.account.webflows.client.SchibstedAccountConsents
 import com.schibsted.account.webflows.user.User
 import com.schibsted.account.webflows.util.Either
 import kotlinx.coroutines.launch
@@ -38,14 +39,39 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         lifecycleScope.launch {
-            ExampleApp.client.requestLoginPrompt(applicationContext, supportFragmentManager, true, UUID.randomUUID())
+            ExampleApp.client.requestLoginPrompt(
+                applicationContext,
+                supportFragmentManager,
+                true,
+                UUID.randomUUID(),
+                SchibstedAccountConsents(
+                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                    marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                    personalization = SchibstedAccountConsents.Status.ACCEPTED,
+                ),
+            )
         }
     }
 
     private fun initializeButtons() {
         binding.loginButton.setOnClickListener {
             startActivity(
-                ExampleApp.client.getAuthenticationIntent(this, "customState", authRequest = AuthRequest(xDomainId = UUID.randomUUID())),
+                ExampleApp.client.getAuthenticationIntent(
+                    context = this,
+                    state = "customState",
+                    authRequest =
+                        AuthRequest(
+                            xDomainId = UUID.randomUUID(),
+                            consents =
+                                SchibstedAccountConsents(
+                                    advertising = SchibstedAccountConsents.Status.ACCEPTED,
+                                    analytics = SchibstedAccountConsents.Status.ACCEPTED,
+                                    marketing = SchibstedAccountConsents.Status.ACCEPTED,
+                                    personalization = SchibstedAccountConsents.Status.ACCEPTED,
+                                ),
+                        ),
+                ),
             )
         }
         binding.manualLoginButton.setOnClickListener {

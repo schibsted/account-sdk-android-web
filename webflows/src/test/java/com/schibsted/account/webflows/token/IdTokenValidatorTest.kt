@@ -219,7 +219,7 @@ class IdTokenValidatorTest {
                 .build()
         val idToken = createIdToken(claims)
         IdTokenValidator.validate(idToken, TestJwks(jwks), context) { result ->
-            result.assertLeft { assertErrorMessage("audience", it.message) }
+            result.assertLeft { assertErrorMessage("aud claim", it.message) }
         }
     }
 
