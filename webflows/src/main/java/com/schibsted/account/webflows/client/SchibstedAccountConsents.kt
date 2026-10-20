@@ -5,7 +5,6 @@ data class SchibstedAccountConsents(
     val analytics: Status,
     val marketing: Status,
     val personalization: Status,
-    val source: String = "cmp",
 ) {
     enum class Status {
         ACCEPTED,
